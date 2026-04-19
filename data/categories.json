@@ -1,0 +1,119 @@
+{
+  "categories": [
+    {
+      "id": "flexibility",
+      "name": "גמישות חברתית",
+      "emoji": "🧘",
+      "description": "היכולת להסתגל, להתגמש ולהמשיך הלאה",
+      "games": [
+        {
+          "id": "flex-questions",
+          "name": "שאלות + מירוץ",
+          "emoji": "📝",
+          "description": "ענו על שאלות וצברו BOOST למירוץ",
+          "type": "questions-then-race",
+          "questionsFile": "questions/flexibility.json",
+          "gamePath": "games/crazy-cars/step1.html",
+          "bgPath": "games/crazy-cars/demo-bg.html"
+        },
+        {
+          "id": "flex-race",
+          "name": "מירוץ מכוניות",
+          "emoji": "🏎️",
+          "description": "ישר למירוץ!",
+          "type": "direct-game",
+          "gamePath": "games/crazy-cars/step1.html"
+        }
+      ]
+    },
+    {
+      "id": "listening",
+      "name": "הקשבה",
+      "emoji": "👂",
+      "description": "היכולת להקשיב באמת ולהבין את הצד השני",
+      "games": [
+        {
+          "id": "listen-questions",
+          "name": "שאלות + מירוץ",
+          "emoji": "📝",
+          "description": "ענו על שאלות וצברו BOOST למירוץ",
+          "type": "questions-then-race",
+          "questionsFile": "questions/flexibility.json",
+          "gamePath": "games/crazy-cars/step1.html",
+          "bgPath": "games/crazy-cars/demo-bg.html"
+        },
+        {
+          "id": "listen-race",
+          "name": "מירוץ מכוניות",
+          "emoji": "🏎️",
+          "description": "ישר למירוץ!",
+          "type": "direct-game",
+          "gamePath": "games/crazy-cars/step1.html"
+        }
+      ]
+    },
+    {
+      "id": "communication",
+      "name": "תקשורת",
+      "emoji": "💬",
+      "description": "היכולת לבטא את עצמך בצורה ברורה ומכבדת",
+      "games": [
+        {
+          "id": "comm-questions",
+          "name": "שאלות + מירוץ",
+          "emoji": "📝",
+          "description": "ענו על שאלות וצברו BOOST למירוץ",
+          "type": "questions-then-race",
+          "questionsFile": "questions/flexibility.json",
+          "gamePath": "games/crazy-cars/step1.html",
+          "bgPath": "games/crazy-cars/demo-bg.html"
+        },
+        {
+          "id": "comm-race",
+          "name": "מירוץ מכוניות",
+          "emoji": "🏎️",
+          "description": "ישר למירוץ!",
+          "type": "direct-game",
+          "gamePath": "games/crazy-cars/step1.html"
+        }
+      ]
+    },
+    {
+      "id": "dolphin",
+      "name": "ערך הדולפין",
+      "emoji": "🐬",
+      "description": "דולפין מרגיש. דולפין בוחר. דולפין מגיב.",
+      "games": [
+        {
+          "id": "dolphin-dive",
+          "name": "הים הפנימי",
+          "emoji": "🌊",
+          "description": "כריש, סרדין או דולפין? גלו איך אתם מגיבים",
+          "type": "standalone-game",
+          "gamePath": "games/dolphin-dive/index.html"
+        }
+      ]
+    },
+    {
+      "id": "empathy",
+      "name": "אמפתיה",
+      "emoji": "❤️",
+      "description": "היכולת להרגיש מה חברים מרגישים",
+      "games": []
+    },
+    {
+      "id": "cooperation",
+      "name": "שיתוף פעולה",
+      "emoji": "🤝",
+      "description": "היכולת לעבוד ביחד ולהגיע לפתרון משותף",
+      "games": []
+    },
+    {
+      "id": "self-regulation",
+      "name": "ויסות עצמי",
+      "emoji": "🧠",
+      "description": "היכולת לשלוט ברגשות ולהגיב בצורה מתאימה",
+      "games": []
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מיומנויות חברתיות</title>
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+<iframe id="bg" src="about:blank"></iframe>
+
+<div class="nav">
+    <div class="nav-btn" id="navHome" onclick="app.showHub()">🏠 ראשי</div>
+    <div class="nav-btn" id="navBack" onclick="app.goBack()">→ חזרה</div>
+</div>
+
+<!-- HUB -->
+<div id="hub" class="screen hub on">
+    <div style="font-size:46px">🏎️</div>
+    <div class="hub-title">מיומנויות חברתיות</div>
+    <div class="hub-sub">בחרו מיומנות, ענו על שאלות, וצאו למשחק!</div>
+    <div class="hub-grid" id="hubGrid"></div>
+</div>
+
+<!-- CATEGORY (game list) -->
+<div id="category" class="screen cat-screen">
+    <div id="gameList"></div>
+</div>
+
+<!-- QUESTIONS -->
+<div id="questions" class="screen q-screen">
+    <div class="qi">
+        <div class="qtop" id="qNum"></div>
+        <div class="qbar"><div class="qbar-f" id="qBar"></div></div>
+        <div class="qsit" id="qSit"></div>
+        <div class="qopts" id="qOpts"></div>
+        <div class="qfb" id="qFb"></div>
+    </div>
+</div>
+
+<div class="boost" id="boost">
+    <span class="boost-l">BOOST</span>
+    <div class="boost-t"><div class="boost-f" id="bFill"></div></div>
+    <span class="boost-p" id="bPct">0%</span>
+</div>
+
+<div class="rbadge" id="rb">⚡ <span id="rbV">x1.0</span></div>
+
+<!-- RESULTS -->
+<div id="results" class="screen res-screen">
+    <div class="rbox">
+        <div class="em" id="rE">🏆</div>
+        <div class="ti" id="rT"></div>
+        <div class="st" id="rSt"></div>
+        <div class="rrows" id="rR"></div>
+        <div class="rbtns">
+            <button class="p" onclick="app.showHub()">🏠 חזרה</button>
+        </div>
+    </div>
+</div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

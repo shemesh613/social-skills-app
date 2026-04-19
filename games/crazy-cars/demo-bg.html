@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>* { margin: 0; } body { overflow: hidden; background: #000; } canvas { display: block; }</style>
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }
+</script>
+</head>
+<body>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+
+// === SETUP ===
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x87ceeb); // Same sky as game
+scene.fog = new THREE.Fog(0x87ceeb, 80, 250);
+
+const camera = new THREE.PerspectiveCamera(65, innerWidth / innerHeight, 0.1, 400);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+document.body.appendChild(renderer.domElement);
+
+// === LIGHTS (same as game) ===
+scene.add(new THREE.AmbientLight(0x606080, 0.7));
+const sun = new THREE.DirectionalLight(0xffffff, 1.2);
+sun.position.set(80, 120, 60);
+sun.castShadow = true;
+scene.add(sun);
+scene.add(new THREE.HemisphereLight(0x87ceeb, 0x444444, 0.5));
+
+// === CIRCULAR TRACK ===
+const TRACK_RADIUS = 60;
+const TRACK_WIDTH = 12;
+const CURB_WIDTH = 1.5;
+
+// Road surface (ring)
+const roadGeo = new THREE.RingGeometry(TRACK_RADIUS - TRACK_WIDTH/2, TRACK_RADIUS + TRACK_WIDTH/2, 80, 1);
+roadGeo.rotateX(-Math.PI / 2);
+const roadMat = new THREE.MeshStandardMaterial({ color: 0x555560, roughness: 0.9 });
+const road = new THREE.Mesh(roadGeo, roadMat);
+road.receiveShadow = true;
+scene.add(road);
+
+// Inner curb (red)
+const curbInGeo = new THREE.RingGeometry(TRACK_RADIUS - TRACK_WIDTH/2 - CURB_WIDTH, TRACK_RADIUS - TRACK_WIDTH/2, 80, 1);
+curbInGeo.rotateX(-Math.PI / 2);
+const curbMat = new THREE.MeshStandardMaterial({ color: 0xcc2222 });
+scene.add(new THREE.Mesh(curbInGeo, curbMat));
+
+// Outer curb (red)
+const curbOutGeo = new THREE.RingGeometry(TRACK_RADIUS + TRACK_WIDTH/2, TRACK_RADIUS + TRACK_WIDTH/2 + CURB_WIDTH, 80, 1);
+curbOutGeo.rotateX(-Math.PI / 2);
+scene.add(new THREE.Mesh(curbOutGeo, curbMat));
+
+// Center dashes (white)
+for (let i = 0; i < 40; i++) {
+    const angle = (i / 40) * Math.PI * 2;
+    const dashGeo = new THREE.BoxGeometry(0.3, 0.05, 2);
+    const dash = new THREE.Mesh(dashGeo, new THREE.MeshStandardMaterial({ color: 0xffffff }));
+    dash.position.set(Math.cos(angle) * TRACK_RADIUS, 0.02, Math.sin(angle) * TRACK_RADIUS);
+    dash.rotation.y = -angle + Math.PI / 2;
+    scene.add(dash);
+}
+
+// Ground (green/grey)
+const groundGeo = new THREE.PlaneGeometry(600, 600);
+groundGeo.rotateX(-Math.PI / 2);
+const groundMat = new THREE.MeshStandardMaterial({ color: 0x445544 });
+const ground = new THREE.Mesh(groundGeo, groundMat);
+ground.position.y = -0.05;
+ground.receiveShadow = true;
+scene.add(ground);
+
+// === BUILDINGS (like the game — dark blue with yellow windows) ===
+function makeBuilding(x, z, w, d, h, color) {
+    const geo = new THREE.BoxGeometry(w, h, d);
+    const mat = new THREE.MeshStandardMaterial({ color });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.set(x, h / 2, z);
+    mesh.castShadow = true;
+    scene.add(mesh);
+
+    // Windows (yellow emissive)
+    const winMat = new THREE.MeshStandardMaterial({ color: 0xccaa22, emissive: 0xccaa22, emissiveIntensity: 0.5 });
+    const rows = Math.floor(h / 4);
+    const cols = Math.floor(w / 3);
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+            if (srand() > 0.7) continue; // some windows dark
+            const win = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.5, 0.1), winMat);
+            win.position.set(
+                x - w/2 + 1.5 + c * 3,
+                2 + r * 4,
+                z + d/2 + 0.05
+            );
+            scene.add(win);
+            // Back side
+            const win2 = win.clone();
+            win2.position.z = z - d/2 - 0.05;
+            scene.add(win2);
+        }
+    }
+}
+
+// Seeded random for consistent look
+let seed = 42;
+function srand() { seed = (seed * 16807 + 0) % 2147483647; return (seed - 1) / 2147483646; }
+
+const bColors = [0x3a4a6e, 0x2d3e5e, 0x4a5a7e, 0x5a6a8e];
+
+// Inner buildings (inside the track circle)
+for (let i = 0; i < 12; i++) {
+    const angle = (i / 12) * Math.PI * 2 + srand() * 0.3;
+    const r = 15 + srand() * 25;
+    const h = 15 + srand() * 30;
+    const w = 6 + srand() * 8;
+    makeBuilding(
+        Math.cos(angle) * r, Math.sin(angle) * r,
+        w, w * (0.6 + srand() * 0.6), h,
+        bColors[Math.floor(srand() * bColors.length)]
+    );
+}
+
+// Outer buildings (outside the track)
+for (let i = 0; i < 20; i++) {
+    const angle = (i / 20) * Math.PI * 2 + srand() * 0.2;
+    const r = TRACK_RADIUS + TRACK_WIDTH/2 + 10 + srand() * 30;
+    const h = 12 + srand() * 35;
+    const w = 7 + srand() * 10;
+    makeBuilding(
+        Math.cos(angle) * r, Math.sin(angle) * r,
+        w, w * (0.5 + srand() * 0.5), h,
+        bColors[Math.floor(srand() * bColors.length)]
+    );
+}
+
+// === LOAD CAR ===
+let carModel = null;
+const loader = new GLTFLoader();
+const draco = new DRACOLoader();
+draco.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/libs/draco/');
+loader.setDRACOLoader(draco);
+
+loader.load('assets/models/race-car.glb', (gltf) => {
+    carModel = gltf.scene;
+    carModel.scale.setScalar(1);
+    carModel.castShadow = true;
+    scene.add(carModel);
+});
+
+// === AI CARS (3 extra cars at different positions) ===
+const aiCars = [];
+const aiColors = [0x2255ff, 0x22cc22, 0xffaa00];
+for (let i = 0; i < 3; i++) {
+    loader.load('assets/models/race-car.glb', (gltf) => {
+        const ai = gltf.scene;
+        ai.scale.setScalar(0.95);
+        // Tint the car
+        ai.traverse(child => {
+            if (child.isMesh && child.material) {
+                child.material = child.material.clone();
+                if (child.material.color && child.material.color.r > 0.5) {
+                    child.material.color.setHex(aiColors[i]);
+                }
+            }
+        });
+        scene.add(ai);
+        aiCars.push({ mesh: ai, offset: (i + 1) * (Math.PI * 2 / 4), speed: 0.008 + Math.random() * 0.003 });
+    });
+}
+
+// === ANIMATION ===
+let t = 0;
+const CAR_SPEED = 0.01;
+
+function animate() {
+    requestAnimationFrame(animate);
+    t += CAR_SPEED;
+
+    // Main car position on circular track
+    if (carModel) {
+        const angle = t;
+        const x = Math.cos(angle) * TRACK_RADIUS;
+        const z = Math.sin(angle) * TRACK_RADIUS;
+        carModel.position.set(x, 0.15, z);
+        carModel.rotation.y = -angle + Math.PI;
+    }
+
+    // Static sideline camera — watching cars pass by
+    if (!window._camSet) {
+        camera.position.set(TRACK_RADIUS + 18, 6, 0);
+        camera.lookAt(TRACK_RADIUS, 0, 0);
+        window._camSet = true;
+    }
+
+    // AI cars
+    for (const ai of aiCars) {
+        if (!ai.mesh) continue;
+        const angle = t * (ai.speed / CAR_SPEED) + ai.offset;
+        const r = TRACK_RADIUS + (aiCars.indexOf(ai) - 1) * 3; // spread across lanes
+        ai.mesh.position.set(Math.cos(angle) * r, 0.15, Math.sin(angle) * r);
+        ai.mesh.rotation.y = -angle + Math.PI;
+    }
+
+    renderer.render(scene, camera);
+}
+animate();
+
+window.addEventListener('resize', () => {
+    camera.aspect = innerWidth / innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth, innerHeight);
+});
+</script>
+</body>
+</html>
