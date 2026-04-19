@@ -11,7 +11,10 @@ async function init() {
     categories = (await res.json()).categories;
 
     Bridge.init(document.getElementById('bg'), onRaceComplete);
-    showHub();
+    const params = new URLSearchParams(window.location.search);
+    const cat = params.get('category');
+    if (cat && categories.find(c => c.id === cat)) openCategory(cat);
+    else showHub();
 }
 
 // ===== SCREENS =====
