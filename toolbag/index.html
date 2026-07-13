@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>🎒 תיק הכלים — פרק 1: הפנס הפנימי</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;800&family=Frank+Ruhl+Libre:wght@700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:'Heebo',sans-serif;background:linear-gradient(180deg,#0d1330 0%,#1b2456 55%,#2b2e6e 100%);color:#f2f4ff;overflow:hidden;user-select:none}
+.scr{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
+.scr.on{display:flex}
+h1{font-family:'Frank Ruhl Libre',serif;font-size:clamp(30px,7vw,52px);color:#ffd54a;text-shadow:0 4px 24px rgba(255,213,74,.35)}
+h2{font-family:'Frank Ruhl Libre',serif;font-size:clamp(20px,4.5vw,30px);color:#ffd54a;margin-bottom:10px}
+.btn{display:block;width:100%;max-width:420px;margin:8px auto;padding:15px 22px;border:none;border-radius:16px;font-family:'Heebo';font-size:17.5px;font-weight:800;cursor:pointer;background:linear-gradient(180deg,#ffd54a,#f5a623);color:#4a2c00;box-shadow:0 6px 0 #b57712,0 10px 24px rgba(0,0,0,.35);transition:transform .1s}
+.btn:active{transform:translateY(4px);box-shadow:0 2px 0 #b57712}
+.btn.sec{background:linear-gradient(180deg,#3c477f,#2a3260);color:#dfe6ff;box-shadow:0 6px 0 #1a2040,0 10px 24px rgba(0,0,0,.3)}
+.btn.calm{background:linear-gradient(180deg,#7dffa8,#25c05f);color:#053514;box-shadow:0 6px 0 #128040,0 10px 24px rgba(0,0,0,.35)}
+
+/* ===== stars bg ===== */
+.stars{position:fixed;inset:0;pointer-events:none;z-index:0}
+.stars i{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;opacity:.6;animation:tw 3s infinite}
+@keyframes tw{0%,100%{opacity:.15}50%{opacity:.8}}
+
+/* ===== title ===== */
+#scr-title .bag{font-size:clamp(80px,20vw,150px);animation:float 3.2s ease-in-out infinite;filter:drop-shadow(0 14px 30px rgba(0,0,0,.5))}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}
+.chapter{background:rgba(255,213,74,.14);border:1.5px solid rgba(255,213,74,.55);border-radius:30px;padding:7px 22px;font-size:17px;font-weight:800;color:#ffd54a;margin:14px 0 22px}
+.tiny{font-size:13.5px;opacity:.65;margin-top:14px}
+
+/* ===== dialogue ===== */
+.stage{position:relative;width:100%;max-width:640px;flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:8px;z-index:1}
+.sceneArt{flex:1;display:flex;align-items:center;justify-content:center;font-size:clamp(64px,16vw,120px);text-align:center;line-height:1.25;filter:drop-shadow(0 10px 24px rgba(0,0,0,.45))}
+.owl{animation:float 3s ease-in-out infinite}
+.bubble{position:relative;background:#fffef2;color:#3a2c10;border-radius:20px;padding:16px 20px;font-size:clamp(16px,2.6vh,19.5px);line-height:1.65;font-weight:600;min-height:96px;box-shadow:0 12px 34px rgba(0,0,0,.45)}
+.bubble:before{content:'';position:absolute;top:-14px;right:44px;border:9px solid transparent;border-bottom-color:#fffef2}
+.who{position:absolute;top:-15px;right:14px;background:#ffd54a;color:#4a2c00;font-size:13px;font-weight:800;border-radius:20px;padding:2px 12px}
+.next{margin-top:10px;text-align:center;font-size:14px;color:#ffd54a;opacity:.85;animation:tw 1.6s infinite}
+
+/* ===== flashlight room ===== */
+#room{position:relative;width:100%;max-width:640px;flex:1;border-radius:22px;overflow:hidden;background:linear-gradient(180deg,#141b3e,#1d1436);cursor:none;touch-action:none}
+#room .item{position:absolute;font-size:46px;transform:translate(-50%,-50%)}
+#heart{position:absolute;font-size:74px;transform:translate(-50%,-50%);cursor:pointer;transition:transform .3s}
+#heart.beat{animation:beat 1s infinite}
+@keyframes beat{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.14)}}
+#dark{position:absolute;inset:0;pointer-events:none;background:rgba(4,5,20,.985)}
+#torch{position:absolute;font-size:34px;pointer-events:none;transform:translate(-50%,-50%) rotate(-35deg);z-index:5}
+.hint{width:100%;max-width:640px;text-align:center;font-size:15.5px;font-weight:600;color:#ffe9a8;padding:10px 6px 2px}
+
+/* ===== heart closeup / feelings ===== */
+.bigheart{font-size:clamp(90px,22vw,150px);animation:beat 1.2s infinite;filter:drop-shadow(0 0 34px rgba(255,90,120,.45))}
+.bigheart.calm{animation:calmGlow 2.4s ease-in-out infinite;filter:drop-shadow(0 0 44px rgba(255,213,110,.8))}
+@keyframes calmGlow{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.feelRow{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:16px 0}
+.feel{background:rgba(255,255,255,.09);border:2px solid rgba(255,255,255,.25);border-radius:18px;padding:14px 20px;font-size:17px;font-weight:800;color:#fff;cursor:pointer;text-align:center;min-width:104px;transition:all .15s}
+.feel:hover{border-color:#ffd54a;background:rgba(255,213,74,.12)}
+.feel span{display:block;font-size:34px;margin-bottom:4px}
+
+/* ===== scenarios ===== */
+.dots{display:flex;gap:9px;margin:6px 0 12px;z-index:1}
+.dot{width:13px;height:13px;border-radius:50%;background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.35)}
+.dot.cur{background:#ffd54a;border-color:#ffd54a;box-shadow:0 0 12px rgba(255,213,74,.7)}
+.dot.done{background:#7dffa8;border-color:#7dffa8}
+.sceneCard{width:100%;max-width:640px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);border-radius:22px;padding:18px;text-align:center;z-index:1}
+.sceneEmoji{font-size:clamp(54px,13vw,92px);line-height:1.3;margin:6px 0;transition:all .4s}
+.sceneEmoji.shake{animation:shake .55s}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-12px) rotate(-2deg)}40%{transform:translateX(11px)}60%{transform:translateX(-9px) rotate(2deg)}80%{transform:translateX(7px)}}
+.sceneEmoji.sink{animation:sink 1.6s forwards}
+@keyframes sink{to{transform:translateY(16px) scale(.9);filter:grayscale(.85) brightness(.6)}}
+.sceneEmoji.glow{animation:calmGlow 2s ease-in-out infinite;filter:drop-shadow(0 0 30px rgba(255,213,110,.75))}
+.sceneTxt{font-size:clamp(16px,2.5vh,19px);line-height:1.7;font-weight:600;margin:8px 4px}
+.choice{display:block;width:100%;margin:9px 0;padding:14px 16px;border:2px solid rgba(255,255,255,.22);border-radius:16px;background:rgba(255,255,255,.06);color:#fff;font-family:'Heebo';font-size:16.5px;font-weight:700;cursor:pointer;text-align:right;line-height:1.5;transition:all .15s}
+.choice:hover{border-color:#ffd54a;background:rgba(255,213,74,.1)}
+.reflect{background:rgba(143,211,255,.1);border:1.5px dashed rgba(143,211,255,.5);border-radius:16px;padding:13px 16px;font-size:15.5px;line-height:1.7;margin-top:12px;color:#dff0ff}
+.explored{font-size:13.5px;color:#8fd3ff;margin-top:10px;font-weight:600}
+
+/* ===== badge / toolbag ===== */
+.slots{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:18px 0;max-width:520px}
+.slot{width:60px;height:60px;border-radius:16px;background:rgba(255,255,255,.07);border:2px dashed rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:29px;opacity:.55}
+.slot.earned{background:rgba(255,213,74,.16);border:2px solid #ffd54a;opacity:1;animation:pop .6s cubic-bezier(.2,1.6,.4,1);box-shadow:0 0 22px rgba(255,213,74,.5)}
+@keyframes pop{0%{transform:scale(0)}100%{transform:scale(1)}}
+#flyTool{position:fixed;font-size:70px;z-index:50;pointer-events:none;display:none}
+
+/* ===== family card ===== */
+.famCard{width:100%;max-width:560px;background:#fffef2;color:#3a2c10;border-radius:22px;padding:22px;text-align:right;box-shadow:0 16px 44px rgba(0,0,0,.5);z-index:1}
+.famCard h3{font-family:'Frank Ruhl Libre',serif;color:#a15c00;font-size:20px;margin-bottom:8px;text-align:center}
+.famCard li{font-size:15.5px;line-height:1.8;margin-bottom:7px}
+.famCard ul{padding-right:20px}
+.mission{background:linear-gradient(135deg,#fff3c9,#ffe4a1);border:2px solid #f5a623;border-radius:16px;padding:13px 16px;margin-top:12px;font-size:15.5px;line-height:1.7;font-weight:700}
+
+canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
+.fadeIn{animation:fadeIn .5s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="stars" id="stars"></div>
+<canvas id="confetti"></canvas>
+<div id="flyTool">🔦</div>
+
+<!-- ============ TITLE ============ -->
+<div class="scr on" id="scr-title">
+  <div class="bag">🎒</div>
+  <h1>תיק הכלים</h1>
+  <div class="chapter">פרק 1 · הפנס הפנימי 🔦</div>
+  <button class="btn" onclick="startStory()">▶️ מתחילים את ההרפתקה</button>
+  <div class="tiny">מסע של 7 כלים לחיים · מתאים לבית ולכיתה</div>
+</div>
+
+<!-- ============ DIALOGUE ============ -->
+<div class="scr" id="scr-story">
+  <div class="stage" onclick="advance()">
+    <div class="sceneArt" id="art">🌙</div>
+    <div class="bubble">
+      <div class="who" id="who">🦉 הינשוף</div>
+      <div id="txt"></div>
+    </div>
+    <div class="next" id="nextHint">👆 הקישו להמשך</div>
+  </div>
+</div>
+
+<!-- ============ FLASHLIGHT ROOM ============ -->
+<div class="scr" id="scr-room">
+  <div class="hint" id="roomHint">🌑 חושך בפנים... הזיזו את הפנס ומצאו את הלב שלכם</div>
+  <div id="room">
+    <div class="item" style="top:22%;right:14%">🪑</div>
+    <div class="item" style="top:70%;right:78%">🧸</div>
+    <div class="item" style="top:78%;right:22%">📚</div>
+    <div class="item" style="top:18%;right:74%">🖼️</div>
+    <div id="heart" class="beat" style="top:52%;right:58%" onclick="foundHeart()">❤️</div>
+    <div id="dark"></div>
+    <div id="torch">🔦</div>
+  </div>
+</div>
+
+<!-- ============ FEELING PICK ============ -->
+<div class="scr" id="scr-feel">
+  <div class="bigheart" id="heartBig">💗</div>
+  <h2 id="feelQ">מה הלב מרגיש עכשיו?</h2>
+  <div class="sceneTxt" id="feelCtx" style="max-width:520px"></div>
+  <div class="feelRow" id="feelRow"></div>
+  <div id="feelSteps" style="width:100%;max-width:440px"></div>
+</div>
+
+<!-- ============ SCENARIO ============ -->
+<div class="scr" id="scr-scen">
+  <div class="dots" id="dots"></div>
+  <div class="sceneCard">
+    <div class="sceneEmoji" id="scEmoji"></div>
+    <div class="sceneTxt" id="scTxt"></div>
+    <div id="scBody"></div>
+  </div>
+</div>
+
+<!-- ============ BADGE ============ -->
+<div class="scr" id="scr-badge">
+  <h1 style="font-size:clamp(26px,6vw,40px)">🎉 הכלי הראשון שלך!</h1>
+  <div class="sceneTxt" style="max-width:520px;text-align:center">הפנס הפנימי נכנס לתיק הכלים.<br>עוד 6 כלים מחכים בהמשך המסע...</div>
+  <div class="slots" id="slots"></div>
+  <button class="btn calm" onclick="showFam()">🏡 קלף למשפחה ולכיתה</button>
+  <button class="btn sec" onclick="location.reload()">🔄 לשחק שוב</button>
+</div>
+
+<!-- ============ FAMILY CARD ============ -->
+<div class="scr" id="scr-fam">
+  <div class="famCard fadeIn">
+    <h3>🗣️ מדברים על זה יחד</h3>
+    <ul>
+      <li>מתי בפעם האחרונה הלב שלך הרגיש כבד? מה הוא הרגיש?</li>
+      <li>למה לדעתך זה עוזר להגיד <b>"זה נורמלי להרגיש ככה"</b>?</li>
+      <li>מה ההבדל בין להוציא את הכעס החוצה, להחזיק הכל בפנים — ולהדליק פנס פנימי?</li>
+    </ul>
+    <div class="mission">🌟 <b>משימת האומץ של השבוע:</b> בפעם הבאה שמשהו מציק — עצרו, שאלו "מה הלב שלי מרגיש?", תגידו "זה נורמלי", וחבקו את הלב. ספרו אחר כך למשפחה איך זה היה!</div>
+  </div>
+  <button class="btn" style="margin-top:16px" onclick="show('scr-badge')">⬅️ חזרה</button>
+</div>
+
+<script>
+'use strict';
+/* ================= util ================= */
+function $(s){return document.querySelector(s)}
+function show(id){document.querySelectorAll('.scr').forEach(function(s){s.classList.remove('on')});$('#'+id).classList.add('on')}
+/* soft sounds via WebAudio — no assets */
+var AC=null;
+function snd(f,d,type,vol){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();var o=AC.createOscillator(),g=AC.createGain();o.type=type||'sine';o.frequency.value=f;g.gain.value=vol||.12;g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+(d||.25));o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+(d||.25))}catch(e){}}
+function sndTap(){snd(520,.12)} function sndGood(){snd(660,.16);setTimeout(function(){snd(880,.22)},110)}
+function sndWarm(){snd(392,.4,'triangle',.1);setTimeout(function(){snd(523,.5,'triangle',.1)},180)}
+
+/* stars */
+(function(){var h='';for(var i=0;i<40;i++)h+='<i style="top:'+Math.random()*100+'%;right:'+Math.random()*100+'%;animation-delay:'+Math.random()*3+'s"></i>';$('#stars').innerHTML=h})();
+
+/* confetti */
+function confettiBurst(){
+  var c=$('#confetti'),x=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;
+  var P=[],cols=['#ffd54a','#7dffa8','#8fd3ff','#ff9bb3','#fff'];
+  for(var i=0;i<130;i++)P.push({x:innerWidth/2,y:innerHeight*.4,vx:(Math.random()-.5)*13,vy:-Math.random()*11-3,s:Math.random()*7+4,c:cols[i%5],r:Math.random()*6});
+  var t=0;(function fr(){x.clearRect(0,0,c.width,c.height);t++;
+    P.forEach(function(p){p.x+=p.vx;p.y+=p.vy;p.vy+=.3;p.r+=.15;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;x.fillRect(-p.s/2,-p.s/2,p.s,p.s*.6);x.restore()});
+    if(t<110)requestAnimationFrame(fr);else x.clearRect(0,0,c.width,c.height)})();
+}
+
+/* ================= intro dialogue ================= */
+var LINES=[
+ {art:'🌙🚶',who:'',t:'סוף יום. אתם הולכים הביתה, והלב קצת כבד... היום היה יום לא פשוט.'},
+ {art:'🦉',who:'🦉 הינשוף',t:'עצרו רגע, ידידיי הצעירים! אני הינשוף שומר תיק הכלים. אני רואה שהלב שלכם כבד היום...'},
+ {art:'🎒✨',who:'🦉 הינשוף',t:'יש לי מתנה בשבילכם — הכלי הראשון בתיק: <b>הפנס הפנימי</b> 🔦'},
+ {art:'🔦❤️',who:'🦉 הינשוף',t:'כשמשהו קשה קורה — במקום להתפוצץ או לברוח, עוצרים רגע... ומאירים <b>פנימה</b>: מה הלב שלי מרגיש?'},
+ {art:'💛🤗',who:'🦉 הינשוף',t:'ואז אומרים ללב: <b>"זה נורמלי להרגיש ככה"</b> — ומחבקים אותו. לב שמקבל חיבוק, נרגע.'},
+ {art:'🔦🌑',who:'🦉 הינשוף',t:'רוצים לנסות? קחו את הפנס — בואו נמצא את הלב שלכם בחושך!'}
+];
+var li=0;
+function startStory(){sndTap();li=0;show('scr-story');paint()}
+function paint(){var L=LINES[li];$('#art').innerHTML=L.art;$('#art').className='sceneArt'+(L.art==='🦉'?' owl':'');$('#who').style.display=L.who?'block':'none';$('#who').textContent=L.who;typeIt(L.t)}
+var typing=false,typeTimer=null;
+function typeIt(html){
+  typing=true;var el=$('#txt');el.innerHTML='';var plain=html.replace(/<[^>]+>/g,'');var i=0;
+  clearInterval(typeTimer);
+  typeTimer=setInterval(function(){i++;if(i>=plain.length){clearInterval(typeTimer);el.innerHTML=html;typing=false;return}el.textContent=plain.slice(0,i)},22);
+}
+function advance(){
+  sndTap();
+  if(typing){clearInterval(typeTimer);$('#txt').innerHTML=LINES[li].t;typing=false;return}
+  li++;
+  if(li>=LINES.length){startRoom();return}
+  paint();
+}
+
+/* ================= flashlight room ================= */
+function startRoom(){
+  show('scr-room');
+  var room=$('#room'),dark=$('#dark'),torch=$('#torch');
+  function move(x,y){
+    var r=room.getBoundingClientRect();var px=x-r.left,py=y-r.top;
+    dark.style.background='radial-gradient(circle 120px at '+px+'px '+py+'px, rgba(4,5,20,0) 0 74px, rgba(4,5,20,.985) 130px)';
+    torch.style.left=px+'px';torch.style.top=(py-6)+'px';
+  }
+  room.onpointermove=function(e){move(e.clientX,e.clientY)};
+  room.onpointerdown=function(e){move(e.clientX,e.clientY)};
+  /* start beam center */
+  var r=room.getBoundingClientRect();move(r.left+r.width/2,r.top+r.height/2);
+}
+function foundHeart(){sndGood();feelFlow({
+  ctx:'מצאתם את הלב! אחרי יום כזה, תקשיבו לו רגע...',
+  feels:[{e:'😢',n:'עצב'},{e:'😠',n:'כעס'},{e:'😟',n:'דאגה'}],
+  after:function(){toScen(0)}
+})}
+
+/* ================= feeling flow (reused) ================= */
+/* steps: pick feeling -> "זה נורמלי" -> hug -> heart calms -> after() */
+function feelFlow(cfg){
+  show('scr-feel');
+  var hb=$('#heartBig');hb.textContent='💗';hb.className='bigheart';
+  $('#feelQ').textContent='מה הלב מרגיש עכשיו?';
+  $('#feelCtx').innerHTML=cfg.ctx||'';
+  var row=$('#feelRow');row.innerHTML='';row.style.display='flex';
+  $('#feelSteps').innerHTML='';
+  cfg.feels.forEach(function(f){
+    var d=document.createElement('div');d.className='feel';d.innerHTML='<span>'+f.e+'</span>'+f.n;
+    d.onclick=function(){sndTap();step2(f)};row.appendChild(d);
+  });
+  function step2(f){
+    row.style.display='none';
+    $('#heartBig').textContent=f.e;
+    $('#feelQ').textContent='זיהיתם! הלב מרגיש '+f.n+'.';
+    $('#feelCtx').innerHTML='עכשיו תגידו לו את משפט הקסם:';
+    $('#feelSteps').innerHTML='<button class="btn" onclick="void(0)" id="normBtn">💛 "זה נורמלי להרגיש '+f.n+'"</button>';
+    $('#normBtn').onclick=function(){sndWarm();step3(f)};
+  }
+  function step3(f){
+    $('#feelQ').textContent='יפה מאוד... הלב שומע אתכם.';
+    $('#feelCtx').innerHTML='נשאר עוד צעד אחד:';
+    $('#feelSteps').innerHTML='<button class="btn calm" id="hugBtn">🤗 לחבק את הלב</button>';
+    $('#hugBtn').onclick=function(){
+      sndWarm();
+      var hb=$('#heartBig');hb.textContent='💛';hb.className='bigheart calm';
+      $('#feelQ').textContent='הלב נרגע ✨';
+      $('#feelCtx').innerHTML='הרגש עדיין שם — וזה בסדר. אבל עכשיו <b>אתם</b> מחזיקים אותו, ולא הוא אתכם.';
+      $('#feelSteps').innerHTML='<button class="btn" id="contBtn">ממשיכים ⬅️</button>';
+      $('#contBtn').onclick=function(){sndTap();cfg.after()};
+    };
+  }
+}
+
+/* ================= scenarios ================= */
+var SCEN=[
+ {emoji:'⚽😔',txt:'הפסקה. כל הילדים משחקים כדורגל... ואף אחד לא הזמין אתכם לשחק.',
+  feel:{e:'💔',n:'עלבון'},
+  choices:[
+   {t:'😠 לצעוק: "אתם מגעילים! בכלל לא רוצה לשחק איתכם!"',anim:'shake',emoji:'😠🗯️😨',
+    cons:'הילדים נבהלים ומתרחקים. עכשיו אתם לבד — וגם כועסים וגם עצובים.',
+    ref:'הכעס יצא החוצה עוד לפני שהבנו מה הלב באמת מרגיש. הצעקה לא קירבה אותנו למשחק...'},
+   {t:'🙁 ללכת לפינה, לשתוק, ולהחזיק הכל בפנים',anim:'sink',emoji:'🧍😶🌧️',
+    cons:'ההפסקה עוברת... הרגש נשאר בפנים — וגדל. הלב כבד עד סוף היום.',
+    ref:'רגש שמחזיקים בפנים בלי להקשיב לו לא נעלם — הוא מחכה ומתנפח.'},
+   {t:'🔦 לעצור רגע... ולהדליק את הפנס הפנימי',flash:true,
+    okEmoji:'⚽😊🙌',ok:'עכשיו, כשהלב רגוע, אפשר לחשוב בהיגיון. ניגשים ושואלים: "אפשר להצטרף?" — "בטח, בוא!"'}
+  ]},
+ {emoji:'📝😧',txt:'למדתם קשה למבחן, באמת התאמצתם... והציון שחזר נמוך ממה שקיוויתם.',
+  feel:{e:'😞',n:'אכזבה'},
+  choices:[
+   {t:'😤 לקמט את הדף ולזרוק אותו לפח',anim:'shake',emoji:'📄💥🗑️',
+    cons:'הדף בפח — אבל ההרגשה נשארה. ועכשיו גם אי אפשר לראות מה אפשר לתקן.',
+    ref:'זרקנו את הדף — אבל את האכזבה אי אפשר לזרוק לפח. היא עדיין בלב.'},
+   {t:'😶 להגיד לכולם "לא אכפת לי בכלל" ולהעמיד פנים',anim:'sink',emoji:'🎭😶💧',
+    cons:'מבחוץ הכל "בסדר"... אבל בפנים הלב יודע את האמת, וההעמדת פנים מעייפת.',
+    ref:'כשמסתירים רגש גם מעצמנו — אף אחד לא יכול לעזור לנו. אפילו לא אנחנו.'},
+   {t:'🔦 לעצור רגע... ולהדליק את הפנס הפנימי',flash:true,
+    okEmoji:'🙋👩‍🏫💪',ok:'הלב נרגע — ועכשיו יש כוח לגשת למורה ולשאול: "איך אני יכול להשתפר לפעם הבאה?"'}
+  ]},
+ {emoji:'🧱😱',txt:'שעה שלמה בניתם מגדל לגו ענק... ואח קטן שלכם עבר — והפיל את הכל.',
+  feel:{e:'😠',n:'כעס'},
+  choices:[
+   {t:'🌋 לצעוק עליו חזק ולהפיל לו את הצעצועים',anim:'shake',emoji:'🌋😭🧸',
+    cons:'האח הקטן בוכה, אמא כועסת... ועכשיו יש גם מגדל הרוס וגם ריב גדול.',
+    ref:'הכעס אמיתי ומוצדק — אבל כשהוא מתפוצץ החוצה, הוא הורס עוד דברים בדרך.'},
+   {t:'🚪 לברוח לחדר ולטרוק את הדלת חזק',anim:'sink',emoji:'🚪🧍🌧️',
+    cons:'לבד בחדר, הכעס מבעבע בפנים... והמגדל עדיין הרוס. שום דבר לא הסתדר.',
+    ref:'לפעמים צריך רגע לבד — אבל בלי פנס פנימי, הכעס נשאר תקוע בפנים.'},
+   {t:'🔦 לעצור רגע... ולהדליק את הפנס הפנימי',flash:true,
+    okEmoji:'🗣️🧱🤝',ok:'הלב נרגע. עכשיו אפשר להגיד בקול רגוע: "עצוב לי, עבדתי על זה שעה. בוא תעזור לי לבנות מחדש" — ובונים יחד, גבוה יותר!'}
+  ]}
+];
+var si=0,explored=[];
+function toScen(i){
+  si=i;explored=[];
+  var d='';for(var k=0;k<SCEN.length;k++)d+='<div class="dot'+(k<si?' done':k===si?' cur':'')+'"></div>';
+  $('#dots').innerHTML=d;
+  show('scr-scen');
+  var S=SCEN[si];
+  $('#scEmoji').className='sceneEmoji';$('#scEmoji').textContent=S.emoji;
+  $('#scTxt').innerHTML=S.txt;
+  renderChoices();
+}
+function renderChoices(){
+  var S=SCEN[si],h='<div class="sceneTxt" style="font-size:15px;opacity:.85">מה עושים? 🤔</div>';
+  S.choices.forEach(function(c,idx){h+='<button class="choice" onclick="pick('+idx+')">'+c.t+(explored.indexOf(idx)>-1?' ✔️':'')+'</button>'});
+  if(explored.length)h+='<div class="explored">🔍 חקרתם '+explored.length+' מתוך 3 דרכים</div>';
+  $('#scBody').innerHTML=h;
+}
+function pick(idx){
+  sndTap();
+  var S=SCEN[si],c=S.choices[idx];
+  if(explored.indexOf(idx)<0)explored.push(idx);
+  if(c.flash){ /* the flashlight path — run feeling flow, then good outcome */
+    feelFlow({ctx:'<b>'+S.txt+'</b><br>מאירים פנימה...',feels:[S.feel,{e:'😢',n:'עצב'},{e:'😟',n:'דאגה'}].slice(0,3),
+      after:function(){goodOutcome(c)}});
+    return;
+  }
+  var em=$('#scEmoji');em.textContent=c.emoji;em.className='sceneEmoji '+c.anim;
+  snd(200,.3,'sawtooth',.06);
+  $('#scTxt').innerHTML=c.cons;
+  var h='<div class="reflect">💭 '+c.ref+'</div>';
+  h+='<button class="btn sec" onclick="retryScen()">🔄 לנסות דרך אחרת</button>';
+  $('#scBody').innerHTML=h;
+}
+function retryScen(){
+  sndTap();var S=SCEN[si];
+  $('#scEmoji').className='sceneEmoji';$('#scEmoji').textContent=S.emoji;
+  $('#scTxt').innerHTML=S.txt;renderChoices();
+}
+function goodOutcome(c){
+  show('scr-scen');
+  var em=$('#scEmoji');em.textContent=c.okEmoji;em.className='sceneEmoji glow';
+  sndGood();
+  $('#scTxt').innerHTML=c.ok;
+  var last=si>=SCEN.length-1;
+  var h='<div class="reflect">🔦 עצרנו ← הרגשנו ← אמרנו "זה נורמלי" ← חיבקנו ← <b>ואז בחרנו מה לעשות.</b> זה הפנס הפנימי!</div>';
+  if(explored.length<SCEN[si].choices.length)h+='<button class="btn sec" onclick="retryScen()">🔍 רגע, מה היה קורה בדרכים האחרות?</button>';
+  h+='<button class="btn" onclick="'+(last?'earnBadge()':'toScen('+(si+1)+')')+'">'+(last?'🎒 לקבל את הכלי!':'לסיפור הבא ⬅️')+'</button>';
+  $('#scBody').innerHTML=h;
+}
+
+/* ================= badge ================= */
+var TOOLS=['🔦','🐬','🌸','📗','🙋','❓','🛡️'];
+function earnBadge(){
+  show('scr-badge');
+  var h='';TOOLS.forEach(function(t,i){h+='<div class="slot" id="slot'+i+'">'+(i===0?'':'🔒')+'</div>'});
+  $('#slots').innerHTML=h;
+  /* fly the flashlight into slot 0 */
+  var f=$('#flyTool');f.style.display='block';f.style.left='50%';f.style.top='30%';f.style.transition='none';f.style.transform='translate(-50%,-50%) scale(1.6)';
+  setTimeout(function(){
+    var s=$('#slot0').getBoundingClientRect();
+    f.style.transition='all .9s cubic-bezier(.3,1.3,.4,1)';
+    f.style.left=(s.left+s.width/2)+'px';f.style.top=(s.top+s.height/2)+'px';f.style.transform='translate(-50%,-50%) scale(.55)';
+    setTimeout(function(){f.style.display='none';var sl=$('#slot0');sl.textContent='🔦';sl.className='slot earned';confettiBurst();sndGood();setTimeout(sndWarm,300)},950);
+  },500);
+}
+function showFam(){sndTap();show('scr-fam')}
+</script>
+</body>
+</html>
