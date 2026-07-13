@@ -182,6 +182,7 @@ const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
 renderer.setSize(innerWidth,innerHeight);
 renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;
 const scene=new THREE.Scene();
 scene.background=new THREE.Color(0x8ecdf5);
 scene.fog=new THREE.Fog(0x8ecdf5,60,140);
@@ -252,9 +253,65 @@ function emojiSprite(em,scale){
   sp.scale.set(scale,scale,1);return sp;
 }
 const owl=emojiSprite('🦉',3.2);owl.position.set(6.4,7.4,12);scene.add(owl);
-const marker=emojiSprite('⬇️',2.2);scene.add(marker);
+/* quest marker — a spinning golden arrow, floats ABOVE its target so it never mixes with the scenery */
+const marker=new THREE.Group();
+(function(){
+  const gold=new THREE.MeshBasicMaterial({color:0xffd54a});
+  const tip=new THREE.Mesh(new THREE.ConeGeometry(.62,1.15,16),gold);tip.rotation.x=Math.PI;tip.position.y=-.55;marker.add(tip);
+  const stem=new THREE.Mesh(new THREE.CylinderGeometry(.22,.22,.85,14),gold);stem.position.y=.45;marker.add(stem);
+  const glow=new THREE.Mesh(new THREE.ConeGeometry(.78,1.35,16),new THREE.MeshBasicMaterial({color:0xffe9a0,transparent:true,opacity:.18,depthWrite:false}));
+  glow.rotation.x=Math.PI;glow.position.y=-.55;marker.add(glow);
+})();
+marker.scale.setScalar(.8);
+scene.add(marker);
 const heartSp=emojiSprite('💗',2.4);heartSp.visible=false;scene.add(heartSp);
 const chatSp=emojiSprite('💬',2);chatSp.visible=false;scene.add(chatSp);
+
+/* ================= design pass: clouds, flowers, yard life ================= */
+function cnv(w,h,draw){const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return t}
+/* mowing stripes on the field */
+field.material=new THREE.MeshLambertMaterial({map:cnv(256,256,(x,w,h)=>{for(let i=0;i<8;i++){x.fillStyle=i%2?'#4f9e43':'#5aac4d';x.fillRect(i*w/8,0,w/8,h)}})});
+/* tiled pavement */
+pave.material=new THREE.MeshLambertMaterial({map:cnv(512,256,(x,w,h)=>{x.fillStyle='#c3bdb0';x.fillRect(0,0,w,h);x.strokeStyle='rgba(115,110,100,.5)';x.lineWidth=3;
+  for(let i=0;i<=12;i++){x.beginPath();x.moveTo(i*w/12,0);x.lineTo(i*w/12,h);x.stroke()}
+  for(let i=0;i<=6;i++){x.beginPath();x.moveTo(0,i*h/6);x.lineTo(w,i*h/6);x.stroke()}})});
+/* school sign */
+const sign=new THREE.Mesh(new THREE.PlaneGeometry(5.6,1.7),new THREE.MeshBasicMaterial({map:cnv(512,160,(x,w,h)=>{
+  x.fillStyle='#fff8ea';x.fillRect(0,0,w,h);x.strokeStyle='#b0543e';x.lineWidth=10;x.strokeRect(5,5,w-10,h-10);
+  x.fillStyle='#2b4c8c';x.font='bold 72px Heebo,Arial';x.textAlign='center';x.textBaseline='middle';x.fillText('🏫 בית הספר שלנו',w/2,h/2+4)})}));
+sign.position.set(0,7.8,-33.35);scene.add(sign);
+/* hopscotch on the pavement */
+const hop=new THREE.Mesh(new THREE.PlaneGeometry(2.6,5.6),new THREE.MeshLambertMaterial({transparent:true,map:cnv(160,340,(x,w,h)=>{
+  x.strokeStyle='#fff';x.lineWidth=7;x.fillStyle='#fff';x.font='bold 34px Arial';x.textAlign='center';x.textBaseline='middle';
+  const rows=[[1],[2,3],[4],[5,6],[7]];let y=h-4;const rh=(h-8)/5;
+  rows.forEach(r=>{const cw=(w-8)/r.length;r.forEach((n,i)=>{const cx=4+i*cw;x.strokeRect(cx,y-rh,cw,rh);x.fillText(n,cx+cw/2,y-rh/2)});y-=rh});})}));
+hop.rotation.x=-Math.PI/2;hop.rotation.z=.3;hop.position.set(-13,.035,-21);scene.add(hop);
+/* drifting clouds */
+const cloudTex=cnv(256,128,(x,w,h)=>{[[70,80,44],[120,60,52],[175,82,42],[145,95,36],[95,95,34]].forEach(c=>{
+  const g=x.createRadialGradient(c[0],c[1],4,c[0],c[1],c[2]);g.addColorStop(0,'rgba(255,255,255,.95)');g.addColorStop(1,'rgba(255,255,255,0)');
+  x.fillStyle=g;x.beginPath();x.arc(c[0],c[1],c[2],0,7);x.fill()})});
+const clouds=[];
+for(let i=0;i<6;i++){const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:cloudTex,transparent:true,opacity:.85,depthWrite:false}));
+  sp.scale.set(15+Math.random()*11,6.5+Math.random()*3,1);
+  sp.position.set(-60+Math.random()*120,25+Math.random()*9,-48+Math.random()*66);
+  scene.add(sp);clouds.push(sp)}
+/* flowers along the fences */
+const FL=['🌼','🌷','🌻','🌸'];
+for(let i=0;i<20;i++){const f=emojiSprite(FL[i%4],1.5);
+  const edge=i%4;
+  if(edge===0)f.position.set(-40+Math.random()*80,.5,28.2+Math.random()*1.4);
+  else if(edge===1)f.position.set(-40+Math.random()*80,.5,-50.5+Math.random()*1.4);
+  else if(edge===2)f.position.set(-42.4+Math.random()*1.6,.5,-48+Math.random()*72);
+  else f.position.set(40.8+Math.random()*1.6,.5,-48+Math.random()*72);
+  scene.add(f)}
+/* bushes */
+function bush(x,z,s){s=s||1;const b=new THREE.Group();
+  [[0,.5,0,.75],[.6,.4,.2,.5],[-.55,.42,-.15,.48]].forEach(v=>{const m=new THREE.Mesh(new THREE.SphereGeometry(v[3]*s,10,8),M(0x2f7d38));m.position.set(v[0]*s,v[1]*s,v[2]*s);m.castShadow=true;b.add(m)});
+  b.position.set(x,0,z);scene.add(b)}
+bush(-8,-31.5,1.2);bush(11,-31.5,1.1);bush(-17,-31,1);bush(24,4,.9);bush(-27,2,1.1);bush(34,-20,1.2);bush(-34,-16,.9);
+/* warm lamp on the owl's post */
+const lamp=new THREE.Mesh(new THREE.SphereGeometry(.34,12,9),new THREE.MeshBasicMaterial({color:0xfff0b0}));
+lamp.position.set(-1.15,6.2,0);post.add(lamp);
 
 /* =================== characters =================== */
 /* Quaternius "Ultimate Modular Men" — CC0, rigged, animations built in */
@@ -648,10 +705,12 @@ function animate(){
   CHARS.forEach(c=>c.mixer.update(dt));
   /* quest markers + triggers */
   markerT+=dt;
-  if(QUEST===0){marker.position.set(OWLPOS.x-.6,5.2+Math.sin(markerT*3)*.35,OWLPOS.z);
+  marker.rotation.y=markerT*2.4;
+  clouds.forEach(c=>{c.position.x+=dt*.55;if(c.position.x>72)c.position.x=-72});
+  if(QUEST===0){marker.position.set(OWLPOS.x-1.6,3.3+Math.sin(markerT*3)*.35,OWLPOS.z+1.3);
     if(MODE==='explore'&&distTo(OWLPOS)<5){actBtn.textContent='🦉 לדבר עם הינשוף';actBtn.style.display='block';actBtn.onclick=()=>{sndTap();actBtn.style.display='none';QUEST=.5;owlTalk()}}
     else actBtn.style.display='none';
-  }else if(QUEST===1){marker.position.set(TEACHER.x,5.4+Math.sin(markerT*3)*.35,TEACHER.z+.8);
+  }else if(QUEST===1){marker.position.set(TEACHER.x,4.9+Math.sin(markerT*3)*.4,TEACHER.z+.8);
     if(MODE==='explore'&&distTo(TEACHER)<7){actBtn.textContent='📄 לקבל את המבחן';actBtn.style.display='block';actBtn.onclick=()=>{sndTap();QUEST=2;startScenario()}}
     else actBtn.style.display='none';
   }else marker.visible=false;
