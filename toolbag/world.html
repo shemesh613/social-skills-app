@@ -225,9 +225,11 @@ goal(-16.2);goal(16.2);
 /* fence */
 (function(){const c=0xc7a15a;for(let x=-44;x<=44;x+=4){box(.25,1.7,.25,c,x,.85,30);box(.25,1.7,.25,c,x,.85,-52)}for(let z=-52;z<=30;z+=4){box(.25,1.7,.25,c,-44,.85,z);box(.25,1.7,.25,c,44,.85,z)}
 box(88,.2,.2,c,0,1.5,30);box(88,.2,.2,c,0,1.5,-52);box(.2,.2,82,c,-44,1.5,-11);box(.2,.2,82,c,44,1.5,-11)})();
-/* trees */
-function tree(x,z,s){s=s||1;const t=new THREE.Group();box(.9*s,3*s,.9*s,0x8a5a2b,0,1.5*s,0,t);
-const lv=new THREE.Mesh(new THREE.ConeGeometry(2.6*s,4.5*s,7),M(0x3e8f3e));lv.position.y=5*s;lv.castShadow=true;t.add(lv);
+/* trees — round canopies */
+function tree(x,z,s){s=s||1;const t=new THREE.Group();
+const tr=new THREE.Mesh(new THREE.CylinderGeometry(.32*s,.5*s,3*s,10),M(0x8a5a2b));tr.position.y=1.5*s;tr.castShadow=true;t.add(tr);
+[[0,4.4,0,1.9,0x3e8f3e],[1.15,3.7,.4,1.25,0x4aa24a],[-1.05,3.8,-.35,1.2,0x357f39]].forEach(v=>{
+  const lv=new THREE.Mesh(new THREE.SphereGeometry(v[3]*s,12,9),M(v[4]));lv.position.set(v[0]*s,v[1]*s,v[2]*s);lv.castShadow=true;t.add(lv)});
 t.position.set(x,0,z);scene.add(t)}
 tree(-24,10);tree(-30,-6,1.2);tree(26,12,1.1);tree(32,-14,.9);tree(-20,-24,.8);tree(24,-26);tree(-36,18,1.1);tree(38,6);
 /* bench */
@@ -254,15 +256,31 @@ const chatSp=emojiSprite('💬',2);chatSp.visible=false;scene.add(chatSp);
 
 /* =================== characters =================== */
 const SKIN=0xf1c27d;
-function makeKid(shirt,kip,pants){
+function makeKid(shirt,kip,pants,scale){
+  /* cartoon proportions: big head, huge eyes, chubby body */
   const g=new THREE.Group();
-  box(.95,1.15,.55,shirt,0,1.35,0,g);                    /* torso */
-  const head=box(.62,.6,.62,SKIN,0,2.24,0,g);
-  box(.34,.09,.34,kip,0,2.58,0,g);                       /* kippah */
-  box(.09,.09,.05,0x222222,-.14,2.3,.31,g);box(.09,.09,.05,0x222222,.14,2.3,.31,g); /* eyes */
-  function limb(w,h,c,x,y){const p=new THREE.Group();p.position.set(x,y,0);const m=box(w,h,w,c,0,-h/2+.05,0,p);g.add(p);return p}
-  const armL=limb(.24,.9,shirt,-.62,1.86), armR=limb(.24,.9,shirt,.62,1.86);
-  const legL=limb(.28,.82,pants||0x2b3a66,-.24,.82), legR=limb(.28,.82,pants||0x2b3a66,.24,.82);
+  const torso=new THREE.Mesh(new THREE.CapsuleGeometry(.46,.42,8,16),M(shirt));torso.position.y=1.28;torso.scale.set(1,1,.86);torso.castShadow=true;g.add(torso);
+  const head=new THREE.Mesh(new THREE.SphereGeometry(.52,22,16),M(SKIN));head.position.y=2.3;head.scale.set(1,1.04,.96);head.castShadow=true;g.add(head);
+  const km=new THREE.Mesh(new THREE.SphereGeometry(.3,16,10),M(kip));km.scale.y=.4;km.position.set(0,2.74,-.1);g.add(km); /* kippah */
+  /* big pixar eyes: white + pupil + highlight */
+  [-1,1].forEach(s=>{
+    const w=new THREE.Mesh(new THREE.SphereGeometry(.135,14,10),new THREE.MeshLambertMaterial({color:0xffffff}));
+    w.position.set(.19*s,2.36,.42);w.scale.set(1,1.25,.6);g.add(w);
+    const pu=new THREE.Mesh(new THREE.SphereGeometry(.06,10,8),M(0x2a1a0a));pu.position.set(.19*s,2.35,.5);g.add(pu);
+  });
+  /* brows + smile */
+  [-1,1].forEach(s=>{const b=new THREE.Mesh(new THREE.CapsuleGeometry(.022,.12,3,6),M(0x5a3a1a));
+    b.position.set(.19*s,2.58,.44);b.rotation.z=Math.PI/2+s*.18;g.add(b)});
+  const sm=new THREE.Mesh(new THREE.TorusGeometry(.12,.028,6,12,Math.PI),M(0xa05030));
+  sm.position.set(0,2.13,.44);sm.rotation.set(.3,0,Math.PI);g.add(sm);
+  function limb(r,h,c,x,y){const p=new THREE.Group();p.position.set(x,y,0);
+    const m=new THREE.Mesh(new THREE.CapsuleGeometry(r,h,4,10),M(c));m.position.y=-h/2;m.castShadow=true;p.add(m);g.add(p);return p}
+  const armL=limb(.125,.56,shirt,-.56,1.7), armR=limb(.125,.56,shirt,.56,1.7);
+  const legL=limb(.15,.5,pants||0x2b3a66,-.23,.84), legR=limb(.15,.5,pants||0x2b3a66,.23,.84);
+  /* shoes */
+  [legL,legR].forEach(l=>{const sh=new THREE.Mesh(new THREE.SphereGeometry(.17,10,8),M(0x333344));
+    sh.scale.set(1,.55,1.4);sh.position.set(0,-.78,.06);l.add(sh)});
+  if(scale)g.scale.setScalar(scale);
   scene.add(g);
   return {g,armL,armR,legL,legR,phase:Math.random()*6,target:null,face:null,speed:4.4};
 }
@@ -295,6 +313,13 @@ for(let i=0;i<5;i++){
   k.g.position.copy(pos);HOME.push(pos.clone());
   kids.push(k);
 }
+/* teacher — hands out the tests near the school door */
+const teacher=makeKid(0xf7f7f7,0x222222,0x44506a,1.3);
+teacher.g.position.set(2.5,0,-29);
+teacher.armR.rotation.x=-.9; /* holding the pile of tests */
+const pile=new THREE.Mesh(new THREE.BoxGeometry(.5,.08,.4),M(0xffffff));
+pile.position.set(0,-.6,.2);teacher.armR.add(pile);
+const TEACHER=new THREE.Vector3(2.5,0,-29);
 /* ball */
 const ball=new THREE.Mesh(new THREE.SphereGeometry(.42,14,12),new THREE.MeshLambertMaterial({color:0xffffff}));
 ball.castShadow=true;scene.add(ball);
@@ -363,6 +388,8 @@ function camTick(dt){
     tl=player.g.position.clone().add(new THREE.Vector3(0,1.6,0));
   }else if(camMode==='field'){
     tp=new THREE.Vector3(10,4.6,4);tl=new THREE.Vector3(0,1.2,-8);
+  }else if(camMode==='teacher'){
+    tp=new THREE.Vector3(9.5,4.2,-19);tl=new THREE.Vector3(1.5,1.6,-28);
   }else if(camMode==='owl'){
     tp=player.g.position.clone().add(new THREE.Vector3(2.5,3.4,4.5));
     tl=new THREE.Vector3(6.4,5.4,12);
@@ -384,23 +411,24 @@ function owlTalk(){
     {who:'🦉 הינשוף',t:'קח ממני את הכלי הראשון בתיק: <b>הפנס הפנימי</b> 🔦'},
     {who:'🦉 הינשוף',t:'כשמשהו קשה קורה — עוצרים רגע, מאירים <b>פנימה</b> ושואלים: מה הלב שלי מרגיש?'},
     {who:'🦉 הינשוף',t:'ואז אומרים ללב: <b>"זה נורמלי להרגיש ככה"</b> — ומחבקים אותו. לב שמקבל חיבוק, נרגע.'},
-    {who:'🦉 הינשוף',t:'אבל כלי לומדים רק על אמת... תראה — במגרש שם משחקים כדורגל. לך לשם ⚽'}
+    {who:'🦉 הינשוף',t:'אבל כלי לומדים רק על אמת... אני רואה שהמורה מחלק עכשיו את המבחנים ליד הכניסה. לך לקבל את שלך 📄'}
   ],()=>{
     sndGood();QUEST=1;camMode='follow';MODE='explore';
-    questEl.textContent='⚽ לכו למגרש הכדורגל';
+    questEl.textContent='📄 לכו למורה ליד הכניסה לבית הספר';
   });
 }
 
 function startScenario(){
-  MODE='cine';camMode='field';actBtn.style.display='none';questEl.style.display='none';
-  /* player walks to the edge of the field */
-  player.target=new THREE.Vector3(7.5,0,-3.5);
+  MODE='cine';camMode='teacher';actBtn.style.display='none';questEl.style.display='none';
+  /* player walks up to the teacher */
+  player.target=new THREE.Vector3(2.5,0,-26);
   setTimeout(()=>{
     say([
-      {who:'',t:'ההפסקה הגדולה. כל הילדים משחקים כדורגל...'},
-      {who:'',t:'אתה עומד בצד. אף אחד לא הזמין אותך לשחק. הלב מתכווץ...'}
+      {who:'',t:'למדת קשה למבחן הזה. שיננת, התאמצת, באמת קיווית...'},
+      {who:'👨‍🏫 המורה',t:'"הנה המבחן שלך. תסתכל בבית, בסדר?"'},
+      {who:'',t:'אתה מציץ... הציון נמוך. הרבה פחות ממה שקיווית. הלב צונח למטה.'}
     ],showChoices);
-  },1600);
+  },1700);
 }
 function showChoices(){
   MODE='cine';
@@ -408,8 +436,8 @@ function showChoices(){
   $('#txt').innerHTML='<b>מה עושים?</b> 🤔';
   dlg.classList.add('on');
   let h='';
-  h+='<button class="choice" onclick="window.pick(0)">😠 לצעוק: "אתם מגעילים! בכלל לא רוצה לשחק איתכם!"'+(explored.has(0)?' ✔️':'')+'</button>';
-  h+='<button class="choice" onclick="window.pick(1)">🙁 ללכת לשבת לבד על הספסל, לשתוק ולהחזיק הכל בפנים'+(explored.has(1)?' ✔️':'')+'</button>';
+  h+='<button class="choice" onclick="window.pick(0)">😤 לקמט את הדף, לזרוק אותו על הרצפה ולבעוט בו'+(explored.has(0)?' ✔️':'')+'</button>';
+  h+='<button class="choice" onclick="window.pick(1)">😶 לחייך כאילו כלום: "לא אכפת לי מהמבחן הטיפשי הזה!"'+(explored.has(1)?' ✔️':'')+'</button>';
   h+='<button class="choice" onclick="window.pick(2)">🔦 לעצור רגע... ולהדליק את הפנס הפנימי'+(explored.has(2)?' ✔️':'')+'</button>';
   $('#chDlg').innerHTML=h;
 }
@@ -419,24 +447,32 @@ window.pick=function(i){
   if(i===0)consAngry();else if(i===1)consBench();else consFlash();
 };
 
-/* --- consequence: shout --- */
+/* --- consequence: crumple & kick the test --- */
+const paperSp=emojiSprite('📄',1.5);paperSp.visible=false;scene.add(paperSp);
+function arcMove(sp,from,to,dur,h,cb){const t0=performance.now();
+  (function m(){const t=Math.min((performance.now()-t0)/dur,1);
+    sp.position.lerpVectors(from,to,t);sp.position.y=from.y+(to.y-from.y)*t+Math.sin(t*Math.PI)*h;
+    if(t<1)requestAnimationFrame(m);else if(cb)cb()})()}
 function consAngry(){
   snd(180,.5,'sawtooth',.09);
-  chatSp.material=emojiSprite('🗯️',2).material;chatSp.visible=true;
+  const p0=player.g.position.clone().add(new THREE.Vector3(0,1.7,.5));
+  const p1=player.g.position.clone().add(new THREE.Vector3(1.5,0.15,2.2));
+  const p2=p1.clone().add(new THREE.Vector3(3.5,0,4));
+  paperSp.visible=true;paperSp.position.copy(p0);
+  arcMove(paperSp,p0,p1,700,1.2,()=>{snd(150,.2,'square',.07);
+    arcMove(paperSp,p1,p2,700,1.6)});   /* the kick */
+  /* the whole yard stops and stares */
   soccerActive=false;
-  /* kids scatter away from player */
-  kids.forEach((k,i)=>{const dir=new THREE.Vector3().subVectors(k.g.position,player.g.position).setY(0).normalize();
-    k.target=k.g.position.clone().addScaledVector(dir,9+i*1.5);k.speed=6});
+  kids.forEach(k=>{k.target=null;const d=new THREE.Vector3().subVectors(player.g.position,k.g.position);k.g.rotation.y=Math.atan2(d.x,d.z)});
   setTimeout(()=>{
-    chatSp.visible=false;
-    reflect('הילדים נבהלים ומתרחקים. עכשיו אתה לבד — וגם כועס וגם עצוב.',
-            '💭 הכעס יצא החוצה עוד לפני שהבנו מה הלב באמת מרגיש. הצעקה לא קירבה אותנו למשחק...');
-  },2300);
+    reflect('הדף עף על הרצפה... כל החצר מסתכלת. אבל האכזבה? היא עדיין בלב — ועכשיו אי אפשר אפילו לראות מה אפשר לתקן.',
+            '💭 את הדף אפשר לזרוק. רגש אי אפשר לזרוק — הוא נשאר בפנים גם כשהדף על הרצפה.');
+  },2400);
 }
-/* --- consequence: bench --- */
+/* --- consequence: fake smile, hold it all inside --- */
 function consBench(){
   soccerActive=true;
-  player.target=new THREE.Vector3(20,0,2.6);player.speed=4;
+  player.target=new THREE.Vector3(16,0,-14);player.speed=3.4;
   camMode='follow';
   /* the world literally grays out around him */
   const t0=performance.now();
@@ -445,10 +481,9 @@ function consBench(){
     scene.background.setHSL(.58,.35-.22*k,.62-.25*k);
     if(k<1)requestAnimationFrame(dim)})();
   setTimeout(()=>{
-    player.g.rotation.y=Math.PI+.6;
     heartSp.material=emojiSprite('🖤',2.4).material;heartSp.visible=true;
-    reflect('ההפסקה עוברת... הרגש נשאר בפנים — וגדל. העולם נהיה אפור, והלב כבד.',
-            '💭 רגש שמחזיקים בפנים בלי להקשיב לו לא נעלם — הוא מחכה, ומתנפח.');
+    reflect('"לא אכפת לי!" אתה מחייך והולך משם... אבל בפנים הלב יודע את האמת — והעולם נהיה אפור.',
+            '💭 כשמסתירים רגש אפילו מעצמנו — אף אחד לא יכול לעזור לנו. ההעמדת פנים רק מעייפת את הלב.');
   },2600);
 }
 /* --- consequence: inner flashlight --- */
@@ -464,8 +499,8 @@ function consFlash(){
 function feelStage(){
   heartSp.material=emojiSprite('💗',2.6).material;heartSp.visible=true;
   feelFlow({
-    ctx:'כל העולם ממתין רגע... מאירים פנימה. מה הלב מרגיש כשלא הזמינו אותך?',
-    feels:[{e:'💔',n:'עלבון'},{e:'😢',n:'עצב'},{e:'😟',n:'דאגה'}],
+    ctx:'כל העולם ממתין רגע... מאירים פנימה. מה הלב מרגיש אחרי הציון הזה?',
+    feels:[{e:'😞',n:'אכזבה'},{e:'😢',n:'עצב'},{e:'😠',n:'כעס'}],
     after:goodEnding
   });
 }
@@ -479,29 +514,28 @@ function goodEnding(){
     scene.background.setHSL(.58,.5,.17+.45*k);
     if(k<1)requestAnimationFrame(up)})();
   setTimeout(()=>{heartSp.visible=false},1800);
-  /* walk to the kids and ask */
-  player.target=new THREE.Vector3(FIELD.x+2,0,FIELD.z+2);player.speed=4.4;
-  camMode='field';
+  /* turn back to the teacher and ask for help */
+  player.target=new THREE.Vector3(2.5,0,-26.5);player.speed=4;
+  camMode='teacher';
   setTimeout(()=>{
     say([
-      {who:'😊 אתה (בקול רגוע)',t:'"אפשר להצטרף אליכם?"'},
-      {who:'⚽ הילדים',t:'"בטח! בוא, אתה בקבוצה של דני!"'}
+      {who:'😊 אתה (בקול רגוע)',t:'"המורה... אני קצת מאוכזב מהציון. אפשר לשבת יחד ולראות איך אני משתפר?"'},
+      {who:'👨‍🏫 המורה',t:'"איזה יופי ששאלת! מי ששואל ככה — הציון הבא שלו כבר בדרך למעלה. מחר בהפסקה, אני ואתה 💪"'}
     ],()=>{
-      /* celebration: kids jump, ball passes to player, confetti */
-      sndGood();soccerActive=false;
-      kids.forEach((k,i)=>{k.target=null;jump(k,i*120)});
-      ballFrom=ball.position.clone();ballTo=player.g.position.clone().add(new THREE.Vector3(.6,0,.6));ballT=0;
-      const t0=performance.now();
-      (function pass(){ballT+=.02;const t=Math.min(ballT,1);
-        ball.position.lerpVectors(ballFrom,ballTo,t);ball.position.y=.42+Math.sin(t*Math.PI)*1.5;
-        if(t<1)requestAnimationFrame(pass)})();
+      /* the teacher raises his arm warmly, small celebration */
+      sndGood();
+      const a0=teacher.armR.rotation.x,t1=performance.now();
+      (function wave(){const t=Math.min((performance.now()-t1)/600,1);
+        teacher.armR.rotation.x=a0+(-1.6-a0)*t;
+        if(t<1)requestAnimationFrame(wave)})();
+      jump(player,150);
       confettiBurst();
       setTimeout(()=>{
-        reflect('הלב נרגע — ואז ביקשת בקול רגוע. עכשיו אתם משחקים יחד! ⚽',
+        reflect('הלב נרגע — ואז ביקשת עזרה בקול רגוע. זה נקרא אומץ אמיתי! 📈',
           '🔦 עצרנו ← הרגשנו ← אמרנו "זה נורמלי" ← חיבקנו ← <b>ואז בחרנו מה לעשות.</b> זה הפנס הפנימי!',true);
-      },1900);
+      },1600);
     });
-  },2100);
+  },2300);
 }
 function jump(k,delay){setTimeout(()=>{const t0=performance.now();
   (function j(){const t=(performance.now()-t0)/500;if(t>=1){k.g.position.y=0;return}
@@ -524,10 +558,11 @@ window.retry=function(){
   sndTap();dlg.classList.remove('on');$('#chDlg').innerHTML='';
   /* reset world */
   hemi.intensity=1;sun.intensity=1.6;scene.background.set(0x8ecdf5);
-  heartSp.visible=false;chatSp.visible=false;
+  heartSp.visible=false;chatSp.visible=false;paperSp.visible=false;
+  teacher.armR.rotation.x=-.9;
   kids.forEach((k,i)=>{k.target=HOME[i].clone();k.speed=5});
-  player.target=new THREE.Vector3(7.5,0,-3.5);player.speed=4.4;
-  soccerActive=true;camMode='field';
+  player.target=new THREE.Vector3(2.5,0,-26);player.speed=4.4;
+  soccerActive=true;camMode='teacher';
   setTimeout(showChoices,1700);
 };
 window.finish=function(){dlg.classList.remove('on');$('#chDlg').innerHTML='';earnBadge()};
@@ -602,8 +637,8 @@ function animate(){
   if(QUEST===0){marker.position.set(OWLPOS.x-.6,5.2+Math.sin(markerT*3)*.35,OWLPOS.z);
     if(MODE==='explore'&&distTo(OWLPOS)<5){actBtn.textContent='🦉 לדבר עם הינשוף';actBtn.style.display='block';actBtn.onclick=()=>{sndTap();actBtn.style.display='none';QUEST=.5;owlTalk()}}
     else actBtn.style.display='none';
-  }else if(QUEST===1){marker.position.set(FIELD.x,4.6+Math.sin(markerT*3)*.35,FIELD.z+3);
-    if(MODE==='explore'&&distTo(new THREE.Vector3(FIELD.x,0,FIELD.z+8))<7){actBtn.textContent='⚽ לגשת למגרש';actBtn.style.display='block';actBtn.onclick=()=>{sndTap();QUEST=2;startScenario()}}
+  }else if(QUEST===1){marker.position.set(TEACHER.x,5.4+Math.sin(markerT*3)*.35,TEACHER.z+.8);
+    if(MODE==='explore'&&distTo(TEACHER)<7){actBtn.textContent='📄 לקבל את המבחן';actBtn.style.display='block';actBtn.onclick=()=>{sndTap();QUEST=2;startScenario()}}
     else actBtn.style.display='none';
   }else marker.visible=false;
   /* floating heart above player */
