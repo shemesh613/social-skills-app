@@ -76,7 +76,7 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
 .stars{position:fixed;inset:0;pointer-events:none;z-index:0}
 .stars i{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;opacity:.5;animation:tw 3s infinite}
 </style>
-<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}</script>
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
 </head>
 <body>
 <canvas id="c3d"></canvas>
@@ -94,7 +94,7 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
   <div style="font-size:clamp(70px,17vw,120px);filter:drop-shadow(0 14px 30px rgba(0,0,0,.5))">🎒</div>
   <h1>תיק הכלים</h1>
   <div class="chapter">פרק 1 · הפנס הפנימי 🔦</div>
-  <button class="btn" onclick="enterWorld()">▶️ להיכנס לעולם</button>
+  <button class="btn" id="startBtn" disabled onclick="enterWorld()">⏳ טוען את הדמויות...</button>
   <div class="tiny">מסע של 7 כלים לחיים · הזיזו את הדמות, גשו לדמויות — והחיים יקרו</div>
 </div>
 
@@ -173,6 +173,8 @@ function earnBadge(){
 
 <script type="module">
 import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 
 /* =================== renderer / scene =================== */
 const canvas=document.getElementById('c3d');
@@ -255,40 +257,53 @@ const heartSp=emojiSprite('💗',2.4);heartSp.visible=false;scene.add(heartSp);
 const chatSp=emojiSprite('💬',2);chatSp.visible=false;scene.add(chatSp);
 
 /* =================== characters =================== */
-const SKIN=0xf1c27d;
-function makeKid(shirt,kip,pants,scale){
-  /* cartoon proportions: big head, huge eyes, chubby body */
-  const g=new THREE.Group();
-  const torso=new THREE.Mesh(new THREE.CapsuleGeometry(.46,.42,8,16),M(shirt));torso.position.y=1.28;torso.scale.set(1,1,.86);torso.castShadow=true;g.add(torso);
-  const head=new THREE.Mesh(new THREE.SphereGeometry(.52,22,16),M(SKIN));head.position.y=2.3;head.scale.set(1,1.04,.96);head.castShadow=true;g.add(head);
-  const km=new THREE.Mesh(new THREE.SphereGeometry(.3,16,10),M(kip));km.scale.y=.4;km.position.set(0,2.74,-.1);g.add(km); /* kippah */
-  /* big pixar eyes: white + pupil + highlight */
-  [-1,1].forEach(s=>{
-    const w=new THREE.Mesh(new THREE.SphereGeometry(.135,14,10),new THREE.MeshLambertMaterial({color:0xffffff}));
-    w.position.set(.19*s,2.36,.42);w.scale.set(1,1.25,.6);g.add(w);
-    const pu=new THREE.Mesh(new THREE.SphereGeometry(.06,10,8),M(0x2a1a0a));pu.position.set(.19*s,2.35,.5);g.add(pu);
-  });
-  /* brows + smile */
-  [-1,1].forEach(s=>{const b=new THREE.Mesh(new THREE.CapsuleGeometry(.022,.12,3,6),M(0x5a3a1a));
-    b.position.set(.19*s,2.58,.44);b.rotation.z=Math.PI/2+s*.18;g.add(b)});
-  const sm=new THREE.Mesh(new THREE.TorusGeometry(.12,.028,6,12,Math.PI),M(0xa05030));
-  sm.position.set(0,2.13,.44);sm.rotation.set(.3,0,Math.PI);g.add(sm);
-  function limb(r,h,c,x,y){const p=new THREE.Group();p.position.set(x,y,0);
-    const m=new THREE.Mesh(new THREE.CapsuleGeometry(r,h,4,10),M(c));m.position.y=-h/2;m.castShadow=true;p.add(m);g.add(p);return p}
-  const armL=limb(.125,.56,shirt,-.56,1.7), armR=limb(.125,.56,shirt,.56,1.7);
-  const legL=limb(.15,.5,pants||0x2b3a66,-.23,.84), legR=limb(.15,.5,pants||0x2b3a66,.23,.84);
-  /* shoes */
-  [legL,legR].forEach(l=>{const sh=new THREE.Mesh(new THREE.SphereGeometry(.17,10,8),M(0x333344));
-    sh.scale.set(1,.55,1.4);sh.position.set(0,-.78,.06);l.add(sh)});
-  if(scale)g.scale.setScalar(scale);
-  scene.add(g);
-  return {g,armL,armR,legL,legR,phase:Math.random()*6,target:null,face:null,speed:4.4};
+/* Quaternius "Ultimate Modular Men" — CC0, rigged, animations built in */
+const loader=new GLTFLoader();
+const CHAR_FILES={hoodie:'models/hoodie.glb',casual:'models/casual.glb',beach:'models/beach.glb',worker:'models/worker.glb',farmer:'models/farmer.glb',suit:'models/suit.glb'};
+const MODELS={};
+const charsReady=Promise.all(Object.entries(CHAR_FILES).map(([k,f])=>new Promise((res,rej)=>loader.load(f,gl=>{MODELS[k]=gl;res()},undefined,rej))));
+
+function playA(k,name,once){
+  const a=k.actions[name]||k.actions.Idle_Neutral||k.actions.Idle;
+  if(!a)return;
+  if(k.curName===name&&!once)return;
+  if(k.cur)k.cur.fadeOut(.22);
+  a.reset().fadeIn(.22).play();
+  if(once){a.setLoop(THREE.LoopOnce,1);k.busy=true}else a.setLoop(THREE.LoopRepeat,Infinity);
+  k.cur=a;k.curName=name;
 }
-function walkAnim(k,dt,moving){
-  if(moving){k.phase+=dt*9;const s=Math.sin(k.phase)*.62;
-    k.armL.rotation.x=s;k.armR.rotation.x=-s;k.legL.rotation.x=-s;k.legR.rotation.x=s;
-    k.g.position.y=Math.abs(Math.sin(k.phase))*.06;
-  }else{['armL','armR','legL','legR'].forEach(n=>{k[n].rotation.x*=.85});k.g.position.y*=.85}
+function loco(k,moving,run){if(k.busy)return;playA(k,moving?(run?'Run':'Walk'):'Idle_Neutral')}
+
+function makeChar(model,targetH,kipColor){
+  const src=MODELS[model];
+  const inner=SkeletonUtils.clone(src.scene);
+  inner.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false;
+    /* PBR materials come out near-black without an env map — flatten to Lambert, keeps the palette */
+    o.material=new THREE.MeshLambertMaterial({color:o.material.color});
+  }});
+  /* NOTE: Box3.setFromObject lies for skinned meshes (bind-pose bones inflate it) — the models are ~2.35u tall, use fixed scale */
+  const s=targetH/2.35;
+  inner.scale.setScalar(s);
+  const g=new THREE.Group();g.add(inner);scene.add(g);
+  const mixer=new THREE.AnimationMixer(inner);
+  const actions={};
+  src.animations.forEach(c=>{actions[c.name.replace(/^.*\|/,'')]=mixer.clipAction(c)});
+  const k={g,inner,mixer,actions,cur:null,curName:'',busy:false,target:null,speed:4.4};
+  mixer.addEventListener('finished',()=>{k.busy=false;k.cur=null;k.curName='';playA(k,'Idle_Neutral')});
+  /* kippah, attached to the head bone so it moves with the animations */
+  if(kipColor!==undefined){
+    const head=inner.getObjectByName('Head');
+    if(head){
+      inner.updateMatrixWorld(true);
+      const ws=new THREE.Vector3();head.getWorldScale(ws);
+      const r=(.06*targetH)/ws.y;
+      const kip=new THREE.Mesh(new THREE.SphereGeometry(r,14,10),M(kipColor));
+      kip.scale.y=.4;kip.position.y=(.098*targetH)/ws.y;kip.castShadow=false;
+      head.add(kip);
+    }
+  }
+  playA(k,'Idle_Neutral');
+  return k;
 }
 function stepTo(k,dt){ /* move kid toward k.target; returns moving? */
   if(!k.target)return false;
@@ -300,31 +315,34 @@ function stepTo(k,dt){ /* move kid toward k.target; returns moving? */
   return true;
 }
 
+/* wait for the animated models, then populate the world */
+try{await charsReady}catch(e){const sb=document.getElementById('startBtn');sb.textContent='❌ שגיאה בטעינת הדמויות — רעננו את הדף';throw e}
+const sb=document.getElementById('startBtn');sb.disabled=false;sb.textContent='▶️ להיכנס לעולם';
+
 /* player */
-const player=makeKid(0x2f6fe0,0x2255aa);
+const player=makeChar('hoodie',2.0,0x2255aa);
 player.g.position.set(0,0,22);player.g.rotation.y=Math.PI;
 /* soccer kids in a circle */
-const KIDCOL=[[0xe0552f,0x333333],[0x33aa66,0x884422],[0xead44a,0x2255aa],[0x9955cc,0x117755],[0xdddddd,0x992222]];
+const KIDMODELS=['casual','beach','worker','farmer','casual'];
+const KIPCOL=[0x333333,0x884422,0x2255aa,0x117755,0x992222];
 const kids=[];const HOME=[];
 for(let i=0;i<5;i++){
   const a=i/5*Math.PI*2;
-  const k=makeKid(KIDCOL[i][0],KIDCOL[i][1]);
+  const k=makeChar(KIDMODELS[i],1.9,KIPCOL[i]);
   const pos=new THREE.Vector3(FIELD.x+Math.cos(a)*5.2,0,FIELD.z+Math.sin(a)*4);
   k.g.position.copy(pos);HOME.push(pos.clone());
   kids.push(k);
 }
 /* teacher — hands out the tests near the school door */
-const teacher=makeKid(0xf7f7f7,0x222222,0x44506a,1.3);
+const teacher=makeChar('suit',2.5,0x111111);
 teacher.g.position.set(2.5,0,-29);
-teacher.armR.rotation.x=-.9; /* holding the pile of tests */
-const pile=new THREE.Mesh(new THREE.BoxGeometry(.5,.08,.4),M(0xffffff));
-pile.position.set(0,-.6,.2);teacher.armR.add(pile);
 const TEACHER=new THREE.Vector3(2.5,0,-29);
+const CHARS=[player,...kids,teacher];
 /* ball */
 const ball=new THREE.Mesh(new THREE.SphereGeometry(.42,14,12),new THREE.MeshLambertMaterial({color:0xffffff}));
 ball.castShadow=true;scene.add(ball);
 let ballFrom=kids[0].g.position.clone(),ballTo=kids[2].g.position.clone(),ballT=0,ballHold=0,ballCur=2;
-function nextPass(){ballCur=(ballCur+1+Math.floor(Math.random()*3))%5;ballFrom=ball.position.clone();ballTo=kids[ballCur].g.position.clone().add(new THREE.Vector3((Math.random()-.5),0,(Math.random()-.5)));ballT=0}
+function nextPass(){playA(kids[ballCur],'Kick_Right',true);ballCur=(ballCur+1+Math.floor(Math.random()*3))%5;ballFrom=ball.position.clone();ballTo=kids[ballCur].g.position.clone().add(new THREE.Vector3((Math.random()-.5),0,(Math.random()-.5)));ballT=0}
 function ballTick(dt,active){
   if(!active){return}
   if(ballHold>0){ballHold-=dt;if(ballHold<=0)nextPass();return}
@@ -384,8 +402,8 @@ let camMode='follow';let camPos=new THREE.Vector3(),camLook=new THREE.Vector3();
 function camTick(dt){
   let tp,tl;
   if(camMode==='follow'){
-    tp=player.g.position.clone().add(new THREE.Vector3(0,6.4,9.5));
-    tl=player.g.position.clone().add(new THREE.Vector3(0,1.6,0));
+    tp=player.g.position.clone().add(new THREE.Vector3(0,4.6,7));
+    tl=player.g.position.clone().add(new THREE.Vector3(0,1.5,0));
   }else if(camMode==='field'){
     tp=new THREE.Vector3(10,4.6,4);tl=new THREE.Vector3(0,1.2,-8);
   }else if(camMode==='teacher'){
@@ -407,8 +425,8 @@ function distTo(v){return player.g.position.distanceTo(v)}
 function owlTalk(){
   camMode='owl';
   say([
-    {who:'🦉 הינשוף',t:'שלום, ידיד צעיר! אני הינשוף שומר תיק הכלים. אני רואה שהיום שלך היה... לא פשוט.'},
-    {who:'🦉 הינשוף',t:'קח ממני את הכלי הראשון בתיק: <b>הפנס הפנימי</b> 🔦'},
+    {who:'🦉 הינשוף',t:'שלום, ידיד צעיר! אני הינשוף שומר תיק הכלים. יש לי משהו חשוב בשבילך...'},
+    {who:'🦉 הינשוף',t:'לכל אחד יש רגעים שבהם הלב פתאום נהיה כבד. בדיוק בשביל הרגעים האלה — קח את הכלי הראשון בתיק: <b>הפנס הפנימי</b> 🔦'},
     {who:'🦉 הינשוף',t:'כשמשהו קשה קורה — עוצרים רגע, מאירים <b>פנימה</b> ושואלים: מה הלב שלי מרגיש?'},
     {who:'🦉 הינשוף',t:'ואז אומרים ללב: <b>"זה נורמלי להרגיש ככה"</b> — ומחבקים אותו. לב שמקבל חיבוק, נרגע.'},
     {who:'🦉 הינשוף',t:'אבל כלי לומדים רק על אמת... אני רואה שהמורה מחלק עכשיו את המבחנים ליד הכניסה. לך לקבל את שלך 📄'}
@@ -455,6 +473,7 @@ function arcMove(sp,from,to,dur,h,cb){const t0=performance.now();
     if(t<1)requestAnimationFrame(m);else if(cb)cb()})()}
 function consAngry(){
   snd(180,.5,'sawtooth',.09);
+  playA(player,'Kick_Right',true);
   const p0=player.g.position.clone().add(new THREE.Vector3(0,1.7,.5));
   const p1=player.g.position.clone().add(new THREE.Vector3(1.5,0.15,2.2));
   const p2=p1.clone().add(new THREE.Vector3(3.5,0,4));
@@ -522,13 +541,10 @@ function goodEnding(){
       {who:'😊 אתה (בקול רגוע)',t:'"המורה... אני קצת מאוכזב מהציון. אפשר לשבת יחד ולראות איך אני משתפר?"'},
       {who:'👨‍🏫 המורה',t:'"איזה יופי ששאלת! מי ששואל ככה — הציון הבא שלו כבר בדרך למעלה. מחר בהפסקה, אני ואתה 💪"'}
     ],()=>{
-      /* the teacher raises his arm warmly, small celebration */
+      /* the teacher waves warmly, small celebration */
       sndGood();
-      const a0=teacher.armR.rotation.x,t1=performance.now();
-      (function wave(){const t=Math.min((performance.now()-t1)/600,1);
-        teacher.armR.rotation.x=a0+(-1.6-a0)*t;
-        if(t<1)requestAnimationFrame(wave)})();
-      jump(player,150);
+      playA(teacher,'Wave',true);
+      jump(player,300);
       confettiBurst();
       setTimeout(()=>{
         reflect('הלב נרגע — ואז ביקשת עזרה בקול רגוע. זה נקרא אומץ אמיתי! 📈',
@@ -537,9 +553,7 @@ function goodEnding(){
     });
   },2300);
 }
-function jump(k,delay){setTimeout(()=>{const t0=performance.now();
-  (function j(){const t=(performance.now()-t0)/500;if(t>=1){k.g.position.y=0;return}
-    k.g.position.y=Math.sin(t*Math.PI)*1.1;requestAnimationFrame(j)})()},delay)}
+function jump(k,delay){setTimeout(()=>{playA(k,'Wave',true)},delay)}
 
 /* reflect panel (after a consequence) */
 function reflect(consTxt,refTxt,isGood){
@@ -559,7 +573,6 @@ window.retry=function(){
   /* reset world */
   hemi.intensity=1;sun.intensity=1.6;scene.background.set(0x8ecdf5);
   heartSp.visible=false;chatSp.visible=false;paperSp.visible=false;
-  teacher.armR.rotation.x=-.9;
   kids.forEach((k,i)=>{k.target=HOME[i].clone();k.speed=5});
   player.target=new THREE.Vector3(2.5,0,-26);player.speed=4.4;
   soccerActive=true;camMode='teacher';
@@ -628,10 +641,11 @@ function animate(){
   }
   /* scripted walking (cinematics) */
   if(player.target)moving=stepTo(player,dt)||moving;
-  walkAnim(player,dt,moving);
+  loco(player,moving,true);
   /* kids */
-  kids.forEach(k=>{walkAnim(k,dt,stepTo(k,dt))});
+  kids.forEach(k=>{loco(k,stepTo(k,dt),k.speed>5)});
   ballTick(dt,soccerActive);
+  CHARS.forEach(c=>c.mixer.update(dt));
   /* quest markers + triggers */
   markerT+=dt;
   if(QUEST===0){marker.position.set(OWLPOS.x-.6,5.2+Math.sin(markerT*3)*.35,OWLPOS.z);
