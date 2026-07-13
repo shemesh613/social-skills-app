@@ -30,6 +30,10 @@ h2{font-family:'Frank Ruhl Libre',serif;font-size:clamp(20px,4.5vw,28px);color:#
 .btn.sec{background:linear-gradient(180deg,#3c477f,#2a3260);color:#dfe6ff;box-shadow:0 6px 0 #1a2040}
 .btn.calm{background:linear-gradient(180deg,#7dffa8,#25c05f);color:#053514;box-shadow:0 6px 0 #128040}
 .chapter{background:rgba(255,213,74,.14);border:1.5px solid rgba(255,213,74,.55);border-radius:30px;padding:7px 22px;font-size:16px;font-weight:800;color:#ffd54a;margin:12px 0 20px}
+.charRow{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;max-width:560px}
+.charCard{background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.28);border-radius:18px;padding:16px 18px;font-family:'Heebo';font-size:16.5px;font-weight:800;color:#fff;cursor:pointer;min-width:96px;transition:all .15s}
+.charCard:hover{border-color:#ffd54a;background:rgba(255,213,74,.13);transform:translateY(-3px)}
+.charCard span{display:block;font-size:36px;margin-bottom:6px}
 .tiny{font-size:13px;opacity:.65;margin-top:12px;text-align:center}
 
 /* dialogue (bottom, over the 3D scene) */
@@ -94,8 +98,21 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
   <div style="font-size:clamp(70px,17vw,120px);filter:drop-shadow(0 14px 30px rgba(0,0,0,.5))">🎒</div>
   <h1>תיק הכלים</h1>
   <div class="chapter">פרק 1 · הפנס הפנימי 🔦</div>
-  <button class="btn" id="startBtn" disabled onclick="enterWorld()">⏳ טוען את הדמויות...</button>
+  <button class="btn" id="startBtn" disabled onclick="ovShow('ov-char')">⏳ טוען את הדמויות...</button>
   <div class="tiny">מסע של 7 כלים לחיים · הזיזו את הדמות, גשו לדמויות — והחיים יקרו</div>
+</div>
+
+<!-- character select -->
+<div class="ov dimbg" id="ov-char">
+  <h1 style="font-size:clamp(22px,5vw,34px)">🧒 מי אתם במסע?</h1>
+  <div class="ctxTxt" style="margin-bottom:14px">בחרו את הדמות שלכם — אפשר להחליף בכל כניסה</div>
+  <div class="charRow">
+    <button class="charCard" onclick="chooseChar('hoodie')"><span>🟣</span>קפוצ'ון</button>
+    <button class="charCard" onclick="chooseChar('casual')"><span>🔵</span>קז'ואל</button>
+    <button class="charCard" onclick="chooseChar('adventurer')"><span>🎒</span>הרפתקן</button>
+    <button class="charCard" onclick="chooseChar('worker')"><span>🟠</span>סתיו</button>
+    <button class="charCard" onclick="chooseChar('farmer')"><span>🟢</span>טבע</button>
+  </div>
 </div>
 
 <!-- dialogue -->
@@ -179,6 +196,8 @@ import {EffectComposer} from 'three/addons/postprocessing/EffectComposer.js';
 import {RenderPass} from 'three/addons/postprocessing/RenderPass.js';
 import {UnrealBloomPass} from 'three/addons/postprocessing/UnrealBloomPass.js';
 import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
+import {ShaderPass} from 'three/addons/postprocessing/ShaderPass.js';
+import {FXAAShader} from 'three/addons/shaders/FXAAShader.js';
 
 /* =================== renderer / scene =================== */
 const canvas=document.getElementById('c3d');
@@ -196,9 +215,20 @@ const composer=new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene,cam));
 composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),.25,.65,.9));
 composer.addPass(new OutputPass());
-addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);composer.setSize(innerWidth,innerHeight)});
+/* FXAA — the composer bypasses MSAA, so edges need smoothing back */
+const fxaa=new ShaderPass(FXAAShader);
+function fxaaRes(){fxaa.material.uniforms.resolution.value.set(1/(innerWidth*renderer.getPixelRatio()),1/(innerHeight*renderer.getPixelRatio()))}
+fxaaRes();composer.addPass(fxaa);
+/* gentle vignette */
+composer.addPass(new ShaderPass({
+  uniforms:{tDiffuse:{value:null},amt:{value:.42}},
+  vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+  fragmentShader:'uniform sampler2D tDiffuse;uniform float amt;varying vec2 vUv;void main(){vec4 c=texture2D(tDiffuse,vUv);float d=length(vUv-.5);c.rgb*=1.-smoothstep(.42,.95,d)*amt;gl_FragColor=c;}'
+}));
+addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);composer.setSize(innerWidth,innerHeight);fxaaRes()});
 
-const hemi=new THREE.HemisphereLight(0xcfe8ff,0x557744,1.0);scene.add(hemi);
+/* warm sky / cool ground pair — the "golden hour" trick from stylized-game art direction */
+const hemi=new THREE.HemisphereLight(0xffdec0,0x5f9e8f,1.0);scene.add(hemi);
 const sun=new THREE.DirectionalLight(0xfff2d0,1.6);
 sun.position.set(24,38,18);sun.castShadow=true;
 sun.shadow.mapSize.set(2048,2048);
@@ -224,13 +254,30 @@ line(30,.25,0,-17);line(30,.25,0,1);line(.25,18,-15,-8);line(.25,18,15,-8);line(
 /* goals */
 function goal(x){const g=new THREE.Group();box(.3,2.4,.3,0xffffff,0,1.2,-2.6,g);box(.3,2.4,.3,0xffffff,0,1.2,2.6,g);box(.3,.3,5.5,0xffffff,0,2.5,0,g);g.position.set(x,0,-8);scene.add(g)}
 goal(-16.2);goal(16.2);
-/* school building */
+/* school building — detailed facade */
 (function(){
-  const b=box(30,9,9,0xe8d9b8,0,4.5,-38);
-  box(31,1,10,0xb0543e,0,9.5,-38);
-  box(3.4,4.4,.4,0x7a4a2b,0,2.2,-33.3);
-  for(let i=0;i<6;i++){box(2.6,2.2,.3,0x9adcf0,-12+i*4.8,5.6,-33.4)}
-  box(6,2,.4,0xffffff,0,7.8,-33.4);
+  box(30,9,9,0xf0e2c4,0,4.5,-38);                       /* body */
+  box(30.5,1.1,9.5,0xc9b492,0,.55,-38);                 /* plinth (fake AO base) */
+  box(30,.55,.14,0xbfa67e,0,8.55,-33.46);               /* shadow strip under the eaves */
+  box(.8,9,.8,0xdccaa4,-15,4.5,-33.6);box(.8,9,.8,0xdccaa4,15,4.5,-33.6); /* corner pilasters */
+  box(31.8,.55,10.8,0xa8492f,0,9.15,-38);               /* roof overhang */
+  box(30.6,.6,9.8,0xb0543e,0,9.7,-38);                  /* roof top layer */
+  /* entrance: frame, door, panes, handle, awning, steps */
+  box(4.3,5,.34,0xffffff,0,2.5,-33.44);
+  box(3.4,4.5,.3,0x7a4a2b,0,2.25,-33.3);
+  box(2.5,.95,.1,0x9adcf0,0,3.55,-33.12);
+  box(.14,.95,.12,0xffffff,0,3.55,-33.1);
+  const hd=new THREE.Mesh(new THREE.SphereGeometry(.13,10,8),M(0xd9a53a));hd.position.set(1.25,2.15,-33.1);scene.add(hd);
+  box(4.8,.26,1.7,0xb0543e,0,5.15,-32.85);              /* awning */
+  box(.14,1.1,.14,0x8d3b26,-2.2,4.6,-32.35);box(.14,1.1,.14,0x8d3b26,2.2,4.6,-32.35);
+  box(5.4,.36,1.8,0xd3c6ae,0,.18,-32.5);box(6.6,.3,2.7,0xc2b49a,0,.15,-31.7); /* steps */
+  /* windows: frame + glass + mullions + sill */
+  for(let i=0;i<6;i++){const wx=-12+i*4.8;
+    box(2.95,2.55,.26,0xffffff,wx,5.6,-33.46);
+    const gl=box(2.5,2.1,.2,0x8fd9f2,wx,5.6,-33.4);gl.material.emissive=new THREE.Color(0x224a58);
+    box(.1,2.1,.1,0xffffff,wx,5.6,-33.28);box(2.5,.1,.1,0xffffff,wx,5.6,-33.28);
+    box(3.2,.24,.55,0xdccaa4,wx,4.2,-33.35);
+  }
   /* flag */
   box(.18,7,.18,0x999999,17,3.5,-33);box(1.8,1.1,.06,0x4a7fe0,17.95,6.4,-33);
 })();
@@ -338,7 +385,7 @@ lamp.position.set(-1.15,6.2,0);post.add(lamp);
 /* =================== characters =================== */
 /* Quaternius "Ultimate Modular Men" — CC0, rigged, animations built in */
 const loader=new GLTFLoader();
-const CHAR_FILES={hoodie:'models/hoodie.glb',casual:'models/casual.glb',beach:'models/beach.glb',worker:'models/worker.glb',farmer:'models/farmer.glb',suit:'models/suit.glb'};
+const CHAR_FILES={hoodie:'models/hoodie.glb',casual:'models/casual.glb',adventurer:'models/adventurer.glb',worker:'models/worker.glb',farmer:'models/farmer.glb',suit:'models/suit.glb'};
 const MODELS={};
 const charsReady=Promise.all(Object.entries(CHAR_FILES).map(([k,f])=>new Promise((res,rej)=>loader.load(f,gl=>{MODELS[k]=gl;res()},undefined,rej))));
 
@@ -398,11 +445,21 @@ function stepTo(k,dt){ /* move kid toward k.target; returns moving? */
 try{await charsReady}catch(e){const sb=document.getElementById('startBtn');sb.textContent='❌ שגיאה בטעינת הדמויות — רעננו את הדף';throw e}
 const sb=document.getElementById('startBtn');sb.disabled=false;sb.textContent='▶️ להיכנס לעולם';
 
-/* player */
-const player=makeChar('hoodie',2.0,0x2255aa);
+/* player — default model; swapped by the character-select screen */
+let player=makeChar('hoodie',2.0,0x2255aa);
 player.g.position.set(0,0,22);player.g.rotation.y=Math.PI;
+window.chooseChar=function(name){
+  sndGood();
+  const pos=player.g.position.clone(),rot=player.g.rotation.y;
+  scene.remove(player.g);
+  player=makeChar(name,2.0,0x2255aa);
+  player.g.position.copy(pos);player.g.rotation.y=rot;
+  CHARS=[player,...kids,teacher];
+  try{localStorage.setItem('toolbagChar',name)}catch(e){}
+  enterWorld();
+};
 /* soccer kids in a circle */
-const KIDMODELS=['casual','beach','worker','farmer','casual'];
+const KIDMODELS=['casual','adventurer','worker','farmer','casual'];
 const KIPCOL=[0x333333,0x884422,0x2255aa,0x117755,0x992222];
 const kids=[];const HOME=[];
 for(let i=0;i<5;i++){
@@ -416,7 +473,7 @@ for(let i=0;i<5;i++){
 const teacher=makeChar('suit',2.5,0x111111);
 teacher.g.position.set(2.5,0,-29);
 const TEACHER=new THREE.Vector3(2.5,0,-29);
-const CHARS=[player,...kids,teacher];
+let CHARS=[player,...kids,teacher];
 /* ball */
 const ball=new THREE.Mesh(new THREE.SphereGeometry(.42,14,12),new THREE.MeshLambertMaterial({color:0xffffff}));
 ball.castShadow=true;scene.add(ball);
