@@ -38,18 +38,12 @@ h2{font-family:'Frank Ruhl Libre',serif;font-size:clamp(20px,4.5vw,30px);color:#
 .who{position:absolute;top:-15px;right:14px;background:#ffd54a;color:#4a2c00;font-size:13px;font-weight:800;border-radius:20px;padding:2px 12px}
 .next{margin-top:10px;text-align:center;font-size:14px;color:#ffd54a;opacity:.85;animation:tw 1.6s infinite}
 
-/* ===== flashlight room ===== */
-#room{position:relative;width:100%;max-width:640px;flex:1;border-radius:22px;overflow:hidden;background:linear-gradient(180deg,#141b3e,#1d1436);cursor:none;touch-action:none}
-#room .item{position:absolute;font-size:46px;transform:translate(-50%,-50%)}
-#heart{position:absolute;font-size:74px;transform:translate(-50%,-50%);cursor:pointer;transition:transform .3s}
-#heart.beat{animation:beat 1s infinite}
-@keyframes beat{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.14)}}
-#dark{position:absolute;inset:0;pointer-events:none;background:rgba(4,5,20,.985)}
-#torch{position:absolute;font-size:34px;pointer-events:none;transform:translate(-50%,-50%) rotate(-35deg);z-index:5}
-.hint{width:100%;max-width:640px;text-align:center;font-size:15.5px;font-weight:600;color:#ffe9a8;padding:10px 6px 2px}
-
 /* ===== heart closeup / feelings ===== */
-.bigheart{font-size:clamp(90px,22vw,150px);animation:beat 1.2s infinite;filter:drop-shadow(0 0 34px rgba(255,90,120,.45))}
+@keyframes beat{0%,100%{transform:scale(1)}50%{transform:scale(1.14)}}
+.bigheart{font-size:clamp(90px,22vw,150px);animation:beat 1.2s infinite;filter:drop-shadow(0 0 34px rgba(255,90,120,.45));transition:filter .9s}
+.bigheart.dim{filter:brightness(.1)}
+#torchIn{display:none;font-size:46px;transform:rotate(-140deg);animation:torchDrop .9s cubic-bezier(.3,1.4,.4,1);filter:drop-shadow(0 0 18px rgba(255,235,150,.9));margin-bottom:-14px}
+@keyframes torchDrop{from{opacity:0;transform:rotate(-140deg) translateY(-40px) scale(.4)}to{opacity:1;transform:rotate(-140deg) translateY(0) scale(1)}}
 .bigheart.calm{animation:calmGlow 2.4s ease-in-out infinite;filter:drop-shadow(0 0 44px rgba(255,213,110,.8))}
 @keyframes calmGlow{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
 .feelRow{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:16px 0}
@@ -120,22 +114,9 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
   </div>
 </div>
 
-<!-- ============ FLASHLIGHT ROOM ============ -->
-<div class="scr" id="scr-room">
-  <div class="hint" id="roomHint">🌑 חושך בפנים... הזיזו את הפנס ומצאו את הלב שלכם</div>
-  <div id="room">
-    <div class="item" style="top:22%;right:14%">🪑</div>
-    <div class="item" style="top:70%;right:78%">🧸</div>
-    <div class="item" style="top:78%;right:22%">📚</div>
-    <div class="item" style="top:18%;right:74%">🖼️</div>
-    <div id="heart" class="beat" style="top:52%;right:58%" onclick="foundHeart()">❤️</div>
-    <div id="dark"></div>
-    <div id="torch">🔦</div>
-  </div>
-</div>
-
 <!-- ============ FEELING PICK ============ -->
 <div class="scr" id="scr-feel">
+  <div id="torchIn">🔦</div>
   <div class="bigheart" id="heartBig">💗</div>
   <h2 id="feelQ">מה הלב מרגיש עכשיו?</h2>
   <div class="sceneTxt" id="feelCtx" style="max-width:520px"></div>
@@ -207,7 +188,7 @@ var LINES=[
  {art:'🎒✨',who:'🦉 הינשוף',t:'יש לי מתנה בשבילכם — הכלי הראשון בתיק: <b>הפנס הפנימי</b> 🔦'},
  {art:'🔦❤️',who:'🦉 הינשוף',t:'כשמשהו קשה קורה — במקום להתפוצץ או לברוח, עוצרים רגע... ומאירים <b>פנימה</b>: מה הלב שלי מרגיש?'},
  {art:'💛🤗',who:'🦉 הינשוף',t:'ואז אומרים ללב: <b>"זה נורמלי להרגיש ככה"</b> — ומחבקים אותו. לב שמקבל חיבוק, נרגע.'},
- {art:'🔦🌑',who:'🦉 הינשוף',t:'רוצים לנסות? קחו את הפנס — בואו נמצא את הלב שלכם בחושך!'}
+ {art:'🔦⚡',who:'🦉 הינשוף',t:'אבל כלי לומדים רק <b>על אמת</b>. קחו את הפנס — בואו נראה מה קרה היום בהפסקה...'}
 ];
 var li=0;
 function startStory(){sndTap();li=0;show('scr-story');paint()}
@@ -222,35 +203,20 @@ function advance(){
   sndTap();
   if(typing){clearInterval(typeTimer);$('#txt').innerHTML=LINES[li].t;typing=false;return}
   li++;
-  if(li>=LINES.length){startRoom();return}
+  if(li>=LINES.length){toScen(0);return}
   paint();
 }
-
-/* ================= flashlight room ================= */
-function startRoom(){
-  show('scr-room');
-  var room=$('#room'),dark=$('#dark'),torch=$('#torch');
-  function move(x,y){
-    var r=room.getBoundingClientRect();var px=x-r.left,py=y-r.top;
-    dark.style.background='radial-gradient(circle 120px at '+px+'px '+py+'px, rgba(4,5,20,0) 0 74px, rgba(4,5,20,.985) 130px)';
-    torch.style.left=px+'px';torch.style.top=(py-6)+'px';
-  }
-  room.onpointermove=function(e){move(e.clientX,e.clientY)};
-  room.onpointerdown=function(e){move(e.clientX,e.clientY)};
-  /* start beam center */
-  var r=room.getBoundingClientRect();move(r.left+r.width/2,r.top+r.height/2);
-}
-function foundHeart(){sndGood();feelFlow({
-  ctx:'מצאתם את הלב! אחרי יום כזה, תקשיבו לו רגע...',
-  feels:[{e:'😢',n:'עצב'},{e:'😠',n:'כעס'},{e:'😟',n:'דאגה'}],
-  after:function(){toScen(0)}
-})}
 
 /* ================= feeling flow (reused) ================= */
 /* steps: pick feeling -> "זה נורמלי" -> hug -> heart calms -> after() */
 function feelFlow(cfg){
   show('scr-feel');
-  var hb=$('#heartBig');hb.textContent='💗';hb.className='bigheart';
+  var hb=$('#heartBig');hb.textContent='💗';hb.className='bigheart dim';
+  /* flashlight reveal: the torch drops in and lights the heart */
+  var ti=$('#torchIn');ti.style.display='block';
+  snd(300,.5,'triangle',.08);
+  setTimeout(function(){hb.classList.remove('dim');snd(660,.3,'triangle',.09)},650);
+  setTimeout(function(){ti.style.display='none'},1600);
   $('#feelQ').textContent='מה הלב מרגיש עכשיו?';
   $('#feelCtx').innerHTML=cfg.ctx||'';
   var row=$('#feelRow');row.innerHTML='';row.style.display='flex';
