@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>🎒 תיק הכלים — פרק 1: הפנס הפנימי (עולם)</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;800&family=Frank+Ruhl+Libre:wght@700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Heebo',sans-serif;background:#0d1330;color:#fff;user-select:none;touch-action:none}
+#c3d{position:fixed;inset:0;display:block}
+
+/* ---------- HUD ---------- */
+#quest{position:fixed;top:12px;left:50%;transform:translateX(-50%);background:rgba(10,14,40,.78);border:1.5px solid rgba(255,213,74,.6);border-radius:30px;padding:8px 20px;font-size:15.5px;font-weight:800;color:#ffd54a;z-index:10;white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,.4)}
+#act{position:fixed;bottom:110px;left:50%;transform:translateX(-50%);display:none;z-index:10;border:none;border-radius:18px;padding:14px 26px;font-family:'Heebo';font-size:18px;font-weight:800;background:linear-gradient(180deg,#ffd54a,#f5a623);color:#4a2c00;box-shadow:0 6px 0 #b57712,0 12px 30px rgba(0,0,0,.5);cursor:pointer;animation:bob 1.2s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,-7px)}}
+#joy{position:fixed;bottom:26px;right:26px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.25);z-index:10;touch-action:none}
+#knob{position:absolute;top:50%;left:50%;width:52px;height:52px;border-radius:50%;background:rgba(255,213,74,.85);transform:translate(-50%,-50%);box-shadow:0 4px 14px rgba(0,0,0,.4)}
+.keysHint{position:fixed;bottom:34px;left:26px;font-size:13px;opacity:.6;z-index:10}
+
+/* ---------- overlays ---------- */
+.ov{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;z-index:20;overflow-y:auto}
+.ov.on{display:flex}
+.ov.dimbg{background:rgba(6,8,28,.72);backdrop-filter:blur(2px)}
+h1{font-family:'Frank Ruhl Libre',serif;font-size:clamp(28px,7vw,48px);color:#ffd54a;text-shadow:0 4px 24px rgba(255,213,74,.35)}
+h2{font-family:'Frank Ruhl Libre',serif;font-size:clamp(20px,4.5vw,28px);color:#ffd54a;margin-bottom:8px;text-align:center}
+.btn{display:block;width:100%;max-width:420px;margin:8px auto;padding:15px 22px;border:none;border-radius:16px;font-family:'Heebo';font-size:17.5px;font-weight:800;cursor:pointer;background:linear-gradient(180deg,#ffd54a,#f5a623);color:#4a2c00;box-shadow:0 6px 0 #b57712,0 10px 24px rgba(0,0,0,.35);transition:transform .1s}
+.btn:active{transform:translateY(4px);box-shadow:0 2px 0 #b57712}
+.btn.sec{background:linear-gradient(180deg,#3c477f,#2a3260);color:#dfe6ff;box-shadow:0 6px 0 #1a2040}
+.btn.calm{background:linear-gradient(180deg,#7dffa8,#25c05f);color:#053514;box-shadow:0 6px 0 #128040}
+.chapter{background:rgba(255,213,74,.14);border:1.5px solid rgba(255,213,74,.55);border-radius:30px;padding:7px 22px;font-size:16px;font-weight:800;color:#ffd54a;margin:12px 0 20px}
+.tiny{font-size:13px;opacity:.65;margin-top:12px;text-align:center}
+
+/* dialogue (bottom, over the 3D scene) */
+#dlg{position:fixed;left:0;right:0;bottom:0;padding:14px;z-index:22;display:none}
+#dlg.on{display:block}
+.bubble{position:relative;max-width:620px;margin:0 auto;background:#fffef2;color:#3a2c10;border-radius:20px;padding:16px 20px 14px;font-size:clamp(16px,2.4vh,19px);line-height:1.65;font-weight:600;min-height:88px;box-shadow:0 12px 34px rgba(0,0,0,.5)}
+.who{position:absolute;top:-15px;right:14px;background:#ffd54a;color:#4a2c00;font-size:13.5px;font-weight:800;border-radius:20px;padding:2px 12px}
+.next{text-align:center;font-size:13.5px;color:#a15c00;opacity:.8;margin-top:6px;animation:tw 1.6s infinite}
+@keyframes tw{0%,100%{opacity:.25}50%{opacity:.95}}
+#chDlg{max-width:620px;margin:10px auto 0}
+.choice{display:block;width:100%;margin:8px 0;padding:13px 16px;border:2px solid rgba(255,255,255,.25);border-radius:16px;background:rgba(12,16,44,.88);color:#fff;font-family:'Heebo';font-size:16px;font-weight:700;cursor:pointer;text-align:right;line-height:1.5}
+.choice:hover{border-color:#ffd54a}
+.reflect{max-width:620px;margin:10px auto 0;background:rgba(12,22,50,.92);border:1.5px dashed rgba(143,211,255,.55);border-radius:16px;padding:12px 16px;font-size:15px;line-height:1.7;color:#dff0ff}
+
+/* feelings flow */
+.bigheart{font-size:clamp(84px,20vw,130px);animation:beat 1.2s infinite;filter:drop-shadow(0 0 34px rgba(255,90,120,.45));transition:filter .9s}
+@keyframes beat{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+.bigheart.dim{filter:brightness(.1)}
+.bigheart.calm{animation:calmG 2.4s ease-in-out infinite;filter:drop-shadow(0 0 44px rgba(255,213,110,.8))}
+@keyframes calmG{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+#torchIn{display:none;font-size:44px;transform:rotate(-140deg);animation:torchDrop .9s cubic-bezier(.3,1.4,.4,1);filter:drop-shadow(0 0 18px rgba(255,235,150,.9));margin-bottom:-12px}
+@keyframes torchDrop{from{opacity:0;transform:rotate(-140deg) translateY(-40px) scale(.4)}to{opacity:1;transform:rotate(-140deg) translateY(0) scale(1)}}
+.feelRow{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0}
+.feel{background:rgba(255,255,255,.09);border:2px solid rgba(255,255,255,.3);border-radius:18px;padding:13px 18px;font-size:16.5px;font-weight:800;color:#fff;cursor:pointer;text-align:center;min-width:100px}
+.feel:hover{border-color:#ffd54a}
+.feel span{display:block;font-size:32px;margin-bottom:3px}
+.ctxTxt{font-size:15.5px;line-height:1.7;font-weight:600;text-align:center;max-width:520px}
+
+/* badge */
+.slots{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:16px 0;max-width:520px}
+.slot{width:58px;height:58px;border-radius:16px;background:rgba(255,255,255,.07);border:2px dashed rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:28px;opacity:.55}
+.slot.earned{background:rgba(255,213,74,.16);border:2px solid #ffd54a;opacity:1;animation:pop .6s cubic-bezier(.2,1.6,.4,1);box-shadow:0 0 22px rgba(255,213,74,.5)}
+@keyframes pop{0%{transform:scale(0)}100%{transform:scale(1)}}
+
+/* family card */
+.famCard{width:100%;max-width:560px;background:#fffef2;color:#3a2c10;border-radius:22px;padding:22px;text-align:right;box-shadow:0 16px 44px rgba(0,0,0,.5)}
+.famCard h3{font-family:'Frank Ruhl Libre',serif;color:#a15c00;font-size:20px;margin-bottom:8px;text-align:center}
+.famCard li{font-size:15px;line-height:1.8;margin-bottom:7px}
+.famCard ul{padding-right:20px}
+.mission{background:linear-gradient(135deg,#fff3c9,#ffe4a1);border:2px solid #f5a623;border-radius:16px;padding:12px 16px;margin-top:12px;font-size:15px;line-height:1.7;font-weight:700}
+
+canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
+#flyTool{position:fixed;font-size:66px;z-index:50;pointer-events:none;display:none}
+.stars{position:fixed;inset:0;pointer-events:none;z-index:0}
+.stars i{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;opacity:.5;animation:tw 3s infinite}
+</style>
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}</script>
+</head>
+<body>
+<canvas id="c3d"></canvas>
+<canvas id="confetti"></canvas>
+<div id="flyTool">🔦</div>
+
+<div id="quest" style="display:none"></div>
+<button id="act"></button>
+<div id="joy" style="display:none"><div id="knob"></div></div>
+<div class="keysHint" id="keysHint" style="display:none">🎮 חצים / WASD לתנועה</div>
+
+<!-- title -->
+<div class="ov on dimbg" id="ov-title">
+  <div class="stars" id="stars"></div>
+  <div style="font-size:clamp(70px,17vw,120px);filter:drop-shadow(0 14px 30px rgba(0,0,0,.5))">🎒</div>
+  <h1>תיק הכלים</h1>
+  <div class="chapter">פרק 1 · הפנס הפנימי 🔦</div>
+  <button class="btn" onclick="enterWorld()">▶️ להיכנס לעולם</button>
+  <div class="tiny">מסע של 7 כלים לחיים · הזיזו את הדמות, גשו לדמויות — והחיים יקרו</div>
+</div>
+
+<!-- dialogue -->
+<div id="dlg">
+  <div class="bubble"><div class="who" id="who"></div><div id="txt"></div><div class="next" id="nextH">👆 הקישו להמשך</div></div>
+  <div id="chDlg"></div>
+</div>
+
+<!-- feelings -->
+<div class="ov dimbg" id="ov-feel">
+  <div id="torchIn">🔦</div>
+  <div class="bigheart" id="heartBig">💗</div>
+  <h2 id="feelQ"></h2>
+  <div class="ctxTxt" id="feelCtx"></div>
+  <div class="feelRow" id="feelRow"></div>
+  <div id="feelSteps" style="width:100%;max-width:440px"></div>
+</div>
+
+<!-- badge -->
+<div class="ov dimbg" id="ov-badge">
+  <h1 style="font-size:clamp(24px,6vw,38px)">🎉 הכלי הראשון שלך!</h1>
+  <div class="ctxTxt">הפנס הפנימי נכנס לתיק הכלים.<br>עוד 6 כלים מחכים בהמשך המסע...</div>
+  <div class="slots" id="slots"></div>
+  <button class="btn calm" onclick="showFam()">🏡 קלף למשפחה ולכיתה</button>
+  <button class="btn sec" onclick="location.reload()">🔄 לשחק שוב</button>
+</div>
+
+<!-- family -->
+<div class="ov dimbg" id="ov-fam">
+  <div class="famCard">
+    <h3>🗣️ מדברים על זה יחד</h3>
+    <ul>
+      <li>מתי בפעם האחרונה הלב שלך הרגיש כבד? מה הוא הרגיש?</li>
+      <li>למה לדעתך זה עוזר להגיד <b>"זה נורמלי להרגיש ככה"</b>?</li>
+      <li>מה ההבדל בין להוציא את הכעס החוצה, להחזיק הכל בפנים — ולהדליק פנס פנימי?</li>
+    </ul>
+    <div class="mission">🌟 <b>משימת האומץ של השבוע:</b> בפעם הבאה שמשהו מציק — עצרו, שאלו "מה הלב שלי מרגיש?", תגידו "זה נורמלי", וחבקו את הלב. ספרו אחר כך למשפחה איך זה היה!</div>
+  </div>
+  <button class="btn" style="margin-top:14px" onclick="ovShow('ov-badge')">⬅️ חזרה</button>
+</div>
+
+<script>
+/* ---------- shared non-module helpers (used by inline onclick) ---------- */
+'use strict';
+function $(s){return document.querySelector(s)}
+function ovShow(id){document.querySelectorAll('.ov').forEach(function(o){o.classList.remove('on')});if(id)$('#'+id).classList.add('on')}
+var AC=null;
+function snd(f,d,type,vol){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();var o=AC.createOscillator(),g=AC.createGain();o.type=type||'sine';o.frequency.value=f;g.gain.value=vol||.12;g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+(d||.25));o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+(d||.25))}catch(e){}}
+function sndTap(){snd(520,.12)} function sndGood(){snd(660,.16);setTimeout(function(){snd(880,.22)},110)}
+function sndWarm(){snd(392,.4,'triangle',.1);setTimeout(function(){snd(523,.5,'triangle',.1)},180)}
+(function(){var h='';for(var i=0;i<34;i++)h+='<i style="top:'+Math.random()*100+'%;right:'+Math.random()*100+'%;animation-delay:'+Math.random()*3+'s"></i>';$('#stars').innerHTML=h})();
+function confettiBurst(){
+  var c=$('#confetti'),x=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;
+  var P=[],cols=['#ffd54a','#7dffa8','#8fd3ff','#ff9bb3','#fff'];
+  for(var i=0;i<130;i++)P.push({x:innerWidth/2,y:innerHeight*.4,vx:(Math.random()-.5)*13,vy:-Math.random()*11-3,s:Math.random()*7+4,c:cols[i%5],r:Math.random()*6});
+  var t=0;(function fr(){x.clearRect(0,0,c.width,c.height);t++;
+    P.forEach(function(p){p.x+=p.vx;p.y+=p.vy;p.vy+=.3;p.r+=.15;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;x.fillRect(-p.s/2,-p.s/2,p.s,p.s*.6);x.restore()});
+    if(t<110)requestAnimationFrame(fr);else x.clearRect(0,0,c.width,c.height)})();
+}
+function showFam(){sndTap();ovShow('ov-fam')}
+var TOOLS=['🔦','🐬','🌸','📗','🙋','❓','🛡️'];
+function earnBadge(){
+  ovShow('ov-badge');
+  var h='';TOOLS.forEach(function(t,i){h+='<div class="slot" id="slot'+i+'">'+(i===0?'':'🔒')+'</div>'});
+  $('#slots').innerHTML=h;
+  var f=$('#flyTool');f.style.display='block';f.style.left='50%';f.style.top='28%';f.style.transition='none';f.style.transform='translate(-50%,-50%) scale(1.5)';
+  setTimeout(function(){
+    var s=$('#slot0').getBoundingClientRect();
+    f.style.transition='all .9s cubic-bezier(.3,1.3,.4,1)';
+    f.style.left=(s.left+s.width/2)+'px';f.style.top=(s.top+s.height/2)+'px';f.style.transform='translate(-50%,-50%) scale(.5)';
+    setTimeout(function(){f.style.display='none';var sl=$('#slot0');sl.textContent='🔦';sl.className='slot earned';confettiBurst();sndGood();setTimeout(sndWarm,300)},950);
+  },400);
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+/* =================== renderer / scene =================== */
+const canvas=document.getElementById('c3d');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x8ecdf5);
+scene.fog=new THREE.Fog(0x8ecdf5,60,140);
+const cam=new THREE.PerspectiveCamera(55,innerWidth/innerHeight,.1,300);
+addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+
+const hemi=new THREE.HemisphereLight(0xcfe8ff,0x557744,1.0);scene.add(hemi);
+const sun=new THREE.DirectionalLight(0xfff2d0,1.6);
+sun.position.set(24,38,18);sun.castShadow=true;
+sun.shadow.mapSize.set(2048,2048);
+sun.shadow.camera.left=-50;sun.shadow.camera.right=50;sun.shadow.camera.top=50;sun.shadow.camera.bottom=-50;
+scene.add(sun);
+
+const M=c=>new THREE.MeshLambertMaterial({color:c});
+function box(w,h,d,c,x,y,z,parent){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),M(c));m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;(parent||scene).add(m);return m}
+
+/* =================== the schoolyard =================== */
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(220,220),M(0x6cb55b));
+ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
+/* paved area near school */
+const pave=new THREE.Mesh(new THREE.PlaneGeometry(60,26),M(0xb9b3a6));
+pave.rotation.x=-Math.PI/2;pave.position.set(0,.01,-26);pave.receiveShadow=true;scene.add(pave);
+/* soccer field */
+const field=new THREE.Mesh(new THREE.PlaneGeometry(30,18),M(0x4f9e43));
+field.rotation.x=-Math.PI/2;field.position.set(0,.02,-8);field.receiveShadow=true;scene.add(field);
+const FIELD=new THREE.Vector3(0,0,-8);
+/* field lines */
+function line(w,d,x,z){const l=new THREE.Mesh(new THREE.PlaneGeometry(w,d),new THREE.MeshBasicMaterial({color:0xffffff}));l.rotation.x=-Math.PI/2;l.position.set(x,.03,z);scene.add(l)}
+line(30,.25,0,-17);line(30,.25,0,1);line(.25,18,-15,-8);line(.25,18,15,-8);line(.25,18,0,-8);
+/* goals */
+function goal(x){const g=new THREE.Group();box(.3,2.4,.3,0xffffff,0,1.2,-2.6,g);box(.3,2.4,.3,0xffffff,0,1.2,2.6,g);box(.3,.3,5.5,0xffffff,0,2.5,0,g);g.position.set(x,0,-8);scene.add(g)}
+goal(-16.2);goal(16.2);
+/* school building */
+(function(){
+  const b=box(30,9,9,0xe8d9b8,0,4.5,-38);
+  box(31,1,10,0xb0543e,0,9.5,-38);
+  box(3.4,4.4,.4,0x7a4a2b,0,2.2,-33.3);
+  for(let i=0;i<6;i++){box(2.6,2.2,.3,0x9adcf0,-12+i*4.8,5.6,-33.4)}
+  box(6,2,.4,0xffffff,0,7.8,-33.4);
+  /* flag */
+  box(.18,7,.18,0x999999,17,3.5,-33);box(1.8,1.1,.06,0x4a7fe0,17.95,6.4,-33);
+})();
+/* fence */
+(function(){const c=0xc7a15a;for(let x=-44;x<=44;x+=4){box(.25,1.7,.25,c,x,.85,30);box(.25,1.7,.25,c,x,.85,-52)}for(let z=-52;z<=30;z+=4){box(.25,1.7,.25,c,-44,.85,z);box(.25,1.7,.25,c,44,.85,z)}
+box(88,.2,.2,c,0,1.5,30);box(88,.2,.2,c,0,1.5,-52);box(.2,.2,82,c,-44,1.5,-11);box(.2,.2,82,c,44,1.5,-11)})();
+/* trees */
+function tree(x,z,s){s=s||1;const t=new THREE.Group();box(.9*s,3*s,.9*s,0x8a5a2b,0,1.5*s,0,t);
+const lv=new THREE.Mesh(new THREE.ConeGeometry(2.6*s,4.5*s,7),M(0x3e8f3e));lv.position.y=5*s;lv.castShadow=true;t.add(lv);
+t.position.set(x,0,z);scene.add(t)}
+tree(-24,10);tree(-30,-6,1.2);tree(26,12,1.1);tree(32,-14,.9);tree(-20,-24,.8);tree(24,-26);tree(-36,18,1.1);tree(38,6);
+/* bench */
+const bench=new THREE.Group();
+box(3.2,.25,1.1,0x9a6a3a,0,1.05,0,bench);box(3.2,1.1,.22,0x9a6a3a,0,1.7,-.5,bench);
+box(.25,1,.25,0x555555,-1.3,.5,0,bench);box(.25,1,.25,0x555555,1.3,.5,0,bench);
+bench.position.set(20,0,4);bench.rotation.y=-.5;scene.add(bench);
+/* lamppost for the owl */
+const post=new THREE.Group();
+box(.35,6.4,.35,0x445,0,3.2,0,post);box(1.6,.3,.6,0x445,-.6,6.4,0,post);
+post.position.set(7,0,12);scene.add(post);
+
+/* emoji sprite helper */
+function emojiSprite(em,scale){
+  const cv=document.createElement('canvas');cv.width=cv.height=128;const x=cv.getContext('2d');
+  x.font='100px serif';x.textAlign='center';x.textBaseline='middle';x.fillText(em,64,72);
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv),transparent:true}));
+  sp.scale.set(scale,scale,1);return sp;
+}
+const owl=emojiSprite('🦉',3.2);owl.position.set(6.4,7.4,12);scene.add(owl);
+const marker=emojiSprite('⬇️',2.2);scene.add(marker);
+const heartSp=emojiSprite('💗',2.4);heartSp.visible=false;scene.add(heartSp);
+const chatSp=emojiSprite('💬',2);chatSp.visible=false;scene.add(chatSp);
+
+/* =================== characters =================== */
+const SKIN=0xf1c27d;
+function makeKid(shirt,kip,pants){
+  const g=new THREE.Group();
+  box(.95,1.15,.55,shirt,0,1.35,0,g);                    /* torso */
+  const head=box(.62,.6,.62,SKIN,0,2.24,0,g);
+  box(.34,.09,.34,kip,0,2.58,0,g);                       /* kippah */
+  box(.09,.09,.05,0x222222,-.14,2.3,.31,g);box(.09,.09,.05,0x222222,.14,2.3,.31,g); /* eyes */
+  function limb(w,h,c,x,y){const p=new THREE.Group();p.position.set(x,y,0);const m=box(w,h,w,c,0,-h/2+.05,0,p);g.add(p);return p}
+  const armL=limb(.24,.9,shirt,-.62,1.86), armR=limb(.24,.9,shirt,.62,1.86);
+  const legL=limb(.28,.82,pants||0x2b3a66,-.24,.82), legR=limb(.28,.82,pants||0x2b3a66,.24,.82);
+  scene.add(g);
+  return {g,armL,armR,legL,legR,phase:Math.random()*6,target:null,face:null,speed:4.4};
+}
+function walkAnim(k,dt,moving){
+  if(moving){k.phase+=dt*9;const s=Math.sin(k.phase)*.62;
+    k.armL.rotation.x=s;k.armR.rotation.x=-s;k.legL.rotation.x=-s;k.legR.rotation.x=s;
+    k.g.position.y=Math.abs(Math.sin(k.phase))*.06;
+  }else{['armL','armR','legL','legR'].forEach(n=>{k[n].rotation.x*=.85});k.g.position.y*=.85}
+}
+function stepTo(k,dt){ /* move kid toward k.target; returns moving? */
+  if(!k.target)return false;
+  const p=k.g.position,d=new THREE.Vector3().subVectors(k.target,p);d.y=0;
+  const dist=d.length();
+  if(dist<.15){k.target=null;return false}
+  d.normalize();p.addScaledVector(d,Math.min(k.speed*dt,dist));
+  k.g.rotation.y=Math.atan2(d.x,d.z);
+  return true;
+}
+
+/* player */
+const player=makeKid(0x2f6fe0,0x2255aa);
+player.g.position.set(0,0,22);player.g.rotation.y=Math.PI;
+/* soccer kids in a circle */
+const KIDCOL=[[0xe0552f,0x333333],[0x33aa66,0x884422],[0xead44a,0x2255aa],[0x9955cc,0x117755],[0xdddddd,0x992222]];
+const kids=[];const HOME=[];
+for(let i=0;i<5;i++){
+  const a=i/5*Math.PI*2;
+  const k=makeKid(KIDCOL[i][0],KIDCOL[i][1]);
+  const pos=new THREE.Vector3(FIELD.x+Math.cos(a)*5.2,0,FIELD.z+Math.sin(a)*4);
+  k.g.position.copy(pos);HOME.push(pos.clone());
+  kids.push(k);
+}
+/* ball */
+const ball=new THREE.Mesh(new THREE.SphereGeometry(.42,14,12),new THREE.MeshLambertMaterial({color:0xffffff}));
+ball.castShadow=true;scene.add(ball);
+let ballFrom=kids[0].g.position.clone(),ballTo=kids[2].g.position.clone(),ballT=0,ballHold=0,ballCur=2;
+function nextPass(){ballCur=(ballCur+1+Math.floor(Math.random()*3))%5;ballFrom=ball.position.clone();ballTo=kids[ballCur].g.position.clone().add(new THREE.Vector3((Math.random()-.5),0,(Math.random()-.5)));ballT=0}
+function ballTick(dt,active){
+  if(!active){return}
+  if(ballHold>0){ballHold-=dt;if(ballHold<=0)nextPass();return}
+  ballT+=dt*1.4;const t=Math.min(ballT,1);
+  ball.position.lerpVectors(ballFrom,ballTo,t);
+  ball.position.y=.42+Math.sin(t*Math.PI)*1.3;
+  if(t>=1){ballHold=.5+Math.random()*.8}
+  kids.forEach(k=>{if(!k.target){const d=new THREE.Vector3().subVectors(ball.position,k.g.position);k.g.rotation.y=Math.atan2(d.x,d.z)}});
+}
+
+/* =================== input =================== */
+const keys={};
+addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true});
+addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false});
+let joyV={x:0,y:0};
+const joy=document.getElementById('joy'),knob=document.getElementById('knob');
+function joyHandle(e){
+  const t=e.touches?e.touches[0]:e;const r=joy.getBoundingClientRect();
+  let dx=(t.clientX-(r.left+60))/48, dy=(t.clientY-(r.top+60))/48;
+  const l=Math.hypot(dx,dy);if(l>1){dx/=l;dy/=l}
+  joyV={x:dx,y:dy};knob.style.transform='translate(calc(-50% + '+dx*34+'px), calc(-50% + '+dy*34+'px))';
+}
+joy.addEventListener('pointerdown',e=>{joy.setPointerCapture(e.pointerId);joyHandle(e)});
+joy.addEventListener('pointermove',e=>{if(e.buttons)joyHandle(e)});
+joy.addEventListener('pointerup',()=>{joyV={x:0,y:0};knob.style.transform='translate(-50%,-50%)'});
+
+/* =================== game state / quest =================== */
+let MODE='title';           /* title | explore | dialogue | cine */
+let QUEST=0;                /* 0 go to owl, 1 go to field, 2 scenario done */
+const explored=new Set();
+const actBtn=document.getElementById('act');
+const questEl=document.getElementById('quest');
+window.enterWorld=function(){sndTap();ovShow(null);MODE='explore';
+  questEl.style.display='block';questEl.textContent='🦉 מישהו מחכה לכם ליד הפנס... לכו אליו';
+  const touch='ontouchstart' in window;
+  document.getElementById(touch?'joy':'keysHint').style.display='block';
+};
+
+/* dialogue system */
+const dlg=document.getElementById('dlg');
+let dlgLines=[],dlgI=0,dlgDone=null,typing=false,typeTimer=null;
+function say(lines,done){MODE='dialogue';dlgLines=lines;dlgI=0;dlgDone=done||null;dlg.classList.add('on');$('#chDlg').innerHTML='';paintLine()}
+function paintLine(){const L=dlgLines[dlgI];$('#who').textContent=L.who||'';$('#who').style.display=L.who?'block':'none';$('#nextH').style.display='block';typeIt(L.t)}
+function typeIt(html){typing=true;const el=$('#txt');el.innerHTML='';const plain=html.replace(/<[^>]+>/g,'');let i=0;clearInterval(typeTimer);
+  typeTimer=setInterval(()=>{i++;if(i>=plain.length){clearInterval(typeTimer);el.innerHTML=html;typing=false;return}el.textContent=plain.slice(0,i)},20)}
+dlg.addEventListener('click',()=>{
+  if($('#chDlg').innerHTML)return;      /* choices shown — don't advance */
+  sndTap();
+  if(typing){clearInterval(typeTimer);$('#txt').innerHTML=dlgLines[dlgI].t;typing=false;return}
+  dlgI++;
+  if(dlgI>=dlgLines.length){dlg.classList.remove('on');const d=dlgDone;dlgDone=null;if(d)d();return}
+  paintLine();
+});
+
+/* =================== camera =================== */
+let camMode='follow';let camPos=new THREE.Vector3(),camLook=new THREE.Vector3();
+function camTick(dt){
+  let tp,tl;
+  if(camMode==='follow'){
+    tp=player.g.position.clone().add(new THREE.Vector3(0,6.4,9.5));
+    tl=player.g.position.clone().add(new THREE.Vector3(0,1.6,0));
+  }else if(camMode==='field'){
+    tp=new THREE.Vector3(10,4.6,4);tl=new THREE.Vector3(0,1.2,-8);
+  }else if(camMode==='owl'){
+    tp=player.g.position.clone().add(new THREE.Vector3(2.5,3.4,4.5));
+    tl=new THREE.Vector3(6.4,5.4,12);
+  }else{tp=camPos;tl=camLook}
+  camPos.lerp(tp,Math.min(dt*3.2,1));camLook.lerp(tl,Math.min(dt*3.2,1));
+  cam.position.copy(camPos);cam.lookAt(camLook);
+}
+camPos.copy(player.g.position).add(new THREE.Vector3(0,6.4,9.5));
+camLook.copy(player.g.position);
+
+/* =================== scenario: the soccer field =================== */
+const OWLPOS=new THREE.Vector3(7,0,12);
+function distTo(v){return player.g.position.distanceTo(v)}
+
+function owlTalk(){
+  camMode='owl';
+  say([
+    {who:'🦉 הינשוף',t:'שלום, ידיד צעיר! אני הינשוף שומר תיק הכלים. אני רואה שהיום שלך היה... לא פשוט.'},
+    {who:'🦉 הינשוף',t:'קח ממני את הכלי הראשון בתיק: <b>הפנס הפנימי</b> 🔦'},
+    {who:'🦉 הינשוף',t:'כשמשהו קשה קורה — עוצרים רגע, מאירים <b>פנימה</b> ושואלים: מה הלב שלי מרגיש?'},
+    {who:'🦉 הינשוף',t:'ואז אומרים ללב: <b>"זה נורמלי להרגיש ככה"</b> — ומחבקים אותו. לב שמקבל חיבוק, נרגע.'},
+    {who:'🦉 הינשוף',t:'אבל כלי לומדים רק על אמת... תראה — במגרש שם משחקים כדורגל. לך לשם ⚽'}
+  ],()=>{
+    sndGood();QUEST=1;camMode='follow';MODE='explore';
+    questEl.textContent='⚽ לכו למגרש הכדורגל';
+  });
+}
+
+function startScenario(){
+  MODE='cine';camMode='field';actBtn.style.display='none';questEl.style.display='none';
+  /* player walks to the edge of the field */
+  player.target=new THREE.Vector3(7.5,0,-3.5);
+  setTimeout(()=>{
+    say([
+      {who:'',t:'ההפסקה הגדולה. כל הילדים משחקים כדורגל...'},
+      {who:'',t:'אתה עומד בצד. אף אחד לא הזמין אותך לשחק. הלב מתכווץ...'}
+    ],showChoices);
+  },1600);
+}
+function showChoices(){
+  MODE='cine';
+  $('#who').style.display='none';$('#nextH').style.display='none';
+  $('#txt').innerHTML='<b>מה עושים?</b> 🤔';
+  dlg.classList.add('on');
+  let h='';
+  h+='<button class="choice" onclick="window.pick(0)">😠 לצעוק: "אתם מגעילים! בכלל לא רוצה לשחק איתכם!"'+(explored.has(0)?' ✔️':'')+'</button>';
+  h+='<button class="choice" onclick="window.pick(1)">🙁 ללכת לשבת לבד על הספסל, לשתוק ולהחזיק הכל בפנים'+(explored.has(1)?' ✔️':'')+'</button>';
+  h+='<button class="choice" onclick="window.pick(2)">🔦 לעצור רגע... ולהדליק את הפנס הפנימי'+(explored.has(2)?' ✔️':'')+'</button>';
+  $('#chDlg').innerHTML=h;
+}
+window.pick=function(i){
+  sndTap();explored.add(i);
+  dlg.classList.remove('on');$('#chDlg').innerHTML='';
+  if(i===0)consAngry();else if(i===1)consBench();else consFlash();
+};
+
+/* --- consequence: shout --- */
+function consAngry(){
+  snd(180,.5,'sawtooth',.09);
+  chatSp.material=emojiSprite('🗯️',2).material;chatSp.visible=true;
+  soccerActive=false;
+  /* kids scatter away from player */
+  kids.forEach((k,i)=>{const dir=new THREE.Vector3().subVectors(k.g.position,player.g.position).setY(0).normalize();
+    k.target=k.g.position.clone().addScaledVector(dir,9+i*1.5);k.speed=6});
+  setTimeout(()=>{
+    chatSp.visible=false;
+    reflect('הילדים נבהלים ומתרחקים. עכשיו אתה לבד — וגם כועס וגם עצוב.',
+            '💭 הכעס יצא החוצה עוד לפני שהבנו מה הלב באמת מרגיש. הצעקה לא קירבה אותנו למשחק...');
+  },2300);
+}
+/* --- consequence: bench --- */
+function consBench(){
+  soccerActive=true;
+  player.target=new THREE.Vector3(20,0,2.6);player.speed=4;
+  camMode='follow';
+  /* the world literally grays out around him */
+  const t0=performance.now();
+  (function dim(){const k=Math.min((performance.now()-t0)/2600,1);
+    hemi.intensity=1-.62*k;sun.intensity=1.6-1.1*k;
+    scene.background.setHSL(.58,.35-.22*k,.62-.25*k);
+    if(k<1)requestAnimationFrame(dim)})();
+  setTimeout(()=>{
+    player.g.rotation.y=Math.PI+.6;
+    heartSp.material=emojiSprite('🖤',2.4).material;heartSp.visible=true;
+    reflect('ההפסקה עוברת... הרגש נשאר בפנים — וגדל. העולם נהיה אפור, והלב כבד.',
+            '💭 רגש שמחזיקים בפנים בלי להקשיב לו לא נעלם — הוא מחכה, ומתנפח.');
+  },2600);
+}
+/* --- consequence: inner flashlight --- */
+function consFlash(){
+  soccerActive=true;
+  /* night falls softly, a glowing heart rises above the player */
+  const t0=performance.now();
+  (function dim(){const k=Math.min((performance.now()-t0)/1400,1);
+    hemi.intensity=1-.72*k;sun.intensity=1.6-1.35*k;
+    scene.background.setHSL(.62,.5,.55-.38*k);
+    if(k<1)requestAnimationFrame(dim);else feelStage()})();
+}
+function feelStage(){
+  heartSp.material=emojiSprite('💗',2.6).material;heartSp.visible=true;
+  feelFlow({
+    ctx:'כל העולם ממתין רגע... מאירים פנימה. מה הלב מרגיש כשלא הזמינו אותך?',
+    feels:[{e:'💔',n:'עלבון'},{e:'😢',n:'עצב'},{e:'😟',n:'דאגה'}],
+    after:goodEnding
+  });
+}
+function goodEnding(){
+  ovShow(null);
+  heartSp.material=emojiSprite('💛',2.6).material;
+  /* light returns */
+  const t0=performance.now();
+  (function up(){const k=Math.min((performance.now()-t0)/1400,1);
+    hemi.intensity=.28+.72*k;sun.intensity=.25+1.35*k;
+    scene.background.setHSL(.58,.5,.17+.45*k);
+    if(k<1)requestAnimationFrame(up)})();
+  setTimeout(()=>{heartSp.visible=false},1800);
+  /* walk to the kids and ask */
+  player.target=new THREE.Vector3(FIELD.x+2,0,FIELD.z+2);player.speed=4.4;
+  camMode='field';
+  setTimeout(()=>{
+    say([
+      {who:'😊 אתה (בקול רגוע)',t:'"אפשר להצטרף אליכם?"'},
+      {who:'⚽ הילדים',t:'"בטח! בוא, אתה בקבוצה של דני!"'}
+    ],()=>{
+      /* celebration: kids jump, ball passes to player, confetti */
+      sndGood();soccerActive=false;
+      kids.forEach((k,i)=>{k.target=null;jump(k,i*120)});
+      ballFrom=ball.position.clone();ballTo=player.g.position.clone().add(new THREE.Vector3(.6,0,.6));ballT=0;
+      const t0=performance.now();
+      (function pass(){ballT+=.02;const t=Math.min(ballT,1);
+        ball.position.lerpVectors(ballFrom,ballTo,t);ball.position.y=.42+Math.sin(t*Math.PI)*1.5;
+        if(t<1)requestAnimationFrame(pass)})();
+      confettiBurst();
+      setTimeout(()=>{
+        reflect('הלב נרגע — ואז ביקשת בקול רגוע. עכשיו אתם משחקים יחד! ⚽',
+          '🔦 עצרנו ← הרגשנו ← אמרנו "זה נורמלי" ← חיבקנו ← <b>ואז בחרנו מה לעשות.</b> זה הפנס הפנימי!',true);
+      },1900);
+    });
+  },2100);
+}
+function jump(k,delay){setTimeout(()=>{const t0=performance.now();
+  (function j(){const t=(performance.now()-t0)/500;if(t>=1){k.g.position.y=0;return}
+    k.g.position.y=Math.sin(t*Math.PI)*1.1;requestAnimationFrame(j)})()},delay)}
+
+/* reflect panel (after a consequence) */
+function reflect(consTxt,refTxt,isGood){
+  $('#who').style.display='none';$('#nextH').style.display='none';
+  $('#txt').innerHTML=consTxt;
+  dlg.classList.add('on');
+  let h='<div class="reflect">'+refTxt+'</div>';
+  if(!isGood){h+='<button class="choice" style="text-align:center;background:linear-gradient(180deg,#3c477f,#2a3260)" onclick="window.retry()">🔄 לחזור אחורה ולנסות דרך אחרת</button>'}
+  else{
+    if(explored.size<3)h+='<button class="choice" style="text-align:center;background:linear-gradient(180deg,#3c477f,#2a3260)" onclick="window.retry()">🔍 רגע — מה היה קורה בדרכים האחרות?</button>';
+    h+='<button class="choice" style="text-align:center;background:linear-gradient(180deg,#ffd54a,#f5a623);color:#4a2c00" onclick="window.finish()">🎒 לקבל את הכלי!</button>';
+  }
+  $('#chDlg').innerHTML=h;
+}
+window.retry=function(){
+  sndTap();dlg.classList.remove('on');$('#chDlg').innerHTML='';
+  /* reset world */
+  hemi.intensity=1;sun.intensity=1.6;scene.background.set(0x8ecdf5);
+  heartSp.visible=false;chatSp.visible=false;
+  kids.forEach((k,i)=>{k.target=HOME[i].clone();k.speed=5});
+  player.target=new THREE.Vector3(7.5,0,-3.5);player.speed=4.4;
+  soccerActive=true;camMode='field';
+  setTimeout(showChoices,1700);
+};
+window.finish=function(){dlg.classList.remove('on');$('#chDlg').innerHTML='';earnBadge()};
+
+/* feelings flow (HTML overlay) */
+function feelFlow(cfg){
+  ovShow('ov-feel');
+  const hb=$('#heartBig');hb.textContent='💗';hb.className='bigheart dim';
+  const ti=$('#torchIn');ti.style.display='block';
+  snd(300,.5,'triangle',.08);
+  setTimeout(()=>{hb.classList.remove('dim');snd(660,.3,'triangle',.09)},650);
+  setTimeout(()=>{ti.style.display='none'},1600);
+  $('#feelQ').textContent='מה הלב מרגיש עכשיו?';
+  $('#feelCtx').innerHTML=cfg.ctx||'';
+  const row=$('#feelRow');row.innerHTML='';row.style.display='flex';
+  $('#feelSteps').innerHTML='';
+  cfg.feels.forEach(f=>{
+    const d=document.createElement('div');d.className='feel';d.innerHTML='<span>'+f.e+'</span>'+f.n;
+    d.onclick=()=>{sndTap();step2(f)};row.appendChild(d);
+  });
+  function step2(f){
+    row.style.display='none';
+    $('#heartBig').textContent=f.e;
+    $('#feelQ').textContent='זיהית! הלב מרגיש '+f.n+'.';
+    $('#feelCtx').innerHTML='עכשיו תגיד לו את משפט הקסם:';
+    $('#feelSteps').innerHTML='<button class="btn" id="normBtn">💛 "זה נורמלי להרגיש '+f.n+'"</button>';
+    $('#normBtn').onclick=()=>{sndWarm();step3(f)};
+  }
+  function step3(f){
+    $('#feelQ').textContent='יפה מאוד... הלב שומע אותך.';
+    $('#feelCtx').innerHTML='נשאר עוד צעד אחד:';
+    $('#feelSteps').innerHTML='<button class="btn calm" id="hugBtn">🤗 לחבק את הלב</button>';
+    $('#hugBtn').onclick=()=>{
+      sndWarm();
+      const hb2=$('#heartBig');hb2.textContent='💛';hb2.className='bigheart calm';
+      $('#feelQ').textContent='הלב נרגע ✨';
+      $('#feelCtx').innerHTML='הרגש עדיין שם — וזה בסדר. אבל עכשיו <b>אתה</b> מחזיק אותו, ולא הוא אותך.';
+      $('#feelSteps').innerHTML='<button class="btn" id="contBtn">ממשיכים ⬅️</button>';
+      $('#contBtn').onclick=()=>{sndTap();cfg.after()};
+    };
+  }
+}
+
+/* =================== main loop =================== */
+let soccerActive=true;
+const clock=new THREE.Clock();
+let markerT=0;
+function animate(){
+  requestAnimationFrame(animate);
+  const dt=Math.min(clock.getDelta(),.05);
+  /* player control */
+  let moving=false;
+  if(MODE==='explore'){
+    let vx=(keys['arrowright']||keys['d']?1:0)-(keys['arrowleft']||keys['a']?1:0)+joyV.x;
+    let vz=(keys['arrowdown']||keys['s']?1:0)-(keys['arrowup']||keys['w']?1:0)+joyV.y;
+    const l=Math.hypot(vx,vz);
+    if(l>.15){vx/=Math.max(l,1);vz/=Math.max(l,1);
+      player.g.position.x+=vx*dt*7;player.g.position.z+=vz*dt*7;
+      player.g.position.x=Math.max(-42,Math.min(42,player.g.position.x));
+      player.g.position.z=Math.max(-31,Math.min(28,player.g.position.z));
+      player.g.rotation.y=Math.atan2(vx,vz);moving=true;
+    }
+  }
+  /* scripted walking (cinematics) */
+  if(player.target)moving=stepTo(player,dt)||moving;
+  walkAnim(player,dt,moving);
+  /* kids */
+  kids.forEach(k=>{walkAnim(k,dt,stepTo(k,dt))});
+  ballTick(dt,soccerActive);
+  /* quest markers + triggers */
+  markerT+=dt;
+  if(QUEST===0){marker.position.set(OWLPOS.x-.6,5.2+Math.sin(markerT*3)*.35,OWLPOS.z);
+    if(MODE==='explore'&&distTo(OWLPOS)<5){actBtn.textContent='🦉 לדבר עם הינשוף';actBtn.style.display='block';actBtn.onclick=()=>{sndTap();actBtn.style.display='none';QUEST=.5;owlTalk()}}
+    else actBtn.style.display='none';
+  }else if(QUEST===1){marker.position.set(FIELD.x,4.6+Math.sin(markerT*3)*.35,FIELD.z+3);
+    if(MODE==='explore'&&distTo(new THREE.Vector3(FIELD.x,0,FIELD.z+8))<7){actBtn.textContent='⚽ לגשת למגרש';actBtn.style.display='block';actBtn.onclick=()=>{sndTap();QUEST=2;startScenario()}}
+    else actBtn.style.display='none';
+  }else marker.visible=false;
+  /* floating heart above player */
+  if(heartSp.visible){heartSp.position.copy(player.g.position).add(new THREE.Vector3(0,3.6+Math.sin(markerT*2.4)*.2,0))}
+  if(chatSp.visible){chatSp.position.copy(player.g.position).add(new THREE.Vector3(.8,3.4,0))}
+  camTick(dt);
+  renderer.render(scene,cam);
+}
+animate();
+
+/* debug hooks for automated testing */
+window._dbg={
+  tp:(x,z)=>{player.g.position.set(x,0,z)},
+  quest:()=>QUEST, mode:()=>MODE
+};
+</script>
+</body>
+</html>
