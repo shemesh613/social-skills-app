@@ -284,22 +284,7 @@ goal(-16.2);goal(16.2);
 /* fence */
 (function(){const c=0xc7a15a;for(let x=-44;x<=44;x+=4){box(.25,1.7,.25,c,x,.85,30);box(.25,1.7,.25,c,x,.85,-52)}for(let z=-52;z<=30;z+=4){box(.25,1.7,.25,c,-44,.85,z);box(.25,1.7,.25,c,44,.85,z)}
 box(88,.2,.2,c,0,1.5,30);box(88,.2,.2,c,0,1.5,-52);box(.2,.2,82,c,-44,1.5,-11);box(.2,.2,82,c,44,1.5,-11)})();
-/* trees — round canopies */
-function tree(x,z,s){s=s||1;const t=new THREE.Group();
-const tr=new THREE.Mesh(new THREE.CylinderGeometry(.32*s,.5*s,3*s,10),M(0x8a5a2b));tr.position.y=1.5*s;tr.castShadow=true;t.add(tr);
-[[0,4.4,0,1.9,0x3e8f3e],[1.15,3.7,.4,1.25,0x4aa24a],[-1.05,3.8,-.35,1.2,0x357f39]].forEach(v=>{
-  const lv=new THREE.Mesh(new THREE.SphereGeometry(v[3]*s,12,9),M(v[4]));lv.position.set(v[0]*s,v[1]*s,v[2]*s);lv.castShadow=true;t.add(lv)});
-t.position.set(x,0,z);scene.add(t)}
-tree(-24,10);tree(-30,-6,1.2);tree(26,12,1.1);tree(32,-14,.9);tree(-20,-24,.8);tree(24,-26);tree(-36,18,1.1);tree(38,6);
-/* bench */
-const bench=new THREE.Group();
-box(3.2,.25,1.1,0x9a6a3a,0,1.05,0,bench);box(3.2,1.1,.22,0x9a6a3a,0,1.7,-.5,bench);
-box(.25,1,.25,0x555555,-1.3,.5,0,bench);box(.25,1,.25,0x555555,1.3,.5,0,bench);
-bench.position.set(20,0,4);bench.rotation.y=-.5;scene.add(bench);
-/* lamppost for the owl */
-const post=new THREE.Group();
-box(.35,6.4,.35,0x445,0,3.2,0,post);box(1.6,.3,.6,0x445,-.6,6.4,0,post);
-post.position.set(7,0,12);scene.add(post);
+/* trees, bushes, bench, streetlight — real modeled assets, placed after loading (see buildEnvironment) */
 
 /* emoji sprite helper */
 function emojiSprite(em,scale){
@@ -364,23 +349,7 @@ for(let i=0;i<6;i++){const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:clo
   sp.scale.set(15+Math.random()*11,6.5+Math.random()*3,1);
   sp.position.set(-60+Math.random()*120,25+Math.random()*9,-48+Math.random()*66);
   scene.add(sp);clouds.push(sp)}
-/* flowers along the fences */
-const FL=['🌼','🌷','🌻','🌸'];
-for(let i=0;i<20;i++){const f=emojiSprite(FL[i%4],1.5);
-  const edge=i%4;
-  if(edge===0)f.position.set(-40+Math.random()*80,.5,28.2+Math.random()*1.4);
-  else if(edge===1)f.position.set(-40+Math.random()*80,.5,-50.5+Math.random()*1.4);
-  else if(edge===2)f.position.set(-42.4+Math.random()*1.6,.5,-48+Math.random()*72);
-  else f.position.set(40.8+Math.random()*1.6,.5,-48+Math.random()*72);
-  scene.add(f)}
-/* bushes */
-function bush(x,z,s){s=s||1;const b=new THREE.Group();
-  [[0,.5,0,.75],[.6,.4,.2,.5],[-.55,.42,-.15,.48]].forEach(v=>{const m=new THREE.Mesh(new THREE.SphereGeometry(v[3]*s,10,8),M(0x2f7d38));m.position.set(v[0]*s,v[1]*s,v[2]*s);m.castShadow=true;b.add(m)});
-  b.position.set(x,0,z);scene.add(b)}
-bush(-8,-31.5,1.2);bush(11,-31.5,1.1);bush(-17,-31,1);bush(24,4,.9);bush(-27,2,1.1);bush(34,-20,1.2);bush(-34,-16,.9);
-/* warm lamp on the owl's post */
-const lamp=new THREE.Mesh(new THREE.SphereGeometry(.34,12,9),new THREE.MeshBasicMaterial({color:0xfff0b0}));
-lamp.position.set(-1.15,6.2,0);post.add(lamp);
+/* flowers + bushes are modeled assets now — see buildEnvironment() */
 
 /* =================== characters =================== */
 /* Quaternius "Ultimate Modular Men" — CC0, rigged, animations built in */
@@ -388,6 +357,13 @@ const loader=new GLTFLoader();
 const CHAR_FILES={hoodie:'models/hoodie.glb',casual:'models/casual.glb',adventurer:'models/adventurer.glb',worker:'models/worker.glb',farmer:'models/farmer.glb',suit:'models/suit.glb'};
 const MODELS={};
 const charsReady=Promise.all(Object.entries(CHAR_FILES).map(([k,f])=>new Promise((res,rej)=>loader.load(f,gl=>{MODELS[k]=gl;res()},undefined,rej))));
+/* static environment models — Quaternius nature + KayKit citybits (both CC0) */
+const STAT_FILES={tree1:'models/nature/CommonTree_1.gltf',tree3:'models/nature/CommonTree_3.gltf',tree5:'models/nature/CommonTree_5.gltf',
+  bush1:'models/nature/Bush_1.gltf',berry:'models/nature/BushBerries_1.gltf',flower:'models/nature/Flowers.gltf',
+  grass1:'models/nature/Grass_1.gltf',grass2:'models/nature/Grass_2.gltf',
+  street:'models/city/streetlight.gltf',bench:'models/city/bench.gltf'};
+const STAT={};
+const statReady=Promise.all(Object.entries(STAT_FILES).map(([k,f])=>new Promise((res,rej)=>loader.load(f,gl=>{STAT[k]=gl.scene;res()},undefined,rej))));
 
 function playA(k,name,once){
   const a=k.actions[name]||k.actions.Idle_Neutral||k.actions.Idle;
@@ -441,9 +417,42 @@ function stepTo(k,dt){ /* move kid toward k.target; returns moving? */
   return true;
 }
 
-/* wait for the animated models, then populate the world */
-try{await charsReady}catch(e){const sb=document.getElementById('startBtn');sb.textContent='❌ שגיאה בטעינת הדמויות — רעננו את הדף';throw e}
+/* wait for all models, then populate the world */
+try{await Promise.all([charsReady,statReady])}catch(e){const sb=document.getElementById('startBtn');sb.textContent='❌ שגיאה בטעינה — רעננו את הדף';throw e}
 const sb=document.getElementById('startBtn');sb.disabled=false;sb.textContent='▶️ להיכנס לעולם';
+
+/* ===== modeled environment ===== */
+function place(key,x,z,targetH,ry,tint){
+  const m=STAT[key].clone(true);
+  m.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;
+    const om=o.material;o.material=new THREE.MeshLambertMaterial({color:tint!==undefined?tint:om.color,map:om.map||null});}});
+  const bb=new THREE.Box3().setFromObject(m);
+  const s=targetH/(bb.max.y-bb.min.y);
+  m.scale.setScalar(s);m.position.set(x,-bb.min.y*s,z);
+  m.rotation.y=(ry===undefined)?Math.random()*6.283:ry;
+  scene.add(m);return m;
+}
+/* trees around the yard */
+[[-24,10,8.5,'tree1'],[-30,-6,9.8,'tree3'],[26,12,9,'tree5'],[32,-14,7.5,'tree1'],[-20,-24,7,'tree5'],[24,-26,8.5,'tree3'],[-36,18,9.5,'tree1'],[38,6,8,'tree5']].forEach(v=>place(v[3],v[0],v[1],v[2]));
+/* bushes */
+[[-8,-31.5,2,'bush1'],[11,-31.5,1.9,'berry'],[-17,-31,1.7,'bush1'],[24,7.5,1.6,'berry'],[-27,2,1.9,'bush1'],[34,-20,2,'berry'],[-34,-16,1.6,'bush1']].forEach(v=>place(v[3],v[0],v[1],v[2]));
+/* flowers along the fences */
+for(let i=0;i<14;i++){const e=i%4;let fx,fz;
+  if(e===0){fx=-40+Math.random()*80;fz=27.4+Math.random()*1.6}
+  else if(e===1){fx=-40+Math.random()*80;fz=-50+Math.random()*1.6}
+  else if(e===2){fx=-42+Math.random()*1.6;fz=-48+Math.random()*72}
+  else{fx=40.5+Math.random()*1.6;fz=-48+Math.random()*72}
+  place('flower',fx,fz,.8)}
+/* grass tufts on the lawn */
+for(let i=0;i<16;i++){
+  const gx=-38+Math.random()*76,gz=-46+Math.random()*70;
+  if(Math.abs(gx)<17&&gz>-18&&gz<2)continue;
+  if(Math.abs(gx)<31&&gz<-12&&gz>-40)continue;
+  place(i%2?'grass1':'grass2',gx,gz,.55,undefined,0x4fae4d)}
+/* bench + the owl's streetlight */
+place('bench',20,4,.92,-2.2);
+const slModel=place('street',7,12,7,Math.PI);
+(function(){const sb3=new THREE.Box3().setFromObject(slModel);owl.position.set(7,sb3.max.y+.55,12)})();
 
 /* player — default model; swapped by the character-select screen */
 let player=makeChar('hoodie',2.0,0x2255aa);
