@@ -33,7 +33,7 @@ h2{font-family:'Frank Ruhl Libre',serif;font-size:clamp(20px,4.5vw,28px);color:#
 .charRow{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;max-width:560px}
 .charCard{background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.28);border-radius:18px;padding:16px 18px;font-family:'Heebo';font-size:16.5px;font-weight:800;color:#fff;cursor:pointer;min-width:96px;transition:all .15s}
 .charCard:hover{border-color:#ffd54a;background:rgba(255,213,74,.13);transform:translateY(-3px)}
-.charCard span{display:block;font-size:36px;margin-bottom:6px}
+.charCard img{display:block;width:92px;height:112px;margin:0 auto 6px;pointer-events:none;filter:drop-shadow(0 6px 10px rgba(0,0,0,.4))}
 .tiny{font-size:13px;opacity:.65;margin-top:12px;text-align:center}
 
 /* dialogue (bottom, over the 3D scene) */
@@ -107,11 +107,11 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
   <h1 style="font-size:clamp(22px,5vw,34px)">🧒 מי אתם במסע?</h1>
   <div class="ctxTxt" style="margin-bottom:14px">בחרו את הדמות שלכם — אפשר להחליף בכל כניסה</div>
   <div class="charRow">
-    <button class="charCard" onclick="chooseChar('hoodie')"><span>🟣</span>קפוצ'ון</button>
-    <button class="charCard" onclick="chooseChar('casual')"><span>🔵</span>קז'ואל</button>
-    <button class="charCard" onclick="chooseChar('adventurer')"><span>🎒</span>הרפתקן</button>
-    <button class="charCard" onclick="chooseChar('worker')"><span>🟠</span>סתיו</button>
-    <button class="charCard" onclick="chooseChar('farmer')"><span>🟢</span>טבע</button>
+    <button class="charCard" data-ch="hoodie" onclick="chooseChar('hoodie')"><img alt="">קפוצ'ון</button>
+    <button class="charCard" data-ch="casual" onclick="chooseChar('casual')"><img alt="">קז'ואל</button>
+    <button class="charCard" data-ch="adventurer" onclick="chooseChar('adventurer')"><img alt="">הרפתקן</button>
+    <button class="charCard" data-ch="worker" onclick="chooseChar('worker')"><img alt="">בנאי</button>
+    <button class="charCard" data-ch="farmer" onclick="chooseChar('farmer')"><img alt="">חקלאי</button>
   </div>
 </div>
 
@@ -293,7 +293,53 @@ function emojiSprite(em,scale){
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv),transparent:true}));
   sp.scale.set(scale,scale,1);return sp;
 }
-const owl=emojiSprite('🦉',3.2);owl.position.set(6.4,7.4,12);scene.add(owl);
+/* the owl mentor — a real modeled owl (base at y0, sits on the streetlight) */
+const owl=new THREE.Group();
+(function(){
+  const M=c=>new THREE.MeshLambertMaterial({color:c});
+  const brown=0x7a4f2b,dark=0x5c3a1e,cream=0xf0e0bd,orange=0xe8952f;
+  const add=(mesh)=>{mesh.castShadow=true;owl.add(mesh);return mesh};
+  const body=add(new THREE.Mesh(new THREE.SphereGeometry(.5,20,16),M(brown)));
+  body.scale.set(1,1.22,.9);body.position.y=.6;
+  const belly=add(new THREE.Mesh(new THREE.SphereGeometry(.38,18,14),M(cream)));
+  belly.scale.set(.82,1.12,.5);belly.position.set(0,.55,.28);
+  const head=add(new THREE.Mesh(new THREE.SphereGeometry(.4,20,16),M(brown)));
+  head.position.y=1.22;
+  /* face disc */
+  const face=add(new THREE.Mesh(new THREE.SphereGeometry(.34,18,14),M(cream)));
+  face.scale.set(.95,.8,.45);face.position.set(0,1.2,.17);
+  /* eyes (kept for blinking) */
+  const eyes=[];
+  [-1,1].forEach(s=>{
+    const eW=add(new THREE.Mesh(new THREE.SphereGeometry(.145,14,12),M(0xffffff)));
+    eW.position.set(.155*s,1.27,.32);
+    const eP=add(new THREE.Mesh(new THREE.SphereGeometry(.07,10,8),M(0x1a1208)));
+    eP.position.set(.155*s,1.27,.44);
+    const gl=add(new THREE.Mesh(new THREE.SphereGeometry(.025,8,6),new THREE.MeshBasicMaterial({color:0xffffff})));
+    gl.position.set(.155*s+.03,1.31,.485);
+    eyes.push(eW,eP,gl);
+    /* brow tuft */
+    const br=add(new THREE.Mesh(new THREE.BoxGeometry(.2,.05,.07),M(dark)));
+    br.position.set(.16*s,1.44,.33);br.rotation.z=-.35*s;
+    /* ear tuft */
+    const ear=add(new THREE.Mesh(new THREE.ConeGeometry(.09,.26,10),M(dark)));
+    ear.position.set(.24*s,1.6,0);ear.rotation.z=-.3*s;
+    /* wing */
+    const w=add(new THREE.Mesh(new THREE.SphereGeometry(.3,14,12),M(dark)));
+    w.scale.set(.35,1.05,.68);w.position.set(.48*s,.62,0);w.rotation.z=.22*s;
+    /* foot */
+    const f=add(new THREE.Mesh(new THREE.BoxGeometry(.14,.08,.24),M(orange)));
+    f.position.set(.17*s,.04,.12);
+  });
+  /* beak */
+  const beak=add(new THREE.Mesh(new THREE.ConeGeometry(.075,.2,10),M(orange)));
+  beak.position.set(0,1.14,.4);beak.rotation.x=Math.PI/2.4;
+  /* tail */
+  const tail=add(new THREE.Mesh(new THREE.SphereGeometry(.22,12,10),M(dark)));
+  tail.scale.set(.8,.5,1.3);tail.position.set(0,.32,-.42);tail.rotation.x=.5;
+  owl.userData.eyes=eyes;owl.userData.blinkUntil=0;owl.userData.nextBlink=2;
+})();
+owl.position.set(6.4,7.4,12);scene.add(owl);
 /* quest marker — a spinning golden arrow, floats ABOVE its target so it never mixes with the scenery */
 const marker=new THREE.Group();
 (function(){
@@ -332,7 +378,7 @@ pave.material=new THREE.MeshLambertMaterial({map:cnv(512,256,(x,w,h)=>{x.fillSty
 /* school sign */
 const sign=new THREE.Mesh(new THREE.PlaneGeometry(5.6,1.7),new THREE.MeshBasicMaterial({map:cnv(512,160,(x,w,h)=>{
   x.fillStyle='#fff8ea';x.fillRect(0,0,w,h);x.strokeStyle='#b0543e';x.lineWidth=10;x.strokeRect(5,5,w-10,h-10);
-  x.fillStyle='#2b4c8c';x.font='bold 72px Heebo,Arial';x.textAlign='center';x.textBaseline='middle';x.fillText('🏫 בית הספר שלנו',w/2,h/2+4)})}));
+  x.fillStyle='#2b4c8c';x.font='bold 46px Heebo,Arial';x.textAlign='center';x.textBaseline='middle';x.fillText('🏫 בית הספר שלנו',w/2,h/2+4)})}));
 sign.position.set(0,7.8,-33.35);scene.add(sign);
 /* hopscotch on the pavement */
 const hop=new THREE.Mesh(new THREE.PlaneGeometry(2.6,5.6),new THREE.MeshLambertMaterial({transparent:true,map:cnv(160,340,(x,w,h)=>{
@@ -407,11 +453,12 @@ function makeChar(model,targetH,kipColor){
   playA(k,'Idle_Neutral');
   return k;
 }
+function face(k,v){k.g.rotation.y=Math.atan2(v.x-k.g.position.x,v.z-k.g.position.z)}
 function stepTo(k,dt){ /* move kid toward k.target; returns moving? */
   if(!k.target)return false;
   const p=k.g.position,d=new THREE.Vector3().subVectors(k.target,p);d.y=0;
   const dist=d.length();
-  if(dist<.15){k.target=null;return false}
+  if(dist<.15){k.target=null;if(k.onArrive){const f=k.onArrive;k.onArrive=null;f()}return false}
   d.normalize();p.addScaledVector(d,Math.min(k.speed*dt,dist));
   k.g.rotation.y=Math.atan2(d.x,d.z);
   return true;
@@ -420,6 +467,33 @@ function stepTo(k,dt){ /* move kid toward k.target; returns moving? */
 /* wait for all models, then populate the world */
 try{await Promise.all([charsReady,statReady])}catch(e){const sb=document.getElementById('startBtn');sb.textContent='❌ שגיאה בטעינה — רעננו את הדף';throw e}
 const sb=document.getElementById('startBtn');sb.disabled=false;sb.textContent='▶️ להיכנס לעולם';
+
+/* real 3D previews on the character-select cards — so the choice actually shows the character */
+(function buildPreviews(){
+  try{
+    const pr=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
+    pr.setSize(184,224);pr.outputColorSpace=THREE.SRGBColorSpace;
+    const ps=new THREE.Scene();
+    const pc=new THREE.PerspectiveCamera(34,184/224,.1,50);
+    pc.position.set(0,1.35,3.9);pc.lookAt(0,1.02,0);
+    ps.add(new THREE.HemisphereLight(0xffffff,0x778899,1.1));
+    const dl=new THREE.DirectionalLight(0xfff2d0,1.5);dl.position.set(2,4,3);ps.add(dl);
+    document.querySelectorAll('.charCard').forEach(card=>{
+      const name=card.dataset.ch,src=MODELS[name];if(!src)return;
+      const inner=SkeletonUtils.clone(src.scene);
+      inner.traverse(o=>{if(o.isMesh){o.frustumCulled=false;o.material=new THREE.MeshLambertMaterial({color:o.material.color})}});
+      inner.scale.setScalar(2.0/2.35);inner.rotation.y=-.4;
+      /* pose it in Idle instead of the T bind pose */
+      const mx=new THREE.AnimationMixer(inner);
+      const clip=src.animations.find(c=>/Idle_Neutral/.test(c.name))||src.animations[0];
+      if(clip){mx.clipAction(clip).play();mx.update(.35)}
+      ps.add(inner);pr.render(ps,pc);
+      card.querySelector('img').src=pr.domElement.toDataURL();
+      ps.remove(inner);
+    });
+    pr.dispose();
+  }catch(e){console.warn('preview fail',e)}
+})();
 
 /* ===== modeled environment ===== */
 function place(key,x,z,targetH,ry,tint){
@@ -452,7 +526,8 @@ for(let i=0;i<16;i++){
 /* bench + the owl's streetlight */
 place('bench',20,4,.92,-2.2);
 const slModel=place('street',7,12,7,Math.PI);
-(function(){const sb3=new THREE.Box3().setFromObject(slModel);owl.position.set(7,sb3.max.y+.55,12)})();
+/* the lamp arm extends to +x after the PI rotation — perch the owl on the lamp head itself */
+(function(){const sb3=new THREE.Box3().setFromObject(slModel);owl.position.set(sb3.max.x-.38,sb3.max.y-.42,12);owl.userData.baseY=owl.position.y})();
 
 /* player — default model; swapped by the character-select screen */
 let player=makeChar('hoodie',2.0,0x2255aa);
@@ -484,7 +559,7 @@ teacher.g.position.set(2.5,0,-29);
 const TEACHER=new THREE.Vector3(2.5,0,-29);
 let CHARS=[player,...kids,teacher];
 /* ball */
-const ball=new THREE.Mesh(new THREE.SphereGeometry(.42,14,12),new THREE.MeshLambertMaterial({color:0xffffff}));
+const ball=new THREE.Mesh(new THREE.SphereGeometry(.28,14,12),new THREE.MeshLambertMaterial({color:0xffffff}));
 ball.castShadow=true;scene.add(ball);
 let ballFrom=kids[0].g.position.clone(),ballTo=kids[2].g.position.clone(),ballT=0,ballHold=0,ballCur=2;
 function nextPass(){playA(kids[ballCur],'Kick_Right',true);ballCur=(ballCur+1+Math.floor(Math.random()*3))%5;ballFrom=ball.position.clone();ballTo=kids[ballCur].g.position.clone().add(new THREE.Vector3((Math.random()-.5),0,(Math.random()-.5)));ballT=0}
@@ -493,7 +568,7 @@ function ballTick(dt,active){
   if(ballHold>0){ballHold-=dt;if(ballHold<=0)nextPass();return}
   ballT+=dt*1.4;const t=Math.min(ballT,1);
   ball.position.lerpVectors(ballFrom,ballTo,t);
-  ball.position.y=.42+Math.sin(t*Math.PI)*1.3;
+  ball.position.y=.28+Math.sin(t*Math.PI)*1.1;
   if(t>=1){ballHold=.5+Math.random()*.8}
   kids.forEach(k=>{if(!k.target){const d=new THREE.Vector3().subVectors(ball.position,k.g.position);k.g.rotation.y=Math.atan2(d.x,d.z)}});
 }
@@ -586,7 +661,7 @@ function camTick(dt){
     tp=new THREE.Vector3(9.5,4.2,-19);tl=new THREE.Vector3(1.5,1.6,-28);
   }else if(camMode==='owl'){
     tp=player.g.position.clone().add(new THREE.Vector3(2.5,3.4,4.5));
-    tl=new THREE.Vector3(6.4,5.4,12);
+    tl=new THREE.Vector3(owl.position.x-.6,owl.position.y-2,owl.position.z);
   }else{tp=camPos;tl=camLook}
   camPos.lerp(tp,Math.min(dt*3.2,1));camLook.lerp(tl,Math.min(dt*3.2,1));
   cam.position.copy(camPos);cam.lookAt(camLook);
@@ -614,8 +689,9 @@ function owlTalk(){
 
 function startScenario(){
   MODE='cine';camMode='teacher';actBtn.style.display='none';questEl.style.display='none';
-  /* player walks up to the teacher */
+  /* player walks up to the teacher and they face each other */
   player.target=new THREE.Vector3(2.5,0,-26);
+  player.onArrive=()=>{face(player,TEACHER);face(teacher,player.g.position);playA(teacher,'Interact',true)};
   setTimeout(()=>{
     say([
       {who:'',t:'למדת קשה למבחן הזה. שיננת, התאמצת, באמת קיווית...'},
@@ -708,6 +784,7 @@ function goodEnding(){
   setTimeout(()=>{heartSp.visible=false},1800);
   /* turn back to the teacher and ask for help */
   player.target=new THREE.Vector3(2.5,0,-26.5);player.speed=4;
+  player.onArrive=()=>{face(player,TEACHER);face(teacher,player.g.position)};
   camMode='teacher';
   setTimeout(()=>{
     say([
@@ -748,6 +825,7 @@ window.retry=function(){
   heartSp.visible=false;chatSp.visible=false;paperSp.visible=false;
   kids.forEach((k,i)=>{k.target=HOME[i].clone();k.speed=5});
   player.target=new THREE.Vector3(2.5,0,-26);player.speed=4.4;
+  player.onArrive=()=>{face(player,TEACHER);face(teacher,player.g.position)};
   soccerActive=true;camMode='teacher';
   setTimeout(showChoices,1700);
 };
@@ -823,6 +901,16 @@ function animate(){
   markerT+=dt;
   marker.rotation.y=markerT*2.4;
   clouds.forEach(c=>{c.position.x+=dt*.55;if(c.position.x>72)c.position.x=-72});
+  /* owl life: gentle bob, follows the player with its gaze, blinks */
+  if(owl.userData.baseY){
+    owl.position.y=owl.userData.baseY+Math.sin(markerT*1.6)*.05;
+    const oa=Math.atan2(player.g.position.x-owl.position.x,player.g.position.z-owl.position.z);
+    let od=((oa-owl.rotation.y+Math.PI)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)-Math.PI;
+    owl.rotation.y+=od*Math.min(dt*2.2,1);
+    if(markerT>owl.userData.nextBlink){owl.userData.blinkUntil=markerT+.13;owl.userData.nextBlink=markerT+2.2+Math.random()*2.8}
+    const bs=markerT<owl.userData.blinkUntil?.1:1;
+    owl.userData.eyes.forEach(e=>{e.scale.y+= (bs-e.scale.y)*Math.min(dt*30,1)});
+  }
   if(QUEST===0){marker.position.set(OWLPOS.x-1.6,3.3+Math.sin(markerT*3)*.35,OWLPOS.z+1.3);
     if(MODE==='explore'&&distTo(OWLPOS)<5){actBtn.textContent='🦉 לדבר עם הינשוף';actBtn.style.display='block';actBtn.onclick=()=>{sndTap();actBtn.style.display='none';QUEST=.5;owlTalk()}}
     else actBtn.style.display='none';
