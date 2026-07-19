@@ -186,6 +186,7 @@ var FAMS=[
 ];
 function earnBadge(idx){
   CUR_BADGE=idx;
+  try{var pr=+localStorage.getItem('toolbagProg')||0;if(idx+1>pr)localStorage.setItem('toolbagProg',String(idx+1))}catch(e){}
   var B=BADGES[idx];
   $('#bdgH').textContent=B.h;$('#bdgSub').innerHTML=B.sub;
   ovShow('ov-badge');
@@ -487,6 +488,13 @@ function stepTo(k,dt){ /* move kid toward k.target; returns moving? */
 /* wait for all models, then populate the world */
 try{await Promise.all([charsReady,statReady])}catch(e){const sb=document.getElementById('startBtn');sb.textContent='❌ שגיאה בטעינה — רעננו את הדף';throw e}
 const sb=document.getElementById('startBtn');sb.disabled=false;sb.textContent='▶️ להיכנס לעולם';
+/* returning player who already earned the flashlight — offer to jump straight to chapter 2 */
+try{if((+localStorage.getItem('toolbagProg')||0)>=1){
+  const rb=document.createElement('button');rb.className='btn calm';rb.style.marginTop='10px';
+  rb.textContent='🐬 יש לך כבר את הפנס! להמשיך לכלי השני';
+  rb.onclick=()=>{sndTap();window._RESUME=1;ovShow('ov-char')};
+  sb.parentNode.insertBefore(rb,sb.nextSibling);
+}}catch(e){}
 
 /* real 3D previews on the character-select cards — so the choice actually shows the character */
 (function buildPreviews(){
@@ -502,8 +510,8 @@ const sb=document.getElementById('startBtn');sb.disabled=false;sb.textContent='�
       const name=card.dataset.ch,src=MODELS[name];if(!src)return;
       const inner=SkeletonUtils.clone(src.scene);
       inner.traverse(o=>{if(o.isMesh){o.frustumCulled=false;o.material=new THREE.MeshLambertMaterial({color:o.material.color})}});
-      inner.scale.setScalar(1.7/2.35);inner.rotation.y=-.4;
-      const ph=inner.getObjectByName('Head');if(ph)ph.scale.multiplyScalar(1.35);
+      inner.scale.setScalar(1.58/2.35);inner.rotation.y=-.4;
+      const ph=inner.getObjectByName('Head');if(ph)ph.scale.multiplyScalar(1.55);
       /* pose it in Idle instead of the T bind pose */
       const mx=new THREE.AnimationMixer(inner);
       const clip=src.animations.find(c=>/Idle_Neutral/.test(c.name))||src.animations[0];
@@ -551,13 +559,13 @@ const slModel=place('street',7,12,7,Math.PI);
 (function(){const sb3=new THREE.Box3().setFromObject(slModel);owl.position.set(sb3.max.x-.38,sb3.max.y-.42,12);owl.userData.baseY=owl.position.y})();
 
 /* player — default model; swapped by the character-select screen */
-let player=makeChar('hoodie',1.7,0x2255aa,1.35);
+let player=makeChar('hoodie',1.58,0x2255aa,1.55);
 player.g.position.set(0,0,22);player.g.rotation.y=Math.PI;
 window.chooseChar=function(name){
   sndGood();
   const pos=player.g.position.clone(),rot=player.g.rotation.y;
   scene.remove(player.g);
-  player=makeChar(name,1.7,0x2255aa,1.35);
+  player=makeChar(name,1.58,0x2255aa,1.55);
   player.g.position.copy(pos);player.g.rotation.y=rot;
   CHARS=[player,...kids,teacher];
   try{localStorage.setItem('toolbagChar',name)}catch(e){}
@@ -569,7 +577,7 @@ const KIPCOL=[0x333333,0x884422,0x2255aa,0x117755,0x992222];
 const kids=[];const HOME=[];
 for(let i=0;i<5;i++){
   const a=i/5*Math.PI*2;
-  const k=makeChar(KIDMODELS[i],1.62,KIPCOL[i],1.35);
+  const k=makeChar(KIDMODELS[i],1.52,KIPCOL[i],1.55);
   const pos=new THREE.Vector3(FIELD.x+Math.cos(a)*5.2,0,FIELD.z+Math.sin(a)*4);
   k.g.position.copy(pos);HOME.push(pos.clone());
   kids.push(k);
@@ -580,16 +588,25 @@ teacher.g.position.set(2.5,0,-29);
 const TEACHER=new THREE.Vector3(2.5,0,-29);
 let CHARS=[player,...kids,teacher];
 /* ball */
-const ball=new THREE.Mesh(new THREE.SphereGeometry(.28,14,12),new THREE.MeshLambertMaterial({color:0xffffff}));
+const ball=new THREE.Mesh(new THREE.SphereGeometry(.19,14,12),new THREE.MeshLambertMaterial({color:0xffffff}));
 ball.castShadow=true;scene.add(ball);
 let ballFrom=kids[0].g.position.clone(),ballTo=kids[2].g.position.clone(),ballT=0,ballHold=0,ballCur=2;
-function nextPass(){playA(kids[ballCur],'Kick_Right',true);ballCur=(ballCur+1+Math.floor(Math.random()*3))%5;ballFrom=ball.position.clone();ballTo=kids[ballCur].g.position.clone().add(new THREE.Vector3((Math.random()-.5),0,(Math.random()-.5)));ballT=0}
+function nextPass(){playA(kids[ballCur],'Kick_Right',true);ballCur=(ballCur+1+Math.floor(Math.random()*3))%5;ballFrom=ball.position.clone();
+  /* land the ball short of the kid — at his feet, never inside his legs */
+  const kp=kids[ballCur].g.position.clone().add(new THREE.Vector3((Math.random()-.5)*.6,0,(Math.random()-.5)*.6));
+  const dir=new THREE.Vector3().subVectors(kp,ballFrom);const L=dir.length();
+  if(L>1e-3){dir.normalize();kp.sub(dir.multiplyScalar(Math.min(.8,L*.5)))}
+  ballTo=kp;ballT=0}
+function ballBackTo(k){ballFrom=ball.position.clone();const kp=k.g.position.clone();
+  const dir=new THREE.Vector3().subVectors(kp,ballFrom);
+  if(dir.length()>1e-3){dir.normalize();kp.addScaledVector(dir,-.8)}
+  ballTo=kp;ballT=0;ballHold=0}
 function ballTick(dt,active){
   if(!active){return}
   if(ballHold>0){ballHold-=dt;if(ballHold<=0)nextPass();return}
   ballT+=dt*1.4;const t=Math.min(ballT,1);
   ball.position.lerpVectors(ballFrom,ballTo,t);
-  ball.position.y=.28+Math.sin(t*Math.PI)*1.1;
+  ball.position.y=.19+Math.sin(t*Math.PI)*1.1;
   if(t>=1){ballHold=.5+Math.random()*.8}
   kids.forEach(k=>{if(!k.target){const d=new THREE.Vector3().subVectors(ball.position,k.g.position);k.g.rotation.y=Math.atan2(d.x,d.z)}});
 }
@@ -622,6 +639,7 @@ window.enterWorld=function(){sndTap();ovShow(null);MODE='explore';
   const touch='ontouchstart' in window;
   document.getElementById(touch?'joy':'keysHint').style.display='block';
   setTimeout(startAmbience,400);
+  if(window._RESUME){window._RESUME=0;window.startCh2()}
 };
 
 /* ---- ambient sound, fully synthesized (no assets, no copyright) ---- */
@@ -855,7 +873,7 @@ window.retry=function(){
     camMode='teacher';
     setTimeout(showChoices,1700);
   }else{
-    ballFrom=ball.position.clone();ballTo=kids[2].g.position.clone();ballT=0;ballHold=0;
+    ballBackTo(kids[2]);
     player.target=new THREE.Vector3(FIELD.x+3.5,0,FIELD.z+4.5);player.speed=4.4;
     player.onArrive=()=>{face(player,FIELD)};
     camMode='field';
@@ -938,7 +956,7 @@ function consShark(){
     playA(player,'Kick_Right',true);
     setTimeout(()=>{
       snd(150,.25,'square',.09);
-      const b1=new THREE.Vector3(FIELD.x-26,.28,FIELD.z-11);   /* over the goal and out */
+      const b1=new THREE.Vector3(FIELD.x-26,.19,FIELD.z-11);   /* over the goal and out */
       arcMove(ball,ball.position.clone(),b1,1000,5);
       /* kids back away from the player, then stop and stare */
       kids.forEach(k=>{const d=new THREE.Vector3().subVectors(k.g.position,player.g.position).normalize();
@@ -1009,10 +1027,10 @@ function dolphinSurface(){
       /* the ball is passed to the player, who kicks it back into play */
       soccerActive=false;
       const b0=ball.position.clone();
-      const b1=player.g.position.clone().add(new THREE.Vector3(.6,0,1));b1.y=.28;
+      const b1=player.g.position.clone().add(new THREE.Vector3(.6,0,1));b1.y=.19;
       arcMove(ball,b0,b1,800,1.4,()=>{
         playA(player,'Kick_Right',true);
-        setTimeout(()=>{ballFrom=ball.position.clone();ballTo=kids[2].g.position.clone();ballT=0;soccerActive=true},500);
+        setTimeout(()=>{ballBackTo(kids[2]);soccerActive=true},500);
       });
       confettiBurst();
       jump(player,300);
@@ -1081,6 +1099,12 @@ function animate(){
       player.g.position.x=Math.max(-42,Math.min(42,player.g.position.x));
       player.g.position.z=Math.max(-31,Math.min(28,player.g.position.z));
       player.g.rotation.y=Math.atan2(vx,vz);moving=true;
+      /* soft collision — can't walk through other characters (free-roam only, never during cinematics) */
+      CHARS.forEach(c=>{if(c===player)return;
+        const dx=player.g.position.x-c.g.position.x,dz=player.g.position.z-c.g.position.z;
+        const d=Math.hypot(dx,dz);
+        if(d<.95&&d>1e-4){player.g.position.x=c.g.position.x+dx/d*.95;player.g.position.z=c.g.position.z+dz/d*.95}
+      });
     }
   }
   /* scripted walking (cinematics) */
@@ -1128,7 +1152,9 @@ animate();
 /* debug hooks for automated testing */
 window._dbg={
   tp:(x,z)=>{player.g.position.set(x,0,z)},
-  quest:()=>QUEST, mode:()=>MODE, ch:()=>CH, soccer:()=>soccerActive
+  quest:()=>QUEST, mode:()=>MODE, ch:()=>CH, soccer:()=>soccerActive,
+  pos:()=>[+player.g.position.x.toFixed(2),+player.g.position.z.toFixed(2)],
+  mind:()=>Math.min(...CHARS.filter(c=>c!==player).map(c=>player.g.position.distanceTo(c.g.position)))
 };
 </script>
 </body>
