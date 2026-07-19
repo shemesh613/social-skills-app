@@ -440,7 +440,7 @@ function playA(k,name,once){
 }
 function loco(k,moving,run){if(k.busy)return;playA(k,moving?(run?'Run':'Walk'):'Idle_Neutral')}
 
-function makeChar(model,targetH,kipColor){
+function makeChar(model,targetH,kipColor,kidHead){
   const src=MODELS[model];
   const inner=SkeletonUtils.clone(src.scene);
   inner.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false;
@@ -468,6 +468,8 @@ function makeChar(model,targetH,kipColor){
       head.add(kip);
     }
   }
+  /* kid proportions: enlarge the head bone (skinned verts follow) — kippah is a child so it scales along */
+  if(kidHead){const h=inner.getObjectByName('Head');if(h)h.scale.multiplyScalar(kidHead)}
   playA(k,'Idle_Neutral');
   return k;
 }
@@ -493,14 +495,15 @@ const sb=document.getElementById('startBtn');sb.disabled=false;sb.textContent='�
     pr.setSize(184,224);pr.outputColorSpace=THREE.SRGBColorSpace;
     const ps=new THREE.Scene();
     const pc=new THREE.PerspectiveCamera(34,184/224,.1,50);
-    pc.position.set(0,1.35,3.9);pc.lookAt(0,1.02,0);
+    pc.position.set(0,1.15,3.3);pc.lookAt(0,.85,0);
     ps.add(new THREE.HemisphereLight(0xffffff,0x778899,1.1));
     const dl=new THREE.DirectionalLight(0xfff2d0,1.5);dl.position.set(2,4,3);ps.add(dl);
     document.querySelectorAll('.charCard').forEach(card=>{
       const name=card.dataset.ch,src=MODELS[name];if(!src)return;
       const inner=SkeletonUtils.clone(src.scene);
       inner.traverse(o=>{if(o.isMesh){o.frustumCulled=false;o.material=new THREE.MeshLambertMaterial({color:o.material.color})}});
-      inner.scale.setScalar(2.0/2.35);inner.rotation.y=-.4;
+      inner.scale.setScalar(1.7/2.35);inner.rotation.y=-.4;
+      const ph=inner.getObjectByName('Head');if(ph)ph.scale.multiplyScalar(1.35);
       /* pose it in Idle instead of the T bind pose */
       const mx=new THREE.AnimationMixer(inner);
       const clip=src.animations.find(c=>/Idle_Neutral/.test(c.name))||src.animations[0];
@@ -548,13 +551,13 @@ const slModel=place('street',7,12,7,Math.PI);
 (function(){const sb3=new THREE.Box3().setFromObject(slModel);owl.position.set(sb3.max.x-.38,sb3.max.y-.42,12);owl.userData.baseY=owl.position.y})();
 
 /* player — default model; swapped by the character-select screen */
-let player=makeChar('hoodie',2.0,0x2255aa);
+let player=makeChar('hoodie',1.7,0x2255aa,1.35);
 player.g.position.set(0,0,22);player.g.rotation.y=Math.PI;
 window.chooseChar=function(name){
   sndGood();
   const pos=player.g.position.clone(),rot=player.g.rotation.y;
   scene.remove(player.g);
-  player=makeChar(name,2.0,0x2255aa);
+  player=makeChar(name,1.7,0x2255aa,1.35);
   player.g.position.copy(pos);player.g.rotation.y=rot;
   CHARS=[player,...kids,teacher];
   try{localStorage.setItem('toolbagChar',name)}catch(e){}
@@ -566,7 +569,7 @@ const KIPCOL=[0x333333,0x884422,0x2255aa,0x117755,0x992222];
 const kids=[];const HOME=[];
 for(let i=0;i<5;i++){
   const a=i/5*Math.PI*2;
-  const k=makeChar(KIDMODELS[i],1.9,KIPCOL[i]);
+  const k=makeChar(KIDMODELS[i],1.62,KIPCOL[i],1.35);
   const pos=new THREE.Vector3(FIELD.x+Math.cos(a)*5.2,0,FIELD.z+Math.sin(a)*4);
   k.g.position.copy(pos);HOME.push(pos.clone());
   kids.push(k);
@@ -656,8 +659,8 @@ const dlg=document.getElementById('dlg');
 let dlgLines=[],dlgI=0,dlgDone=null,typing=false,typeTimer=null;
 function say(lines,done){MODE='dialogue';dlgLines=lines;dlgI=0;dlgDone=done||null;dlg.classList.add('on');$('#chDlg').innerHTML='';paintLine()}
 function paintLine(){const L=dlgLines[dlgI];$('#who').textContent=L.who||'';$('#who').style.display=L.who?'block':'none';$('#nextH').style.display='block';typeIt(L.t)}
-function typeIt(html){typing=true;const el=$('#txt');el.innerHTML='';const plain=html.replace(/<[^>]+>/g,'');let i=0;clearInterval(typeTimer);
-  typeTimer=setInterval(()=>{i++;if(i>=plain.length){clearInterval(typeTimer);el.innerHTML=html;typing=false;return}el.textContent=plain.slice(0,i)},20)}
+function typeIt(html){typing=true;const el=$('#txt');el.innerHTML='';const chars=Array.from(html.replace(/<[^>]+>/g,''));let i=0;clearInterval(typeTimer);
+  typeTimer=setInterval(()=>{i++;if(i>=chars.length){clearInterval(typeTimer);el.innerHTML=html;typing=false;return}el.textContent=chars.slice(0,i).join('')},20)}
 dlg.addEventListener('click',()=>{
   if($('#chDlg').innerHTML)return;      /* choices shown — don't advance */
   sndTap();
@@ -679,8 +682,9 @@ function camTick(dt){
   }else if(camMode==='teacher'){
     tp=new THREE.Vector3(9.5,4.2,-19);tl=new THREE.Vector3(1.5,1.6,-28);
   }else if(camMode==='owl'){
-    tp=player.g.position.clone().add(new THREE.Vector3(2.5,3.4,4.5));
-    tl=new THREE.Vector3(owl.position.x-.6,owl.position.y-2,owl.position.z);
+    /* medium shot on the owl, framed in the upper half so the dialogue box below never covers him */
+    tp=new THREE.Vector3(owl.position.x+3.2,owl.position.y+1.1,owl.position.z+6.6);
+    tl=new THREE.Vector3(owl.position.x,owl.position.y-.75,owl.position.z);
   }else{tp=camPos;tl=camLook}
   camPos.lerp(tp,Math.min(dt*3.2,1));camLook.lerp(tl,Math.min(dt*3.2,1));
   cam.position.copy(camPos);cam.lookAt(camLook);
@@ -693,7 +697,7 @@ const OWLPOS=new THREE.Vector3(7,0,12);
 function distTo(v){return player.g.position.distanceTo(v)}
 
 function owlTalk(){
-  camMode='owl';
+  camMode='owl';questEl.style.display='none';
   say([
     {who:'🦉 הינשוף',t:'שלום, ידיד צעיר! אני הינשוף שומר תיק הכלים. יש לי משהו חשוב בשבילך...'},
     {who:'🦉 הינשוף',t:'לכל אחד יש רגעים שבהם הלב פתאום נהיה כבד. בדיוק בשביל הרגעים האלה — קח את הכלי הראשון בתיק: <b>הפנס הפנימי</b> 🔦'},
@@ -702,7 +706,7 @@ function owlTalk(){
     {who:'🦉 הינשוף',t:'אבל כלי לומדים רק על אמת... אני רואה שהמורה מחלק עכשיו את המבחנים ליד הכניסה. לך לקבל את שלך 📄'}
   ],()=>{
     sndGood();QUEST=1;camMode='follow';MODE='explore';
-    questEl.textContent='📄 לכו למורה ליד הכניסה לבית הספר';
+    questEl.style.display='block';questEl.textContent='📄 לכו למורה ליד הכניסה לבית הספר';
   });
 }
 
@@ -738,6 +742,7 @@ window.pick=function(i){
 
 /* --- consequence: crumple & kick the test --- */
 const paperSp=emojiSprite('📄',1.5);paperSp.visible=false;scene.add(paperSp);
+const dolphinSp=emojiSprite('🐬',2.4);dolphinSp.visible=false;scene.add(dolphinSp);
 function arcMove(sp,from,to,dur,h,cb){const t0=performance.now();
   (function m(){const t=Math.min((performance.now()-t0)/dur,1);
     sp.position.lerpVectors(from,to,t);sp.position.y=from.y+(to.y-from.y)*t+Math.sin(t*Math.PI)*h;
@@ -866,12 +871,18 @@ window.startCh2=function(){
   setNight(0);heartSp.visible=false;chatSp.visible=false;paperSp.visible=false;
   kids.forEach((k,i)=>{k.target=HOME[i].clone();k.speed=5});
   soccerActive=true;marker.visible=true;
+  /* fresh look for ch2: the owl flies from his lamppost onto the goal crossbar by the field */
+  OWLPOS.set(16.2,0,-8);
+  const oFrom=owl.position.clone(),oTo=new THREE.Vector3(16.2,2.9,-8);
+  owl.userData.baseY=0;                       /* pause bob/gaze during flight */
+  sndWarm();
+  arcMove(owl,oFrom,oTo,2100,5,()=>{owl.userData.baseY=oTo.y});
   QUEST=3;camMode='follow';MODE='explore';
   questEl.style.display='block';
-  questEl.textContent='🦉 לינשוף יש כלי חדש בשבילכם... חזרו אליו';
+  questEl.textContent='🦉 הינשוף עף אל שער הכדורגל... לכו אליו';
 };
 function owlTalk2(){
-  camMode='owl';
+  camMode='owl';questEl.style.display='none';
   say([
     {who:'🦉 הינשוף',t:'שלום שוב, ידיד! ראיתי איך הדלקת את הפנס הפנימי... אני גאה בך 🔦'},
     {who:'🦉 הינשוף',t:'היום נוסיף כלי חדש לתיק. לפעמים מישהו פוגע בנו — צוחק, דוחה, אומר מילים כואבות...'},
@@ -882,7 +893,7 @@ function owlTalk2(){
     {who:'🦉 הינשוף',t:'רואה? יש משחק כדורגל במגרש. לך לנסות להצטרף — ותבחר טוב איזו חיה אתה 👀'}
   ],()=>{
     sndGood();QUEST=4;camMode='follow';MODE='explore';
-    questEl.textContent='⚽ הילדים משחקים כדורגל במגרש... גשו אליהם';
+    questEl.style.display='block';questEl.textContent='⚽ הילדים משחקים כדורגל במגרש... גשו אליהם';
   });
 }
 function startScenario2(){
@@ -916,20 +927,29 @@ window.pick2=function(i){
 };
 /* --- shark: kick the ball far away, the game dies --- */
 function consShark(){
-  snd(160,.5,'sawtooth',.1);
-  playA(player,'Kick_Right',true);
+  MODE='cine';camMode='field';
   soccerActive=false;
-  const b0=ball.position.clone();
-  const b1=new THREE.Vector3(FIELD.x-17,.28,FIELD.z-13);
-  arcMove(ball,b0,b1,900,4);
-  /* kids back away from the player, then stop and stare */
-  kids.forEach(k=>{const d=new THREE.Vector3().subVectors(k.g.position,player.g.position).normalize();
-    k.target=k.g.position.clone().add(d.multiplyScalar(4.5));k.speed=5});
-  setTimeout(()=>{
-    kids.forEach(k=>{k.target=null;const d=new THREE.Vector3().subVectors(player.g.position,k.g.position);k.g.rotation.y=Math.atan2(d.x,d.z)});
-    reflect('הכדור עף רחוק... המשחק נהרס לכולם. הילדים מסתכלים עליך — ועכשיו אף אחד כבר לא רוצה שתשחק.',
-            '🦈 הכריש תקף — אבל הלב עדיין כואב. ובמקום חברים למשחק, נשארו רק פנים כועסות.');
-  },2600);
+  snd(160,.5,'sawtooth',.1);
+  /* the player storms to the ball first — everyone sees it coming */
+  player.speed=6.5;
+  player.target=ball.position.clone().setY(0).add(new THREE.Vector3(-.7,0,.9));
+  player.onArrive=()=>{
+    face(player,ball.position);
+    playA(player,'Kick_Right',true);
+    setTimeout(()=>{
+      snd(150,.25,'square',.09);
+      const b1=new THREE.Vector3(FIELD.x-26,.28,FIELD.z-11);   /* over the goal and out */
+      arcMove(ball,ball.position.clone(),b1,1000,5);
+      /* kids back away from the player, then stop and stare */
+      kids.forEach(k=>{const d=new THREE.Vector3().subVectors(k.g.position,player.g.position).normalize();
+        k.target=k.g.position.clone().add(d.multiplyScalar(4.5));k.speed=5});
+      setTimeout(()=>{
+        kids.forEach(k=>{k.target=null;const d=new THREE.Vector3().subVectors(player.g.position,k.g.position);k.g.rotation.y=Math.atan2(d.x,d.z)});
+        reflect('רצת אל הכדור ובעטת אותו רחוק... המשחק נהרס לכולם. הילדים מסתכלים עליך — ועכשיו אף אחד כבר לא רוצה שתשחק.',
+                '🦈 הכריש תקף — אבל הלב עדיין כואב. ובמקום חברים למשחק, נשארו רק פנים כועסות.');
+      },2400);
+    },380);
+  };
 }
 /* --- sardine: walk away in silence, the game goes on without you --- */
 function consSardine(){
@@ -982,6 +1002,10 @@ function dolphinSurface(){
     ],()=>{
       sndGood();
       playA(kids[1],'Wave',true);
+      /* a dolphin leaps across the sky above the field — the chapter's spirit animal celebrates */
+      dolphinSp.visible=true;
+      const d0=new THREE.Vector3(FIELD.x-10,1.2,FIELD.z-3),d1=new THREE.Vector3(FIELD.x,1.2,FIELD.z-5),d2=new THREE.Vector3(FIELD.x+10,1.2,FIELD.z-3);
+      arcMove(dolphinSp,d0,d1,1100,5,()=>{arcMove(dolphinSp,d1,d2,1100,5,()=>{dolphinSp.visible=false})});
       /* the ball is passed to the player, who kicks it back into play */
       soccerActive=false;
       const b0=ball.position.clone();
@@ -1086,7 +1110,7 @@ function animate(){
   }else if(QUEST===1){marker.position.set(TEACHER.x,4.9+Math.sin(markerT*3)*.4,TEACHER.z+.8);
     if(MODE==='explore'&&distTo(TEACHER)<7){actBtn.textContent='📄 לקבל את המבחן';actBtn.style.display='block';actBtn.onclick=()=>{sndTap();QUEST=2;startScenario()}}
     else actBtn.style.display='none';
-  }else if(QUEST===3){marker.visible=true;marker.position.set(OWLPOS.x-1.6,3.3+Math.sin(markerT*3)*.35,OWLPOS.z+1.3);
+  }else if(QUEST===3){marker.visible=true;marker.position.set(OWLPOS.x,4.4+Math.sin(markerT*3)*.35,OWLPOS.z+1.6);
     if(MODE==='explore'&&distTo(OWLPOS)<5){actBtn.textContent='🦉 לדבר עם הינשוף';actBtn.style.display='block';actBtn.onclick=()=>{sndTap();actBtn.style.display='none';QUEST=3.5;owlTalk2()}}
     else actBtn.style.display='none';
   }else if(QUEST===4){marker.visible=true;marker.position.set(FIELD.x,3.4+Math.sin(markerT*3)*.35,FIELD.z+5.5);
