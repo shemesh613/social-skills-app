@@ -382,9 +382,9 @@ const STATCOL=[[117,-1.8,1.35],[123,-1.8,1.35],[117,1.2,1.35],[123,1.2,1.35],[11
   /* chalk writing on the board */
   (function(){const cv=document.createElement('canvas');cv.width=512;cv.height=176;const x=cv.getContext('2d');
     x.fillStyle='#2b5f3d';x.fillRect(0,0,512,176);
-    x.fillStyle='rgba(255,255,255,.92)';x.font='bold 54px Arial';x.textAlign='center';x.direction='rtl';
-    x.fillText('מה הלב שלי מרגיש? 🔦',256,76);
-    x.font='34px Arial';x.fillStyle='rgba(255,255,255,.75)';x.fillText('כלי מס׳ 1: הפנס הפנימי',256,136);
+    x.fillStyle='rgba(255,255,255,.92)';x.font='bold 40px Arial';x.textAlign='center';x.direction='rtl';
+    x.fillText('מה הלב שלי מרגיש? 🔦',256,72);
+    x.font='30px Arial';x.fillStyle='rgba(255,255,255,.75)';x.fillText('כלי מס׳ 1: הפנס הפנימי',256,132);
     const m=new THREE.Mesh(new THREE.PlaneGeometry(6.2,2.05),new THREE.MeshLambertMaterial({map:new THREE.CanvasTexture(cv)}));
     m.position.set(120,2.42,-6.29);scene.add(m)})();
   /* classroom door (east wall) */
@@ -695,6 +695,36 @@ const slModel=place('street',7,12,7,Math.PI);
   /* chapter 1 starts indoors — the owl waits on the classroom window sill */
   owl.position.set(112.15,1.46,-1);owl.userData.baseY=1.46})();
 
+/* =================== the flower meadow — chapter 3's class trip, far west at x=-120 =================== */
+const MEADOW_B={x1:-144,x2:-97,z1:-19,z2:19};
+(function buildMeadow(){
+  const pad=new THREE.Mesh(new THREE.PlaneGeometry(64,48),M(0x63b054));
+  pad.rotation.x=-Math.PI/2;pad.position.set(-120,-.01,0);pad.receiveShadow=true;scene.add(pad);
+  /* winding dirt trail from the east edge to the picnic spot */
+  [[-102,8,14,4,-.18],[-114,5.5,13,3.6,.14],[-125,3.5,11,3.4,-.1]].forEach(s=>{
+    const t=new THREE.Mesh(new THREE.PlaneGeometry(s[2],s[3]),M(0xd8c39a));
+    t.rotation.x=-Math.PI/2;t.rotation.z=s[4];t.position.set(s[0],.005,s[1]);t.receiveShadow=true;scene.add(t)});
+  /* trees, bushes, rocks */
+  [[-138,10,8.5,'tree3'],[-134,-12,9.5,'tree1'],[-108,-13,8,'tree5'],[-100,14,7.5,'tree1'],[-142,-2,8.8,'tree5']].forEach(v=>place(v[3],v[0],v[1],v[2]));
+  [[-129,12,1.9,'bush1'],[-104,2,1.7,'berry'],[-136,-7,1.8,'bush1'],[-113,-9,1.6,'berry']].forEach(v=>place(v[3],v[0],v[1],v[2]));
+  for(let i=0;i<3;i++){const r=new THREE.Mesh(new THREE.IcosahedronGeometry(.55+i*.2,0),M(0x9a9a92));
+    r.position.set([-127.5,-110,-133][i],.4,[6.8,-4,-1][i]);r.castShadow=true;scene.add(r)}
+  /* the meadow's stars: flowers everywhere */
+  for(let i=0;i<34;i++){
+    const fx=-142+Math.random()*44,fz=-17+Math.random()*34;
+    place('flower',fx,fz,.75+Math.random()*.35)}
+  /* dense flower ring around the picnic spot */
+  for(let i=0;i<10;i++){const a=i/10*Math.PI*2;place('flower',-126+Math.cos(a)*4.6,4+Math.sin(a)*3.6,.9)}
+  /* checkered picnic blanket */
+  (function(){const cv=document.createElement('canvas');cv.width=cv.height=128;const x=cv.getContext('2d');
+    for(let i=0;i<8;i++)for(let j=0;j<8;j++){x.fillStyle=(i+j)%2?'#e4574f':'#f3efe4';x.fillRect(i*16,j*16,16,16)}
+    const m=new THREE.Mesh(new THREE.PlaneGeometry(3.6,2.8),new THREE.MeshLambertMaterial({map:new THREE.CanvasTexture(cv)}));
+    m.rotation.x=-Math.PI/2;m.rotation.z=.2;m.position.set(-126,.02,4);m.receiveShadow=true;scene.add(m)})();
+  /* butterflies */
+  const bf1=emojiSprite('🦋',1.1);bf1.position.set(-122,2.1,7);scene.add(bf1);
+  const bf2=emojiSprite('🦋',.9);bf2.position.set(-131,1.7,-2);scene.add(bf2);
+})();
+
 /* player — default model; swapped by the character-select screen */
 let player=makeChar('hoodie',1.58,0x2255aa,1.55);
 player.g.position.set(119.5,0,3.2);player.g.rotation.y=Math.PI*.72;
@@ -736,10 +766,10 @@ const ball=new THREE.Mesh(new THREE.SphereGeometry(.19,14,12),new THREE.MeshLamb
 ball.castShadow=true;scene.add(ball);
 let ballFrom=kids[0].g.position.clone(),ballTo=kids[2].g.position.clone(),ballT=0,ballHold=0,ballCur=2;
 function nextPass(){playA(kids[ballCur],'Kick_Right',true);ballCur=(ballCur+1+Math.floor(Math.random()*3))%5;ballFrom=ball.position.clone();
-  /* land the ball short of the kid — at his feet, never inside his legs */
-  const kp=kids[ballCur].g.position.clone().add(new THREE.Vector3((Math.random()-.5)*.6,0,(Math.random()-.5)*.6));
+  /* land the ball right at the receiver's feet — .5 in front, tiny sideways wobble */
+  const kp=kids[ballCur].g.position.clone();
   const dir=new THREE.Vector3().subVectors(kp,ballFrom);const L=dir.length();
-  if(L>1e-3){dir.normalize();kp.sub(dir.multiplyScalar(Math.min(.8,L*.5)))}
+  if(L>1e-3){dir.normalize();kp.addScaledVector(dir,-.5);kp.x+=(Math.random()-.5)*.25;kp.z+=(Math.random()-.5)*.25}
   ballTo=kp;ballT=0}
 function ballBackTo(k){ballFrom=ball.position.clone();const kp=k.g.position.clone();
   const dir=new THREE.Vector3().subVectors(kp,ballFrom);
@@ -750,7 +780,8 @@ function ballTick(dt,active){
   if(ballHold>0){ballHold-=dt;if(ballHold<=0)nextPass();return}
   ballT+=dt*1.4;const t=Math.min(ballT,1);
   ball.position.lerpVectors(ballFrom,ballTo,t);
-  ball.position.y=.19+Math.sin(t*Math.PI)*1.1;
+  /* fly OVER the kids' heads, never through their bodies */
+  ball.position.y=.19+Math.sin(t*Math.PI)*2.2;
   if(t>=1){ballHold=.5+Math.random()*.8}
   kids.forEach(k=>{if(!k.target){const d=new THREE.Vector3().subVectors(ball.position,k.g.position);k.g.rotation.y=Math.atan2(d.x,d.z)}});
 }
@@ -1062,7 +1093,10 @@ window.nextChapter=function(){
       questEl.style.display='block';questEl.textContent='🚪 צאו מהכיתה אל החצר';
     });
   }else if(CH===0)window.startCh2();
-  else if(CH<=5)startChapterN(CH+2);
+  else if(CH<=5){
+    const go=()=>startChapterN(CH+2);
+    if(CFG&&CFG.leave)CFG.leave(go);else go();   /* e.g. returning from the meadow trip */
+  }
 };
 window.startCh2=function(){
   sndTap();ovShow(null);
@@ -1274,87 +1308,124 @@ function dimTo(v,ms){const t0=performance.now();const n0=NIGHT;
   (function d(){const k=Math.min((performance.now()-t0)/(ms||2000),1);setNight(n0+(v-n0)*k);if(k<1)requestAnimationFrame(d)})()}
 
 const CHAPTERS={
-/* ---------- chapter 3: 🌸 the flower that opens ---------- */
+/* ---------- chapter 3: 🌸 the flower that opens — a class trip to the flower meadow ---------- */
 3:{
-  owlPerch:new THREE.Vector3(36.5,1.62,28.8),owlGround:new THREE.Vector3(36,0,27),
-  questOwl:'🦉 הינשוף עף אל הגדר בפינת החצר... לכו אליו',
-  questScene:'🌸 ילד חדש עומד לבד בפינה... גשו אליו',
+  owlPerch:new THREE.Vector3(-20,1.6,29.95),owlGround:new THREE.Vector3(-20,0,27.5),
+  questOwl:'🌸 יום טיול! הינשוף מחכה על הגדר ליד שער היציאה...',
+  questScene:'🚪 השער פתוח — צאו אל שביל הפרחים!',
   owlLines:[
-    'בוא תראה משהו... אתה רואה את הילד החדש שעומד שם לבד? הוא כאן כבר שבוע, ואף אחד לא מכיר אותו.',
-    'יש לי כלי בדיוק בשביל רגעים כאלה: <b>פרח שנפתח</b> 🌸',
-    'פרח סגור יכול להיות הכי יפה בעולם — אבל כשהעלים סגורים, אף אחד לא יכול לראות את זה.',
-    'ככה גם אנחנו: כשלא מספרים כלום על עצמנו — אף אחד לא יודע מה מיוחד בנו.',
-    'אבל זהירות: פרח <b>מזויף</b> — כשממציאים דברים כדי להרשים — נובל מהר. מרגישים את זה מיד.',
-    'הסוד: לשתף משהו <b>אמיתי</b> קטן מהלב. "אני אוהב...", "אני קצת מתרגש מ..." — ולהזמין.',
-    'לך אליו. תנסה לפתוח עלה אחד 🌸'
+    'איזה יום! הכיתה יוצאת לטיול בשדה הפרחים 🌸 ואני מכיר את השדה הזה — יש לי כלי שמתאים בדיוק להיום.',
+    'לפעמים דווקא בטיול, כשכולם הולכים בזוגות וצוחקים... יש ילד אחד שהולך מאחור, לבד. והלב שלו כבד.',
+    'בשביל הרגע הזה יש את <b>הפרח שנפתח</b>: פרח סגור מחזיק בפנים עולם שלם של יופי — אבל אף אחד לא יכול לגלות אותו.',
+    'והסוד? לא צריך להיפתח בבת אחת. מספיק לפתוח <b>עלה אחד</b>: לספר דבר קטן ואמיתי שאתה אוהב.',
+    'כי כשעלה אחד נפתח — קורה קסם: פתאום מישהו עונה <b>"גם אני!"</b>... וככה, בדיוק ככה, מתחילים חברים.',
+    'צא מהשער אל השביל. ואם תרגיש לבד — תזכור: עלה אחד 🌸'
   ],
-  scenePos:new THREE.Vector3(33,0,23),sceneR:5,sceneBtn:'🌸 לגשת לילד החדש',smY:3.2,mo:[.5,3.2,-1],
-  setup(){newKid.g.position.set(33,0,23);newKid.g.rotation.y=Math.PI*.85},
+  scenePos:new THREE.Vector3(-20,0,28),sceneR:4.5,sceneBtn:'🚪 לצאת לטיול!',smY:3.4,mo:[.5,3.2,-2],
+  setup(){},
   startScene(){
-    MODE='cine';camMode='follow';actBtn.style.display='none';questEl.style.display='none';
-    player.target=new THREE.Vector3(31.4,0,22);player.speed=3.6;
-    player.onArrive=()=>{face(player,newKid.g.position);face(newKid,player.g.position)};
+    MODE='cine';actBtn.style.display='none';questEl.style.display='none';
+    const f=document.getElementById('fade');f.style.opacity=1;sndWarm();
     setTimeout(()=>{
-      say([
-        {who:'',t:'הילד החדש עומד ליד הגדר, מסתכל על הנעליים שלו. הוא מגיע לכאן כל הפסקה — תמיד לבד.'},
-        {who:'👦 הילד החדש',t:'"...אה. היי." הוא אומר בשקט, בלי להרים את הראש.'},
-        {who:'',t:'רגע מוזר של שתיקה. מה אומרים עכשיו?'}
-      ],showChoicesN);
-    },1800);
+      /* the trip: everyone is already on the meadow trail */
+      BOUNDS=MEADOW_B;
+      CLSKIDS[0].target=null;CLSKIDS[0].g.position.set(-123.2,0,3.4);
+      CLSKIDS[1].target=null;CLSKIDS[1].g.position.set(-124.6,0,4.8);
+      face(CLSKIDS[0],CLSKIDS[1].g.position);face(CLSKIDS[1],CLSKIDS[0].g.position);
+      owl.position.set(-127.6,1,6.9);owl.userData.baseY=1;   /* on the rock by the blanket */
+      player.g.position.set(-100,0,9);player.g.rotation.y=-Math.PI/2;
+      camPos.copy(player.g.position).add(new THREE.Vector3(0,4.6,7));camLook.copy(player.g.position).add(new THREE.Vector3(0,1.5,0));
+      camMode='follow';
+      setTimeout(()=>{f.style.opacity=0},350);
+      player.target=new THREE.Vector3(-116,0,5.5);player.speed=3.1;player.onArrive=null;
+      setTimeout(()=>{
+        say([
+          {who:'',t:'שדה הפרחים מהמם... אבל כולם הולכים בזוגות, מדברים וצוחקים. ואתה — הולך מאחור. לבד.'},
+          {who:'',t:'ליד השמיכה, יואב ודני מתלהבים ממשהו. היה לך מה להגיד... אבל הרגליים נעצרות. "בטח אין לי מה לספר שיעניין אותם".'},
+          {who:'',t:'הלב דופק. הפרחים מסביב פתוחים לגמרי... ואתה?'}
+        ],showChoicesN);
+      },2300);
+    },850);
   },
-  prompt:'<b>איזה פרח תהיה?</b> 🌸',
+  prompt:'<b>מה הלב בוחר?</b> 🌸',
   choices:[
-    '🥀 פרח סגור: "אה... כלום. ביי" — וללכת משם',
-    '🎭 פרח מזויף: "יש לי בבית 100 משחקים ואני הכי טוב בכדורגל בעולם!"',
-    '🌸 פרח נפתח: לספר משהו אמיתי שאתה אוהב — ולשאול מה הוא אוהב'
+    '🥀 להישאר מאחור לבד: "ממילא אין לי מה לספר..."',
+    '😶 לעמוד לידם בשקט — אולי הם ישימו לב אליי לבד',
+    '🌸 לאזור אומץ ולפתוח עלה אחד: לספר להם דבר קטן ואמיתי שאני אוהב'
   ],
   cons:[
     function(){
-      player.target=new THREE.Vector3(24,0,15);player.speed=3.2;player.onArrive=null;
-      dimTo(.6,2400);
+      player.target=new THREE.Vector3(-110,0,-3);player.speed=2.7;player.onArrive=null;
+      dimTo(.6,2800);
       setTimeout(()=>{
         heartSp.material=emojiSprite('🖤',2.4).material;heartSp.visible=true;
-        reflect('הלכת משם. הוא נשאר לבד ליד הגדר — ואתה לבד בצד השני. שני פרחים סגורים באותה חצר.',
-                '🥀 פרח סגור שומר על עצמו — אבל אף אחד לא מגלה כמה הוא יפה. ושניכם הפסדתם חבר.');
-      },2600);
+        reflect('נשארת מאחור, ליד הסלע. הטיול נמשך בלעדיך — צחוקים מרחוק, ואתה סופר פרחים לבד.',
+                '🥀 "אין לי מה לספר" זה סיפור שהפחד מספר. הפרח נשאר סגור — ואף אחד לא גילה כמה הוא יפה.');
+      },3000);
     },
     function(){
-      spOver('❗',newKid,3,2600);
-      snd(220,.4,'triangle',.09);
+      player.target=new THREE.Vector3(-122.3,0,3.2);player.speed=3.2;
+      player.onArrive=()=>{face(player,CLSKIDS[0].g.position)};
+      setTimeout(()=>{playA(CLSKIDS[0],'Wave',true)},1600);
       setTimeout(()=>{
-        newKid.target=newKid.g.position.clone().add(new THREE.Vector3(5,0,3));newKid.speed=3.4;
-        dimTo(.35,1600);
-      },1400);
-      setTimeout(()=>{
-        reflect('"...בסדר." הוא זז אחורה צעד, ואז הולך משם. משהו בהמצאות האלה הרגיש לו לא אמיתי.',
-                '🎭 פרח מזויף נראה נוצץ לרגע — אבל כולם מריחים שהוא מפלסטיק. אמת קטנה שווה יותר מסיפור ענק.');
-      },3200);
+        dimTo(.4,2000);
+        say([
+          {who:'',t:'אתה עומד ממש לידם. קרוב. שומע הכל... הם צוחקים ממשהו שדני אמר.'},
+          {who:'',t:'דקה עוברת. עוד דקה. הם בכלל לא שמו לב שאתה שם — לא כי הם רעים. כי אתה שקוף כשאתה שותק.'}
+        ],()=>{
+          reflect('עמדת שם בשקט... וכלום לא קרה. להיות קרוב זה עדיין לא להיות ביחד.',
+                  '😶 גם פרח שעומד באמצע השדה — אם העלים סגורים, אף אחד לא רואה אותו. קרבה בלי מילה אחת נשארת שקופה.');
+        });
+      },2400);
     },
     function(){
-      say([
-        {who:'🙂 אתה',t:'"היי! האמת? אני ממש אוהב כדורגל, אבל קצת התביישתי לבוא אליך... מה אתה אוהב?"'},
-        {who:'👦 הילד החדש',t:'"באמת?!" הוא מרים את הראש ומחייך. "גם אני! חשבתי שאף אחד פה לא ידבר איתי אף פעם..."'},
-        {who:'',t:'פתאום יש שיחה. שני פרחים נפתחים באותו רגע 🌸'}
-      ],()=>{
-        sndGood();
-        playA(newKid,'Wave',true);
-        spOver('🌸',player,3.4,3500);
-        jump(player,250);
-        /* both walk toward the field together, and the kids wave them in */
-        player.target=new THREE.Vector3(7,0,1.5);player.speed=3.6;player.onArrive=null;
-        newKid.target=new THREE.Vector3(8.8,0,2.5);newKid.speed=3.6;
-        setTimeout(()=>{playA(kids[0],'Wave',true);playA(kids[3],'Wave',true);confettiBurst()},2400);
-        setTimeout(()=>{
-          reflect('סיפרת משהו אמיתי אחד — וקיבלת חבר. הוא רק חיכה שמישהו יפתח את העלה הראשון.',
-            '🌸 עלה אמיתי קטן ← שאלה אחת בחזרה ← חברות. פרח שנפתח מגלה לעולם כמה הוא יפה!',true);
-        },3400);
-      });
+      player.target=new THREE.Vector3(-122.6,0,3.6);player.speed=3.4;
+      player.onArrive=()=>{
+        face(player,CLSKIDS[0].g.position);face(CLSKIDS[0],player.g.position);
+        say([
+          {who:'🙂 אתה (הלב דופק... ובכל זאת)',t:'"תראו את הפרח הסגול הזה! אני... אני ממש אוהב טבע. יש לי בבית אוסף אבנים מיוחדות מכל טיול"'},
+          {who:'👦 יואב',t:'"רגע, באמת?! גם אני אוסף!! יש לי אבן עם נצנצים מאילת!" העיניים שלו נדלקות. "איזו הכי מיוחדת שיש לך?"'},
+          {who:'👦 דני',t:'"אני חייב לראות את האוסף הזה! אולי תביא מחר לכיתה?"'},
+          {who:'',t:'ופתאום... אתם שלושה. יושבים על השמיכה, מדברים על אבנים, צבים ומפלים. עלה אחד נפתח — ופתח הכל.'}
+        ],()=>{
+          sndGood();
+          playA(CLSKIDS[0],'Wave',true);playA(CLSKIDS[1],'Wave',true);
+          jump(player,200);
+          /* the three settle around the blanket */
+          player.target=new THREE.Vector3(-125.2,0,3);player.speed=2.6;player.onArrive=null;
+          spOver('🌸',player,3.3,4000);
+          /* flowers bloom in an arc over the picnic spot */
+          setTimeout(()=>{
+            for(let i=0;i<5;i++){setTimeout(()=>{
+              const s=getSp(['🌸','🌼','🌷','🌸','🌺'][i],1.9);s.visible=true;
+              arcMove(s,new THREE.Vector3(-131+i*2.4,1.2,7),new THREE.Vector3(-129+i*2.4,1.2,1),1500,3.5,()=>{s.visible=false});
+            },i*240)}
+            confettiBurst();sndWarm();
+          },1800);
+          setTimeout(()=>{
+            reflect('אזרת אומץ, פתחת עלה אחד קטן — ושני "גם אני!" חיכו לך בצד השני. ככה בדיוק נולדת חברות.',
+              '🌸 הלב דופק? זה בסדר — פותחים עלה אחד בכל זאת: דבר קטן ואמיתי שאוהבים. והקסם: מי ששומע, נפתח בחזרה!',true);
+          },4200);
+        });
+      };
     }
   ],
   retry(){
-    newKid.target=null;newKid.g.position.set(33,0,23);newKid.g.rotation.y=Math.PI*.85;
-    player.target=new THREE.Vector3(31.4,0,22);player.speed=4.4;
-    player.onArrive=()=>{face(player,newKid.g.position);face(newKid,player.g.position)};
+    CLSKIDS[0].target=null;CLSKIDS[0].g.position.set(-123.2,0,3.4);
+    CLSKIDS[1].target=null;CLSKIDS[1].g.position.set(-124.6,0,4.8);
+    face(CLSKIDS[0],CLSKIDS[1].g.position);face(CLSKIDS[1],CLSKIDS[0].g.position);
+    player.target=new THREE.Vector3(-116,0,5.5);player.speed=4.2;player.onArrive=null;
+  },
+  leave(cb){
+    const f=document.getElementById('fade');f.style.opacity=1;sndWarm();
+    setTimeout(()=>{
+      BOUNDS=YARD_B;
+      player.g.position.set(-20,0,26.5);player.g.rotation.y=Math.PI;
+      owl.position.copy(OWL_LAMP);owl.userData.baseY=OWL_LAMP.y;
+      camPos.copy(player.g.position).add(new THREE.Vector3(0,4.6,7));camLook.copy(player.g.position).add(new THREE.Vector3(0,1.5,0));
+      setTimeout(()=>{f.style.opacity=0},350);
+      cb();
+    },850);
   }
 },
 /* ---------- chapter 4: 📗 the green folder ---------- */
@@ -1631,7 +1702,7 @@ const CHAPTERS={
 },
 /* ---------- chapter 7: 🛡️ we don't stay silent ---------- */
 7:{
-  owlPerch:new THREE.Vector3(-33,1.62,28.8),owlGround:new THREE.Vector3(-32,0,27),
+  owlPerch:new THREE.Vector3(-33,1.6,29.95),owlGround:new THREE.Vector3(-32,0,27),
   questOwl:'🦉 הינשוף מחכה על הגדר בפינה הרחוקה... לכו אליו',
   questScene:'🛡️ משהו לא טוב קורה ליד הגדר... מהרו לשם!',
   owlLines:[
