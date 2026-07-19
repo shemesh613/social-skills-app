@@ -93,6 +93,7 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
 <div class="keysHint" id="keysHint" style="display:none">🎮 חצים / WASD לתנועה</div>
 
 <!-- title -->
+<div id="fade" style="position:fixed;inset:0;background:#000;opacity:0;transition:opacity .8s;pointer-events:none;z-index:70"></div>
 <div class="ov on dimbg" id="ov-title">
   <div class="stars" id="stars"></div>
   <div style="font-size:clamp(70px,17vw,120px);filter:drop-shadow(0 14px 30px rgba(0,0,0,.5))">🎒</div>
@@ -193,7 +194,7 @@ function earnBadge(idx){
   var h='';TOOLS.forEach(function(t,i){h+='<div class="slot'+(i<idx?' earned':'')+'" id="slot'+i+'">'+(i<idx?t:(i===idx?'':'🔒'))+'</div>'});
   $('#slots').innerHTML=h;
   var bh='';
-  if(B.next)bh+='<button class="btn" onclick="startCh2()">'+B.next+'</button>';
+  if(B.next)bh+='<button class="btn" onclick="nextChapter()">'+B.next+'</button>';
   bh+='<button class="btn calm" onclick="showFam()">🏡 קלף למשפחה ולכיתה</button>';
   bh+='<button class="btn sec" onclick="location.reload()">🔄 לשחק שוב</button>';
   $('#bdgBtns').innerHTML=bh;
@@ -304,6 +305,102 @@ goal(-16.2);goal(16.2);
 (function(){const c=0xc7a15a;for(let x=-44;x<=44;x+=4){box(.25,1.7,.25,c,x,.85,30);box(.25,1.7,.25,c,x,.85,-52)}for(let z=-52;z<=30;z+=4){box(.25,1.7,.25,c,-44,.85,z);box(.25,1.7,.25,c,44,.85,z)}
 box(88,.2,.2,c,0,1.5,30);box(88,.2,.2,c,0,1.5,-52);box(.2,.2,82,c,-44,1.5,-11);box(.2,.2,82,c,44,1.5,-11)})();
 /* trees, bushes, bench, streetlight — real modeled assets, placed after loading (see buildEnvironment) */
+
+/* =================== the classroom — chapter 1 interior, far east at x=120 =================== */
+let INCLASS=true;
+const YARD_B={x1:-42,x2:42,z1:-31,z2:28};
+let BOUNDS={x1:113.3,x2:126.7,z1:-5.3,z2:5.4};
+const OWL_LAMP=new THREE.Vector3();
+const DOORP=new THREE.Vector3(127.2,0,2.2);
+const STATCOL=[[117,-1.8,1.35],[123,-1.8,1.35],[117,1.2,1.35],[123,1.2,1.35],[117,4.2,1.35],[123,4.2,1.35],[124.6,-4.7,1.4],[112.9,-4.6,1.2]];
+(function buildClassroom(){
+  const W=0xf5e6d3,WOOD=0xc19a6b,DARK=0x5c4a3d,PLAS=0xc75740;
+  /* grass pad + wooden floor */
+  const pad=new THREE.Mesh(new THREE.PlaneGeometry(46,40),M(0x6cb55b));pad.rotation.x=-Math.PI/2;pad.position.set(120,-.03,0);scene.add(pad);
+  box(17.4,.3,14.4,0xd4a574,120,-.15,0).receiveShadow=true;
+  /* floor plank lines */
+  for(let i=0;i<7;i++){const pl=new THREE.Mesh(new THREE.PlaneGeometry(.08,13.6),new THREE.MeshBasicMaterial({color:0xb98d5f}));pl.rotation.x=-Math.PI/2;pl.position.set(113.6+i*2.2,.012,0);scene.add(pl)}
+  /* north wall (board wall) */
+  box(16.7,4.4,.35,W,120,2.2,-6.67);
+  /* east wall (door wall) */
+  box(.35,4.4,13.7,W,128.17,2.2,0);
+  /* west wall — segmented around the owl's window (opening z -2.4..0.4, y 1.3..3.5) */
+  box(.35,4.4,4.45,W,111.83,2.2,-4.62);
+  box(.35,4.4,6.45,W,111.83,2.2,3.62);
+  box(.35,1.3,2.8,W,111.83,.65,-1);
+  box(.35,.9,2.8,W,111.83,3.95,-1);
+  box(.7,.16,3.2,WOOD,111.95,1.38,-1);                     /* window sill — the owl's perch */
+  box(.18,2.3,.18,0xffffff,111.9,2.45,-2.45);box(.18,2.3,.18,0xffffff,111.9,2.45,.45);
+  box(.18,.18,3.1,0xffffff,111.9,3.55,-1);
+  /* south wall — open window band (low wall + pillars + lintel) so the follow-cam sees through */
+  box(16.7,1.15,.35,W,120,.575,6.67);
+  box(16.7,.55,.35,W,120,4.12,6.67);
+  box(16.7,.14,.5,0xffffff,120,1.25,6.67);
+  box(.55,4.4,.42,W,116.4,2.2,6.67);box(.55,4.4,.42,W,123.6,2.2,6.67);
+  /* baseboards */
+  box(16.4,.34,.1,DARK,120,.17,-6.44);box(.1,.34,13.4,DARK,127.94,.17,0);box(.1,.34,13.4,DARK,112.06,.17,0);
+  /* chalkboard + tray + chalk */
+  box(7,2.7,.14,WOOD,120,2.35,-6.42);
+  box(6.5,2.2,.12,0x2b5f3d,120,2.4,-6.36);
+  box(6.6,.12,.32,WOOD,120,1.22,-6.28);
+  box(.3,.06,.08,0xffffff,118.6,1.28,-6.26);box(.3,.06,.08,0xfff3b0,121.3,1.28,-6.26);
+  /* chalk writing on the board */
+  (function(){const cv=document.createElement('canvas');cv.width=512;cv.height=176;const x=cv.getContext('2d');
+    x.fillStyle='#2b5f3d';x.fillRect(0,0,512,176);
+    x.fillStyle='rgba(255,255,255,.92)';x.font='bold 54px Arial';x.textAlign='center';x.direction='rtl';
+    x.fillText('מה הלב שלי מרגיש? 🔦',256,76);
+    x.font='34px Arial';x.fillStyle='rgba(255,255,255,.75)';x.fillText('כלי מס׳ 1: הפנס הפנימי',256,136);
+    const m=new THREE.Mesh(new THREE.PlaneGeometry(6.2,2.05),new THREE.MeshLambertMaterial({map:new THREE.CanvasTexture(cv)}));
+    m.position.set(120,2.42,-6.29);scene.add(m)})();
+  /* classroom door (east wall) */
+  box(.2,3.5,2,0xffffff,128,1.75,2.2);
+  box(.16,3.25,1.62,0x8b6914,127.93,1.62,2.2);
+  box(.1,.5,.5,0x6e4f10,127.86,1.9,2.2);
+  const hd2=new THREE.Mesh(new THREE.SphereGeometry(.09,10,8),M(0xd9a53a));hd2.position.set(127.82,1.55,1.62);scene.add(hd2);
+  /* teacher desk (near board, east side) */
+  box(2.2,.12,1.05,WOOD,124.6,.96,-4.9);
+  box(.12,.9,.12,DARK,123.7,.45,-5.3);box(.12,.9,.12,DARK,125.5,.45,-5.3);
+  box(.12,.9,.12,DARK,123.7,.45,-4.5);box(.12,.9,.12,DARK,125.5,.45,-4.5);
+  box(.55,.1,.4,0x3a6fb0,124.2,1.07,-4.9);box(.45,.16,.32,0xb03a3a,124.95,1.1,-4.85);
+  /* student desks: 2 columns x 3 rows, chairs facing the board */
+  [[117,-2.2],[123,-2.2],[117,.8],[123,.8],[117,3.8],[123,3.8]].forEach((p,pi)=>{
+    const dx=p[0],dz=p[1];
+    box(1.5,.1,.9,WOOD,dx,1,dz);
+    box(.1,.98,.1,DARK,dx-.65,.49,dz-.35);box(.1,.98,.1,DARK,dx+.65,.49,dz-.35);
+    box(.1,.98,.1,DARK,dx-.65,.49,dz+.35);box(.1,.98,.1,DARK,dx+.65,.49,dz+.35);
+    box(.72,.09,.68,PLAS,dx,.58,dz+.95);
+    box(.09,.56,.09,0x9c4433,dx-.28,.28,dz+.72);box(.09,.56,.09,0x9c4433,dx+.28,.28,dz+.72);
+    box(.09,.56,.09,0x9c4433,dx-.28,.28,dz+1.2);box(.09,.56,.09,0x9c4433,dx+.28,.28,dz+1.2);
+    box(.72,.72,.09,PLAS,dx,1.1,dz+1.24);
+    box(.5,.03,.36,[0x8fd3ff,0xffd54a,0x7dffa8][pi%3],dx-.2,1.07,dz+.05);
+  });
+  /* open bookshelf (west, near board corner): back panel + side panels + boards, colorful spines up front */
+  box(1.9,2.75,.24,WOOD,112.9,1.375,-5.05);
+  box(.14,2.75,.8,WOOD,112.02,1.375,-4.75);box(.14,2.75,.8,WOOD,113.78,1.375,-4.75);
+  box(1.9,.12,.8,WOOD,112.9,2.72,-4.75);box(1.9,.12,.8,WOOD,112.9,.06,-4.75);
+  [.95,1.85].forEach(sy=>box(1.62,.08,.72,0xa8834f,112.9,sy,-4.75));
+  [.16,1.03,1.93].forEach((sy,si)=>{
+    for(let b=0;b<7;b++){const bh=.52+((b*37+si*13)%20)/100;
+      box(.17,bh,.5,[0xe05a4e,0x3a6fb0,0xf0b93a,0x4ba05f,0x9660c9,0xd97b3a,0x5aa8c9][(si*7+b)%7],112.28+b*.21,sy+bh/2,-4.62)}});
+  /* wall posters (canvas) */
+  function poster(txt,em,bg,px,py,pz,ry){const cv=document.createElement('canvas');cv.width=256;cv.height=200;const x=cv.getContext('2d');
+    x.fillStyle=bg;x.fillRect(0,0,256,200);x.strokeStyle='rgba(0,0,0,.16)';x.lineWidth=10;x.strokeRect(5,5,246,190);
+    x.font='84px serif';x.textAlign='center';x.fillText(em,128,102);
+    if(txt){x.fillStyle='#39354a';x.font='bold 32px Arial';x.fillText(txt,128,168)}
+    const m=new THREE.Mesh(new THREE.PlaneGeometry(1.55,1.2),new THREE.MeshLambertMaterial({map:new THREE.CanvasTexture(cv)}));
+    m.position.set(px,py,pz);m.rotation.y=ry||0;scene.add(m)}
+  poster('א ב ג','📖','#fff3d6',115.2,2.7,-6.48,0);
+  poster('שבת שלום','🌸','#e8f2ff',124.8,2.7,-6.48,0);
+  poster('מפת ישראל','🗺️','#eaf7e6',128.05,2.6,-1.6,-Math.PI/2);
+  poster('הציור שלנו','🌈','#fdeef3',112,2.6,3.4,Math.PI/2);
+  poster('','🕐','#ffffff',120,3.95,-6.48,0);
+  /* warm interior lights + hanging shades */
+  [[116.5,0],[123.5,0]].forEach(p=>{
+    const pl=new THREE.PointLight(0xffe2b3,.85,17);pl.position.set(p[0],3.4,p[1]);scene.add(pl);
+    const sh=new THREE.Mesh(new THREE.CylinderGeometry(.34,.5,.3,10),M(0xf7d98c));sh.position.set(p[0],3.85,p[1]);scene.add(sh);
+    box(.05,.55,.05,0x555555,p[0],4.25,p[1]);
+  });
+})();
 
 /* emoji sprite helper */
 function emojiSprite(em,scale){
@@ -556,18 +653,21 @@ for(let i=0;i<16;i++){
 place('bench',20,4,.92,-2.2);
 const slModel=place('street',7,12,7,Math.PI);
 /* the lamp arm extends to +x after the PI rotation — perch the owl on the lamp head itself */
-(function(){const sb3=new THREE.Box3().setFromObject(slModel);owl.position.set(sb3.max.x-.38,sb3.max.y-.42,12);owl.userData.baseY=owl.position.y})();
+(function(){const sb3=new THREE.Box3().setFromObject(slModel);
+  OWL_LAMP.set(sb3.max.x-.38,sb3.max.y-.42,12);
+  /* chapter 1 starts indoors — the owl waits on the classroom window sill */
+  owl.position.set(112.15,1.46,-1);owl.userData.baseY=1.46})();
 
 /* player — default model; swapped by the character-select screen */
 let player=makeChar('hoodie',1.58,0x2255aa,1.55);
-player.g.position.set(0,0,22);player.g.rotation.y=Math.PI;
+player.g.position.set(119.5,0,3.2);player.g.rotation.y=Math.PI*.72;
 window.chooseChar=function(name){
   sndGood();
   const pos=player.g.position.clone(),rot=player.g.rotation.y;
   scene.remove(player.g);
   player=makeChar(name,1.58,0x2255aa,1.55);
   player.g.position.copy(pos);player.g.rotation.y=rot;
-  CHARS=[player,...kids,teacher];
+  CHARS=[player,...kids,teacher,...CLSKIDS];
   try{localStorage.setItem('toolbagChar',name)}catch(e){}
   enterWorld();
 };
@@ -582,11 +682,15 @@ for(let i=0;i<5;i++){
   k.g.position.copy(pos);HOME.push(pos.clone());
   kids.push(k);
 }
-/* teacher — hands out the tests near the school door */
+/* teacher — chapter 1: at the classroom board */
 const teacher=makeChar('suit',2.5,0x111111);
-teacher.g.position.set(2.5,0,-29);
-const TEACHER=new THREE.Vector3(2.5,0,-29);
-let CHARS=[player,...kids,teacher];
+teacher.g.position.set(120.3,0,-5.35);teacher.g.rotation.y=0;
+const TEACHER=new THREE.Vector3(120.3,0,-5.35);
+/* two classmates at their desks */
+const CLSKIDS=[makeChar('casual',1.52,0x554433,1.55),makeChar('worker',1.52,0x226644,1.55)];
+CLSKIDS[0].g.position.set(118.1,0,1.6);CLSKIDS[0].g.rotation.y=Math.PI+.35;
+CLSKIDS[1].g.position.set(122.1,0,4.4);CLSKIDS[1].g.rotation.y=Math.PI-.4;
+let CHARS=[player,...kids,teacher,...CLSKIDS];
 /* ball */
 const ball=new THREE.Mesh(new THREE.SphereGeometry(.19,14,12),new THREE.MeshLambertMaterial({color:0xffffff}));
 ball.castShadow=true;scene.add(ball);
@@ -635,12 +739,31 @@ const explored=new Set();
 const actBtn=document.getElementById('act');
 const questEl=document.getElementById('quest');
 window.enterWorld=function(){sndTap();ovShow(null);MODE='explore';
-  questEl.style.display='block';questEl.textContent='🦉 מישהו מחכה לכם ליד הפנס... לכו אליו';
+  questEl.style.display='block';questEl.textContent='🦉 מישהו מחכה לכם על אדן החלון... לכו אליו';
   const touch='ontouchstart' in window;
   document.getElementById(touch?'joy':'keysHint').style.display='block';
   setTimeout(startAmbience,400);
-  if(window._RESUME){window._RESUME=0;window.startCh2()}
+  if(window._RESUME){window._RESUME=0;toYard(2.5,-24);window.startCh2()}
 };
+/* leave the classroom → the schoolyard (also used by the resume flow) */
+function toYard(px,pz){
+  INCLASS=false;BOUNDS=YARD_B;
+  player.g.position.set(px,0,pz);player.g.rotation.y=Math.PI;
+  owl.position.copy(OWL_LAMP);owl.userData.baseY=OWL_LAMP.y;
+  teacher.g.position.set(2.5,0,-29);teacher.g.rotation.y=0;TEACHER.set(2.5,0,-29);
+  camPos.copy(player.g.position).add(new THREE.Vector3(0,4.6,7));
+  camLook.copy(player.g.position).add(new THREE.Vector3(0,1.5,0));
+}
+function exitClass(){
+  MODE='cine';questEl.style.display='none';
+  const f=document.getElementById('fade');f.style.opacity=1;
+  sndWarm();
+  setTimeout(()=>{
+    toYard(2.5,-25);
+    window.startCh2();
+    setTimeout(()=>{f.style.opacity=0},350);
+  },800);
+}
 
 /* ---- ambient sound, fully synthesized (no assets, no copyright) ---- */
 let ambOn=false;
@@ -698,7 +821,8 @@ function camTick(dt){
   }else if(camMode==='field'){
     tp=new THREE.Vector3(10,4.6,4);tl=new THREE.Vector3(0,1.2,-8);
   }else if(camMode==='teacher'){
-    tp=new THREE.Vector3(9.5,4.2,-19);tl=new THREE.Vector3(1.5,1.6,-28);
+    /* classroom board shot — from the south-west, over the desks */
+    tp=new THREE.Vector3(116.2,3.3,.9);tl=new THREE.Vector3(120.6,1.2,-5.5);
   }else if(camMode==='owl'){
     /* medium shot on the owl, framed in the upper half so the dialogue box below never covers him */
     tp=new THREE.Vector3(owl.position.x+3.2,owl.position.y+1.1,owl.position.z+6.6);
@@ -707,11 +831,11 @@ function camTick(dt){
   camPos.lerp(tp,Math.min(dt*3.2,1));camLook.lerp(tl,Math.min(dt*3.2,1));
   cam.position.copy(camPos);cam.lookAt(camLook);
 }
-camPos.copy(player.g.position).add(new THREE.Vector3(0,6.4,9.5));
+camPos.copy(player.g.position).add(new THREE.Vector3(0,9.5,7));
 camLook.copy(player.g.position);
 
 /* =================== scenario: the soccer field =================== */
-const OWLPOS=new THREE.Vector3(7,0,12);
+const OWLPOS=new THREE.Vector3(112.4,0,-1);   /* ch1: the classroom window sill; ch2 moves it to the goal */
 function distTo(v){return player.g.position.distanceTo(v)}
 
 function owlTalk(){
@@ -721,17 +845,17 @@ function owlTalk(){
     {who:'🦉 הינשוף',t:'לכל אחד יש רגעים שבהם הלב פתאום נהיה כבד. בדיוק בשביל הרגעים האלה — קח את הכלי הראשון בתיק: <b>הפנס הפנימי</b> 🔦'},
     {who:'🦉 הינשוף',t:'כשמשהו קשה קורה — עוצרים רגע, מאירים <b>פנימה</b> ושואלים: מה הלב שלי מרגיש?'},
     {who:'🦉 הינשוף',t:'ואז אומרים ללב: <b>"זה נורמלי להרגיש ככה"</b> — ומחבקים אותו. לב שמקבל חיבוק, נרגע.'},
-    {who:'🦉 הינשוף',t:'אבל כלי לומדים רק על אמת... אני רואה שהמורה מחלק עכשיו את המבחנים ליד הכניסה. לך לקבל את שלך 📄'}
+    {who:'🦉 הינשוף',t:'אבל כלי לומדים רק על אמת... אני רואה שהמורה עומד ליד הלוח ומחלק את המבחנים. לך לקבל את שלך 📄'}
   ],()=>{
     sndGood();QUEST=1;camMode='follow';MODE='explore';
-    questEl.style.display='block';questEl.textContent='📄 לכו למורה ליד הכניסה לבית הספר';
+    questEl.style.display='block';questEl.textContent='📄 גשו למורה ליד הלוח';
   });
 }
 
 function startScenario(){
   MODE='cine';camMode='teacher';actBtn.style.display='none';questEl.style.display='none';
-  /* player walks up to the teacher and they face each other */
-  player.target=new THREE.Vector3(2.5,0,-26);
+  /* player walks up to the teacher at the board and they face each other */
+  player.target=new THREE.Vector3(120.3,0,-4.1);
   player.onArrive=()=>{face(player,TEACHER);face(teacher,player.g.position);playA(teacher,'Interact',true)};
   setTimeout(()=>{
     say([
@@ -774,18 +898,17 @@ function consAngry(){
   paperSp.visible=true;paperSp.position.copy(p0);
   arcMove(paperSp,p0,p1,700,1.2,()=>{snd(150,.2,'square',.07);
     arcMove(paperSp,p1,p2,700,1.6)});   /* the kick */
-  /* the whole yard stops and stares */
-  soccerActive=false;
-  kids.forEach(k=>{k.target=null;const d=new THREE.Vector3().subVectors(player.g.position,k.g.position);k.g.rotation.y=Math.atan2(d.x,d.z)});
+  /* the whole class stops and stares */
+  CLSKIDS.forEach(k=>{const d=new THREE.Vector3().subVectors(player.g.position,k.g.position);k.g.rotation.y=Math.atan2(d.x,d.z)});
   setTimeout(()=>{
-    reflect('הדף עף על הרצפה... כל החצר מסתכלת. אבל האכזבה? היא עדיין בלב — ועכשיו אי אפשר אפילו לראות מה אפשר לתקן.',
+    reflect('הדף עף על רצפת הכיתה... כולם נעצרים ומסתכלים עליך. אבל האכזבה? היא עדיין בלב — ועכשיו אי אפשר אפילו לראות מה אפשר לתקן.',
             '💭 את הדף אפשר לזרוק. רגש אי אפשר לזרוק — הוא נשאר בפנים גם כשהדף על הרצפה.');
   },2400);
 }
 /* --- consequence: fake smile, hold it all inside --- */
 function consBench(){
   soccerActive=true;
-  player.target=new THREE.Vector3(16,0,-14);player.speed=3.4;
+  player.target=new THREE.Vector3(126.3,0,4.5);player.speed=3.4;   /* the back corner of the class */
   camMode='follow';
   /* the world literally grays out around him */
   const t0=performance.now();
@@ -794,7 +917,7 @@ function consBench(){
     if(k<1)requestAnimationFrame(dim)})();
   setTimeout(()=>{
     heartSp.material=emojiSprite('🖤',2.4).material;heartSp.visible=true;
-    reflect('"לא אכפת לי!" אתה מחייך והולך משם... אבל בפנים הלב יודע את האמת — והעולם נהיה אפור.',
+    reflect('"לא אכפת לי!" אתה מחייך והולך לבד לפינת הכיתה... אבל בפנים הלב יודע את האמת — והעולם נהיה אפור.',
             '💭 כשמסתירים רגש אפילו מעצמנו — אף אחד לא יכול לעזור לנו. ההעמדת פנים רק מעייפת את הלב.');
   },2600);
 }
@@ -824,8 +947,8 @@ function goodEnding(){
     setNight(n0*(1-k));
     if(k<1)requestAnimationFrame(up)})();
   setTimeout(()=>{heartSp.visible=false},1800);
-  /* turn back to the teacher and ask for help */
-  player.target=new THREE.Vector3(2.5,0,-26.5);player.speed=4;
+  /* turn back to the teacher at the board and ask for help */
+  player.target=new THREE.Vector3(120.3,0,-4.2);player.speed=4;
   player.onArrive=()=>{face(player,TEACHER);face(teacher,player.g.position)};
   camMode='teacher';
   setTimeout(()=>{
@@ -868,7 +991,7 @@ window.retry=function(){
   kids.forEach((k,i)=>{k.target=HOME[i].clone();k.speed=5});
   soccerActive=true;
   if(CH===0){
-    player.target=new THREE.Vector3(2.5,0,-26);player.speed=4.4;
+    player.target=new THREE.Vector3(120.3,0,-4.1);player.speed=4.4;
     player.onArrive=()=>{face(player,TEACHER);face(teacher,player.g.position)};
     camMode='teacher';
     setTimeout(showChoices,1700);
@@ -883,6 +1006,20 @@ window.retry=function(){
 window.finish=function(){dlg.classList.remove('on');$('#chDlg').innerHTML='';earnBadge(CH)};
 
 /* =================== chapter 2: dolphinship (⚽ the soccer field) =================== */
+/* the badge "next tool" button: from the classroom we first walk out to the yard */
+window.nextChapter=function(){
+  sndTap();ovShow(null);
+  if(CH===0&&INCLASS){
+    camMode='owl';questEl.style.display='none';
+    say([
+      {who:'🦉 הינשוף',t:'רואה איזה כוח יש לך? הפנס הפנימי כבר בתיק! 🔦'},
+      {who:'🦉 הינשוף',t:'ועכשיו... הכלי הבא לא נמצא בכיתה. הוא מחכה בחוץ, בחצר! צא מהדלת — ונפגש שם 🐬'}
+    ],()=>{
+      MODE='explore';QUEST=2.2;marker.visible=true;camMode='follow';
+      questEl.style.display='block';questEl.textContent='🚪 צאו מהכיתה אל החצר';
+    });
+  }else window.startCh2();
+};
 window.startCh2=function(){
   sndTap();ovShow(null);
   CH=1;explored.clear();
@@ -1096,14 +1233,19 @@ function animate(){
     const l=Math.hypot(vx,vz);
     if(l>.15){vx/=Math.max(l,1);vz/=Math.max(l,1);
       player.g.position.x+=vx*dt*7;player.g.position.z+=vz*dt*7;
-      player.g.position.x=Math.max(-42,Math.min(42,player.g.position.x));
-      player.g.position.z=Math.max(-31,Math.min(28,player.g.position.z));
+      player.g.position.x=Math.max(BOUNDS.x1,Math.min(BOUNDS.x2,player.g.position.x));
+      player.g.position.z=Math.max(BOUNDS.z1,Math.min(BOUNDS.z2,player.g.position.z));
       player.g.rotation.y=Math.atan2(vx,vz);moving=true;
       /* soft collision — can't walk through other characters (free-roam only, never during cinematics) */
       CHARS.forEach(c=>{if(c===player)return;
         const dx=player.g.position.x-c.g.position.x,dz=player.g.position.z-c.g.position.z;
         const d=Math.hypot(dx,dz);
         if(d<.95&&d>1e-4){player.g.position.x=c.g.position.x+dx/d*.95;player.g.position.z=c.g.position.z+dz/d*.95}
+      });
+      if(INCLASS)STATCOL.forEach(s=>{
+        const dx=player.g.position.x-s[0],dz=player.g.position.z-s[1];
+        const d=Math.hypot(dx,dz);
+        if(d<s[2]&&d>1e-4){player.g.position.x=s[0]+dx/d*s[2];player.g.position.z=s[1]+dz/d*s[2]}
       });
     }
   }
@@ -1128,11 +1270,14 @@ function animate(){
     const bs=markerT<owl.userData.blinkUntil?.1:1;
     owl.userData.eyes.forEach(e=>{e.scale.y+= (bs-e.scale.y)*Math.min(dt*30,1)});
   }
-  if(QUEST===0){marker.position.set(OWLPOS.x-1.6,3.3+Math.sin(markerT*3)*.35,OWLPOS.z+1.3);
-    if(MODE==='explore'&&distTo(OWLPOS)<5){actBtn.textContent='🦉 לדבר עם הינשוף';actBtn.style.display='block';actBtn.onclick=()=>{sndTap();actBtn.style.display='none';QUEST=.5;owlTalk()}}
+  if(QUEST===0){marker.position.set(OWLPOS.x+.9,2.8+Math.sin(markerT*3)*.3,OWLPOS.z);
+    if(MODE==='explore'&&distTo(OWLPOS)<4.5){actBtn.textContent='🦉 לדבר עם הינשוף';actBtn.style.display='block';actBtn.onclick=()=>{sndTap();actBtn.style.display='none';QUEST=.5;owlTalk()}}
     else actBtn.style.display='none';
-  }else if(QUEST===1){marker.position.set(TEACHER.x,4.9+Math.sin(markerT*3)*.4,TEACHER.z+.8);
-    if(MODE==='explore'&&distTo(TEACHER)<7){actBtn.textContent='📄 לקבל את המבחן';actBtn.style.display='block';actBtn.onclick=()=>{sndTap();QUEST=2;startScenario()}}
+  }else if(QUEST===1){marker.position.set(TEACHER.x,3.6+Math.sin(markerT*3)*.3,TEACHER.z+.9);
+    if(MODE==='explore'&&distTo(TEACHER)<5){actBtn.textContent='📄 לקבל את המבחן';actBtn.style.display='block';actBtn.onclick=()=>{sndTap();QUEST=2;startScenario()}}
+    else actBtn.style.display='none';
+  }else if(QUEST===2.2){marker.visible=true;marker.position.set(DOORP.x-.7,3.1+Math.sin(markerT*3)*.3,DOORP.z);
+    if(MODE==='explore'&&distTo(DOORP)<4){actBtn.textContent='🚪 לצאת לחצר';actBtn.style.display='block';actBtn.onclick=()=>{sndTap();actBtn.style.display='none';exitClass()}}
     else actBtn.style.display='none';
   }else if(QUEST===3){marker.visible=true;marker.position.set(OWLPOS.x,4.4+Math.sin(markerT*3)*.35,OWLPOS.z+1.6);
     if(MODE==='explore'&&distTo(OWLPOS)<5){actBtn.textContent='🦉 לדבר עם הינשוף';actBtn.style.display='block';actBtn.onclick=()=>{sndTap();actBtn.style.display='none';QUEST=3.5;owlTalk2()}}
