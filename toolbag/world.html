@@ -171,6 +171,16 @@ var BADGES=[
   {h:'🎉 הכלי הראשון שלך!',sub:'הפנס הפנימי נכנס לתיק הכלים.<br>עוד 6 כלים מחכים בהמשך המסע...',
    next:'🐬 אל הכלי הבא — דולפיניות!'},
   {h:'🎉 הכלי השני שלך!',sub:'הדולפיניות נכנסה לתיק הכלים.<br>עוד 5 כלים מחכים בהמשך המסע...',
+   next:'🌸 אל הכלי הבא — פרח שנפתח!'},
+  {h:'🎉 הכלי השלישי שלך!',sub:'הפרח שנפתח נכנס לתיק הכלים.<br>עוד 4 כלים מחכים בהמשך המסע...',
+   next:'📗 אל הכלי הבא — התיקיה הירוקה!'},
+  {h:'🎉 הכלי הרביעי שלך!',sub:'התיקיה הירוקה נכנסה לתיק הכלים.<br>עוד 3 כלים מחכים בהמשך המסע...',
+   next:'🙋 אל הכלי הבא — יוזמה חברתית!'},
+  {h:'🎉 הכלי החמישי שלך!',sub:'היוזמה החברתית נכנסה לתיק הכלים.<br>עוד 2 כלים מחכים בהמשך המסע...',
+   next:'❓ אל הכלי הבא — אפר״ת!'},
+  {h:'🎉 הכלי השישי שלך!',sub:'אפר״ת נכנס לתיק הכלים.<br>נשאר כלי אחרון אחד — הכי אמיץ מכולם...',
+   next:'🛡️ אל הכלי האחרון — מגן החברים!'},
+  {h:'🏆 תיק הכלים מלא!',sub:'אספת את כל 7 הכלים! 🎒<br>עכשיו יש לך תיק שלם לכל רגע קשה — אלוף אמיתי של חברות!',
    next:null}
 ];
 var FAMS=[
@@ -183,7 +193,32 @@ var FAMS=[
   '<li>מתי יצא לך להגיב כמו 🦈 כריש? כמו 🐟 סרדין? מה קרה אחר כך?</li>'+
   '<li>מה הכי קשה בלהגיד "בבקשה להפסיק" בקול רגוע דווקא?</li>'+
   '<li>למה הדולפין קודם <b>צולל פנימה</b> — ורק אחר כך מזנק ומדבר?</li></ul>'+
-  '<div class="mission">🌟 <b>משימת האומץ של השבוע:</b> אם מישהו פוגע בכם — צללו פנימה (פנס פנימי!), חבקו את הלב, ואז אמרו בקול בטוח ורגוע: <b>"בבקשה להפסיק"</b>. ספרו בבית איך הלך!</div>'
+  '<div class="mission">🌟 <b>משימת האומץ של השבוע:</b> אם מישהו פוגע בכם — צללו פנימה (פנס פנימי!), חבקו את הלב, ואז אמרו בקול בטוח ורגוע: <b>"בבקשה להפסיק"</b>. ספרו בבית איך הלך!</div>',
+  '<h3>🗣️ מדברים על זה יחד</h3><ul>'+
+  '<li>מה יותר קל — לשאול מישהו על עצמו, או לספר משהו על עצמך? למה?</li>'+
+  '<li>למה פרח סגור אף אחד לא יכול לראות כמה הוא יפה?</li>'+
+  '<li>מה ההבדל בין לספר משהו אמיתי — לבין להמציא משהו "מגניב"?</li></ul>'+
+  '<div class="mission">🌟 <b>משימת האומץ של השבוע:</b> ספרו השבוע למישהו חדש דבר אחד <b>אמיתי</b> שאתם אוהבים — ותשאלו מה הוא אוהב. ספרו בבית מה גיליתם!</div>',
+  '<h3>🗣️ מדברים על זה יחד</h3><ul>'+
+  '<li>מה שווה יותר — לנצח בוויכוח על חוק, או להמשיך לשחק יחד?</li>'+
+  '<li>אילו דברים קטנים שווה לשים ב"תיקיה הירוקה" ולהמשיך הלאה?</li>'+
+  '<li>ומתי דווקא <b>לא</b> מוותרים? (רמז: כשמשהו באמת פוגע)</li></ul>'+
+  '<div class="mission">🌟 <b>משימת האומץ של השבוע:</b> כשמשהו קטן מעצבן במשחק — נשמו, תגידו בלב "תיקיה ירוקה 📗", ותמשיכו לשחק. ספרו בבית אם המשחק היה כיף יותר!</div>',
+  '<h3>🗣️ מדברים על זה יחד</h3><ul>'+
+  '<li>מתי חיכיתם שמישהו יזמין אתכם — וההזמנה לא הגיעה? מה הרגשתם?</li>'+
+  '<li>מה ההבדל בין להצטרף <b>בכוח</b> — לבין להצטרף <b>בנימוס</b>?</li>'+
+  '<li>למה מחמאה קטנה ("איזה מגדל מגניב!") פותחת דלתות?</li></ul>'+
+  '<div class="mission">🌟 <b>משימת האומץ של השבוע:</b> הזמינו השבוע מישהו לשחק — או בקשו יפה להצטרף: מחמאה + "אפשר לעזור?". ספרו בבית מה קרה!</div>',
+  '<h3>🗣️ מדברים על זה יחד</h3><ul>'+
+  '<li>מתי הראש שלכם המציא סיפור רע — ובסוף התברר שהוא לא נכון?</li>'+
+  '<li>איך אותו אירוע בדיוק יכול ליצור רגשות שונים לגמרי?</li>'+
+  '<li>מה השאלה הכי טובה לשאול לפני שמאמינים לסיפור בראש?</li></ul>'+
+  '<div class="mission">🌟 <b>משימת האומץ של השבוע:</b> כשמשהו מבלבל אתכם — לפני שכועסים, שימו סימן שאלה ❓ ותשאלו: "היי, הכל בסדר?". ספרו בבית מה גיליתם!</div>',
+  '<h3>🗣️ מדברים על זה יחד</h3><ul>'+
+  '<li>למה שתיקה מול פגיעה בחבר היא בעצם חלק מהפגיעה?</li>'+
+  '<li>מה ההבדל בין להגיד "זה לא בסדר" בקול רגוע — לבין להתחיל ריב?</li>'+
+  '<li>איך מרגיש ילד שמישהו עמד לצידו? ואיך מרגיש מי שעמד לצידו?</li></ul>'+
+  '<div class="mission">🌟 <b>משימת האומץ של השבוע:</b> אם תראו מישהו פוגע בחבר — אמרו בקול רגוע ובטוח: <b>"אני לא מסכים לזה. זה לא בסדר"</b>, והזמינו את החבר אליכם. ספרו בבית — זה האומץ הכי גדול שיש!</div>'
 ];
 function earnBadge(idx){
   CUR_BADGE=idx;
@@ -585,11 +620,13 @@ function stepTo(k,dt){ /* move kid toward k.target; returns moving? */
 /* wait for all models, then populate the world */
 try{await Promise.all([charsReady,statReady])}catch(e){const sb=document.getElementById('startBtn');sb.textContent='❌ שגיאה בטעינה — רעננו את הדף';throw e}
 const sb=document.getElementById('startBtn');sb.disabled=false;sb.textContent='▶️ להיכנס לעולם';
-/* returning player who already earned the flashlight — offer to jump straight to chapter 2 */
-try{if((+localStorage.getItem('toolbagProg')||0)>=1){
+/* returning player — offer to jump straight to the next tool he hasn't earned yet */
+try{const prog=+localStorage.getItem('toolbagProg')||0;
+if(prog>=1){
+  const p=Math.min(prog,6);
   const rb=document.createElement('button');rb.className='btn calm';rb.style.marginTop='10px';
-  rb.textContent='🐬 יש לך כבר את הפנס! להמשיך לכלי השני';
-  rb.onclick=()=>{sndTap();window._RESUME=1;ovShow('ov-char')};
+  rb.textContent='⏩ יש לך כבר '+p+' כלים! להמשיך אל '+TOOLS[p];
+  rb.onclick=()=>{sndTap();window._RESUME=p;ovShow('ov-char')};
   sb.parentNode.insertBefore(rb,sb.nextSibling);
 }}catch(e){}
 
@@ -667,7 +704,7 @@ window.chooseChar=function(name){
   scene.remove(player.g);
   player=makeChar(name,1.58,0x2255aa,1.55);
   player.g.position.copy(pos);player.g.rotation.y=rot;
-  CHARS=[player,...kids,teacher,...CLSKIDS];
+  CHARS=[player,...kids,teacher,...CLSKIDS,newKid];
   try{localStorage.setItem('toolbagChar',name)}catch(e){}
   enterWorld();
 };
@@ -690,7 +727,10 @@ const TEACHER=new THREE.Vector3(120.3,0,-5.35);
 const CLSKIDS=[makeChar('casual',1.52,0x554433,1.55),makeChar('worker',1.52,0x226644,1.55)];
 CLSKIDS[0].g.position.set(118.1,0,1.6);CLSKIDS[0].g.rotation.y=Math.PI+.35;
 CLSKIDS[1].g.position.set(122.1,0,4.4);CLSKIDS[1].g.rotation.y=Math.PI-.4;
-let CHARS=[player,...kids,teacher,...CLSKIDS];
+/* the quiet new kid — waits in the yard's far corner; stars in chapters 3 and 7 */
+const newKid=makeChar('adventurer',1.42,0x7744aa,1.6);
+newKid.g.position.set(33,0,23);newKid.g.rotation.y=Math.PI*.85;
+let CHARS=[player,...kids,teacher,...CLSKIDS,newKid];
 /* ball */
 const ball=new THREE.Mesh(new THREE.SphereGeometry(.19,14,12),new THREE.MeshLambertMaterial({color:0xffffff}));
 ball.castShadow=true;scene.add(ball);
@@ -733,8 +773,9 @@ joy.addEventListener('pointerup',()=>{joyV={x:0,y:0};knob.style.transform='trans
 
 /* =================== game state / quest =================== */
 let MODE='title';           /* title | explore | dialogue | cine */
-let QUEST=0;                /* ch1: 0 go to owl, 1 go to teacher, 2 done | ch2: 3 go to owl, 4 go to field, 5 done */
-let CH=0;                   /* current chapter index (0 = flashlight, 1 = dolphin) */
+let QUEST=0;                /* ch1: 0 go to owl, 1 go to teacher, 2 done | ch2: 3 owl, 4 field, 5 done | ch3-7: n*10 owl, n*10+1 scene */
+let CH=0;                   /* current chapter index 0..6 */
+let CFG=null;               /* active generic-chapter config (chapters 3-7) */
 const explored=new Set();
 const actBtn=document.getElementById('act');
 const questEl=document.getElementById('quest');
@@ -743,7 +784,8 @@ window.enterWorld=function(){sndTap();ovShow(null);MODE='explore';
   const touch='ontouchstart' in window;
   document.getElementById(touch?'joy':'keysHint').style.display='block';
   setTimeout(startAmbience,400);
-  if(window._RESUME){window._RESUME=0;toYard(2.5,-24);window.startCh2()}
+  if(window._RESUME){const p=window._RESUME;window._RESUME=0;toYard(2.5,-24);
+    if(p===1)window.startCh2();else startChapterN(p+1)}
 };
 /* leave the classroom → the schoolyard (also used by the resume flow) */
 function toYard(px,pz){
@@ -987,9 +1029,10 @@ window.retry=function(){
   sndTap();dlg.classList.remove('on');$('#chDlg').innerHTML='';
   /* reset world */
   setNight(0);
-  heartSp.visible=false;chatSp.visible=false;paperSp.visible=false;
+  heartSp.visible=false;chatSp.visible=false;paperSp.visible=false;hideSps();
   kids.forEach((k,i)=>{k.target=HOME[i].clone();k.speed=5});
   soccerActive=true;
+  if(CH>=2&&CFG){CFG.retry();camMode='follow';setTimeout(showChoicesN,1700);return}
   if(CH===0){
     player.target=new THREE.Vector3(120.3,0,-4.1);player.speed=4.4;
     player.onArrive=()=>{face(player,TEACHER);face(teacher,player.g.position)};
@@ -1018,7 +1061,8 @@ window.nextChapter=function(){
       MODE='explore';QUEST=2.2;marker.visible=true;camMode='follow';
       questEl.style.display='block';questEl.textContent='🚪 צאו מהכיתה אל החצר';
     });
-  }else window.startCh2();
+  }else if(CH===0)window.startCh2();
+  else if(CH<=5)startChapterN(CH+2);
 };
 window.startCh2=function(){
   sndTap();ovShow(null);
@@ -1179,6 +1223,517 @@ function dolphinSurface(){
   },2200);
 }
 
+/* =================== chapters 3-7: the generic chapter engine =================== */
+/* small emoji-sprite pool for chapter effects */
+const spPool={};
+function getSp(em,sc){if(!spPool[em]){spPool[em]=emojiSprite(em,sc||2.2);spPool[em].visible=false;scene.add(spPool[em])}return spPool[em]}
+function spOver(em,k,dy,ms){const s=getSp(em);s.position.copy(k.g.position).add(new THREE.Vector3(0,dy||3.2,0));s.visible=true;if(ms)setTimeout(()=>{s.visible=false},ms);return s}
+function hideSps(){Object.values(spPool).forEach(s=>{s.visible=false})}
+/* sandbox + sand castle (chapter 5 stage, lives in the yard all along) */
+const CASTLE=new THREE.Group();
+(function(){
+  box(5.4,.5,.35,0x9a7648,-26,.25,10.6);box(5.4,.5,.35,0x9a7648,-26,.25,15.4);
+  box(.35,.5,5.15,0x9a7648,-28.7,.25,13);box(.35,.5,5.15,0x9a7648,-23.3,.25,13);
+  const sand=new THREE.Mesh(new THREE.BoxGeometry(5,.28,4.5),M(0xe8d29a));sand.position.set(-26,.14,13);sand.receiveShadow=true;scene.add(sand);
+  const c1=new THREE.Mesh(new THREE.CylinderGeometry(.55,.68,.9,10),M(0xdec38f));c1.position.y=.73;CASTLE.add(c1);
+  const c2=new THREE.Mesh(new THREE.CylinderGeometry(.4,.46,.7,10),M(0xd6b87f));c2.position.y=1.42;CASTLE.add(c2);
+  const ct=new THREE.Mesh(new THREE.ConeGeometry(.44,.6,10),M(0xc9a961));ct.position.set(0,2.05,0);ct.name='ctop';CASTLE.add(ct);
+  CASTLE.position.set(-26.4,0,13.1);scene.add(CASTLE);
+})();
+function startChapterN(n){
+  sndTap();ovShow(null);
+  CFG=CHAPTERS[n];CH=n-1;explored.clear();
+  setNight(0);heartSp.visible=false;chatSp.visible=false;paperSp.visible=false;hideSps();
+  kids.forEach((k,i)=>{k.target=HOME[i].clone();k.speed=5});
+  soccerActive=true;marker.visible=true;
+  OWLPOS.copy(CFG.owlGround);
+  const oFrom=owl.position.clone();
+  owl.userData.baseY=0;sndWarm();
+  arcMove(owl,oFrom,CFG.owlPerch.clone(),2100,5,()=>{owl.userData.baseY=CFG.owlPerch.y});
+  if(CFG.setup)CFG.setup();
+  QUEST=n*10;camMode='follow';MODE='explore';
+  questEl.style.display='block';questEl.textContent=CFG.questOwl;
+}
+function owlTalkN(){
+  camMode='owl';questEl.style.display='none';
+  say(CFG.owlLines.map(t=>({who:'🦉 הינשוף',t})),()=>{
+    sndGood();QUEST=(CH+1)*10+1;camMode='follow';MODE='explore';
+    questEl.style.display='block';questEl.textContent=CFG.questScene;
+  });
+}
+function showChoicesN(){
+  MODE='cine';
+  $('#who').style.display='none';$('#nextH').style.display='none';
+  $('#txt').innerHTML=CFG.prompt;
+  dlg.classList.add('on');
+  let h='';CFG.choices.forEach((c,i)=>{h+='<button class="choice" onclick="window.pickN('+i+')">'+c+(explored.has(i)?' ✔️':'')+'</button>'});
+  $('#chDlg').innerHTML=h;
+}
+window.pickN=function(i){sndTap();explored.add(i);dlg.classList.remove('on');$('#chDlg').innerHTML='';CFG.cons[i]()};
+function dimTo(v,ms){const t0=performance.now();const n0=NIGHT;
+  (function d(){const k=Math.min((performance.now()-t0)/(ms||2000),1);setNight(n0+(v-n0)*k);if(k<1)requestAnimationFrame(d)})()}
+
+const CHAPTERS={
+/* ---------- chapter 3: 🌸 the flower that opens ---------- */
+3:{
+  owlPerch:new THREE.Vector3(36.5,1.62,28.8),owlGround:new THREE.Vector3(36,0,27),
+  questOwl:'🦉 הינשוף עף אל הגדר בפינת החצר... לכו אליו',
+  questScene:'🌸 ילד חדש עומד לבד בפינה... גשו אליו',
+  owlLines:[
+    'בוא תראה משהו... אתה רואה את הילד החדש שעומד שם לבד? הוא כאן כבר שבוע, ואף אחד לא מכיר אותו.',
+    'יש לי כלי בדיוק בשביל רגעים כאלה: <b>פרח שנפתח</b> 🌸',
+    'פרח סגור יכול להיות הכי יפה בעולם — אבל כשהעלים סגורים, אף אחד לא יכול לראות את זה.',
+    'ככה גם אנחנו: כשלא מספרים כלום על עצמנו — אף אחד לא יודע מה מיוחד בנו.',
+    'אבל זהירות: פרח <b>מזויף</b> — כשממציאים דברים כדי להרשים — נובל מהר. מרגישים את זה מיד.',
+    'הסוד: לשתף משהו <b>אמיתי</b> קטן מהלב. "אני אוהב...", "אני קצת מתרגש מ..." — ולהזמין.',
+    'לך אליו. תנסה לפתוח עלה אחד 🌸'
+  ],
+  scenePos:new THREE.Vector3(33,0,23),sceneR:5,sceneBtn:'🌸 לגשת לילד החדש',smY:3.2,mo:[.5,3.2,-1],
+  setup(){newKid.g.position.set(33,0,23);newKid.g.rotation.y=Math.PI*.85},
+  startScene(){
+    MODE='cine';camMode='follow';actBtn.style.display='none';questEl.style.display='none';
+    player.target=new THREE.Vector3(31.4,0,22);player.speed=3.6;
+    player.onArrive=()=>{face(player,newKid.g.position);face(newKid,player.g.position)};
+    setTimeout(()=>{
+      say([
+        {who:'',t:'הילד החדש עומד ליד הגדר, מסתכל על הנעליים שלו. הוא מגיע לכאן כל הפסקה — תמיד לבד.'},
+        {who:'👦 הילד החדש',t:'"...אה. היי." הוא אומר בשקט, בלי להרים את הראש.'},
+        {who:'',t:'רגע מוזר של שתיקה. מה אומרים עכשיו?'}
+      ],showChoicesN);
+    },1800);
+  },
+  prompt:'<b>איזה פרח תהיה?</b> 🌸',
+  choices:[
+    '🥀 פרח סגור: "אה... כלום. ביי" — וללכת משם',
+    '🎭 פרח מזויף: "יש לי בבית 100 משחקים ואני הכי טוב בכדורגל בעולם!"',
+    '🌸 פרח נפתח: לספר משהו אמיתי שאתה אוהב — ולשאול מה הוא אוהב'
+  ],
+  cons:[
+    function(){
+      player.target=new THREE.Vector3(24,0,15);player.speed=3.2;player.onArrive=null;
+      dimTo(.6,2400);
+      setTimeout(()=>{
+        heartSp.material=emojiSprite('🖤',2.4).material;heartSp.visible=true;
+        reflect('הלכת משם. הוא נשאר לבד ליד הגדר — ואתה לבד בצד השני. שני פרחים סגורים באותה חצר.',
+                '🥀 פרח סגור שומר על עצמו — אבל אף אחד לא מגלה כמה הוא יפה. ושניכם הפסדתם חבר.');
+      },2600);
+    },
+    function(){
+      spOver('❗',newKid,3,2600);
+      snd(220,.4,'triangle',.09);
+      setTimeout(()=>{
+        newKid.target=newKid.g.position.clone().add(new THREE.Vector3(5,0,3));newKid.speed=3.4;
+        dimTo(.35,1600);
+      },1400);
+      setTimeout(()=>{
+        reflect('"...בסדר." הוא זז אחורה צעד, ואז הולך משם. משהו בהמצאות האלה הרגיש לו לא אמיתי.',
+                '🎭 פרח מזויף נראה נוצץ לרגע — אבל כולם מריחים שהוא מפלסטיק. אמת קטנה שווה יותר מסיפור ענק.');
+      },3200);
+    },
+    function(){
+      say([
+        {who:'🙂 אתה',t:'"היי! האמת? אני ממש אוהב כדורגל, אבל קצת התביישתי לבוא אליך... מה אתה אוהב?"'},
+        {who:'👦 הילד החדש',t:'"באמת?!" הוא מרים את הראש ומחייך. "גם אני! חשבתי שאף אחד פה לא ידבר איתי אף פעם..."'},
+        {who:'',t:'פתאום יש שיחה. שני פרחים נפתחים באותו רגע 🌸'}
+      ],()=>{
+        sndGood();
+        playA(newKid,'Wave',true);
+        spOver('🌸',player,3.4,3500);
+        jump(player,250);
+        /* both walk toward the field together, and the kids wave them in */
+        player.target=new THREE.Vector3(7,0,1.5);player.speed=3.6;player.onArrive=null;
+        newKid.target=new THREE.Vector3(8.8,0,2.5);newKid.speed=3.6;
+        setTimeout(()=>{playA(kids[0],'Wave',true);playA(kids[3],'Wave',true);confettiBurst()},2400);
+        setTimeout(()=>{
+          reflect('סיפרת משהו אמיתי אחד — וקיבלת חבר. הוא רק חיכה שמישהו יפתח את העלה הראשון.',
+            '🌸 עלה אמיתי קטן ← שאלה אחת בחזרה ← חברות. פרח שנפתח מגלה לעולם כמה הוא יפה!',true);
+        },3400);
+      });
+    }
+  ],
+  retry(){
+    newKid.target=null;newKid.g.position.set(33,0,23);newKid.g.rotation.y=Math.PI*.85;
+    player.target=new THREE.Vector3(31.4,0,22);player.speed=4.4;
+    player.onArrive=()=>{face(player,newKid.g.position);face(newKid,player.g.position)};
+  }
+},
+/* ---------- chapter 4: 📗 the green folder ---------- */
+4:{
+  owlPerch:new THREE.Vector3(0,5.45,-32.6),owlGround:new THREE.Vector3(0,0,-30),
+  questOwl:'🦉 הינשוף עף אל הגגון מעל דלת בית הספר... לכו אליו',
+  questScene:'📗 החברים משחקים קלאס ליד המדרכה... גשו אליהם',
+  owlLines:[
+    'שמעת פעם על <b>התיקיה הירוקה</b>? 📗 זה אחד הכלים הכי חזקים בתיק.',
+    'בכל יום קורים דברים קטנים ומעצבנים: מישהו דרך על קו, שינה חוק, לקח את התור...',
+    'יש ילדים שפותחים על כל דבר כזה <b>תיק אדום</b> 📕 — ויכוח גדול, צעקות... והמשחק מת.',
+    'אבל אפשר גם אחרת: לשים את הדבר הקטן ב<b>תיקיה הירוקה</b> — לסגור אותה בעדינות, ולהמשיך לשחק.',
+    'שים לב: דברים <b>גדולים</b> — כשמישהו באמת פוגע — לא נכנסים לתיקיה. עליהם דווקא מדברים!',
+    'רק הקטנים-קטנים. רוב הדברים קטנים יותר ממה שהם מרגישים ברגע 😉',
+    'החברים שלך משחקים קלאס שם ליד המדרכה. לך תשחק — ותחזיק את התיקיה מוכנה 📗'
+  ],
+  scenePos:new THREE.Vector3(-10,0,-21),sceneR:6,sceneBtn:'🎲 להצטרף לקלאס',smY:3.4,mo:[0,6.3,1.5],
+  setup(){
+    CLSKIDS[0].target=null;CLSKIDS[0].g.position.set(-9,0,-20.2);CLSKIDS[0].g.rotation.y=Math.PI*1.3;
+    CLSKIDS[1].target=null;CLSKIDS[1].g.position.set(-11.6,0,-19.2);CLSKIDS[1].g.rotation.y=Math.PI*.7;
+  },
+  startScene(){
+    MODE='cine';camMode='follow';actBtn.style.display='none';questEl.style.display='none';
+    player.target=new THREE.Vector3(-10,0,-22.6);player.speed=3.6;
+    player.onArrive=()=>{face(player,CLSKIDS[0].g.position)};
+    playA(CLSKIDS[0],'Wave',true);
+    setTimeout(()=>{
+      say([
+        {who:'',t:'אתם באמצע משחק קלאס מעולה. התור שלך עכשיו — ואתה מוביל!'},
+        {who:'👦 יואב',t:'"רגע רגע! בואו נשנה חוק: מעכשיו מדלגים <b>פעמיים</b> על כל משבצת! זה יותר מצחיק!"'},
+        {who:'',t:'אבל... זה לא החוק! ככה לא משחקים קלאס! ובדיוק כשאתה מוביל! משהו בבטן מתחמם...'}
+      ],showChoicesN);
+    },1800);
+  },
+  prompt:'<b>איזו תיקיה תפתח?</b> 📁',
+  choices:[
+    '📕 תיק אדום: "אין מצב!!! זה נגד החוקים! אתם הורסים את המשחק!"',
+    '😤 לפרוש: "אם משנים חוקים — אני לא משחק. ביי."',
+    '📗 תיקיה ירוקה: "בסדר, ננסה! אולי זה באמת מצחיק — ואם לא, נחזור לחוק הרגיל"'
+  ],
+  cons:[
+    function(){
+      spOver('💢',player,3.2,2800);
+      snd(170,.5,'sawtooth',.1);
+      CLSKIDS.forEach(k=>{const d=new THREE.Vector3().subVectors(player.g.position,k.g.position);k.g.rotation.y=Math.atan2(d.x,d.z)});
+      dimTo(.45,2200);
+      setTimeout(()=>{
+        reflect('צעקת על החוק... והמשחק פשוט נגמר. יואב מושך בכתפיים: "טוב, אז לא משחקים". כולם מתפזרים.',
+                '📕 התיק האדום ניצח בוויכוח — והפסיד את המשחק. על חוק קטן שילמת בהפסקה שלמה של כיף.');
+      },2600);
+    },
+    function(){
+      player.target=new THREE.Vector3(-1,0,-14);player.speed=3.2;player.onArrive=null;
+      dimTo(.55,2400);
+      setTimeout(()=>{playA(CLSKIDS[0],'Wave',true);playA(CLSKIDS[1],'Wave',true)},1500);
+      setTimeout(()=>{
+        heartSp.material=emojiSprite('🖤',2.4).material;heartSp.visible=true;
+        reflect('הלכת. ומאחוריך? הם משחקים עם החוק החדש — וצוחקים. רק אתה בחוץ.',
+                '😤 לפרוש זה גם תיק אדום, רק בשקט. המשחק המשיך — פשוט בלעדיך.');
+      },2800);
+    },
+    function(){
+      spOver('📗',player,3.3,3000);
+      sndGood();
+      say([
+        {who:'🙂 אתה',t:'"בסדר, ננסה! אולי זה באמת מצחיק — ואם לא, נחזור לחוק הרגיל"'},
+        {who:'👦 יואב',t:'"יששש! אתה תותח! תראה — ככה!" הוא מדלג פעמיים וכמעט נופל, וכולם מתפוצצים מצחוק 😂'}
+      ],()=>{
+        sndGood();
+        jump(player,150);jump(CLSKIDS[0],350);jump(CLSKIDS[1],550);
+        confettiBurst();
+        setTimeout(()=>{
+          reflect('שמת את החוק הקטן בתיקיה הירוקה — והמשחק נהיה אפילו יותר מצחיק ממקודם!',
+            '📗 דבר קטן ← תיקיה ירוקה ← ממשיכים לזרום. ככה חברות נשארת גדולה מהחוקים הקטנים!',true);
+        },2200);
+      });
+    }
+  ],
+  retry(){
+    CLSKIDS[0].target=null;CLSKIDS[0].g.position.set(-9,0,-20.2);CLSKIDS[0].g.rotation.y=Math.PI*1.3;
+    CLSKIDS[1].target=null;CLSKIDS[1].g.position.set(-11.6,0,-19.2);CLSKIDS[1].g.rotation.y=Math.PI*.7;
+    player.target=new THREE.Vector3(-10,0,-22.6);player.speed=4.4;
+    player.onArrive=()=>{face(player,CLSKIDS[0].g.position)};
+  }
+},
+/* ---------- chapter 5: 🙋 social initiative ---------- */
+5:{
+  owlPerch:new THREE.Vector3(-28.6,.86,15.3),owlGround:new THREE.Vector3(-28,0,17),
+  questOwl:'🦉 הינשוף נחת על פינת ארגז החול... לכו אליו',
+  questScene:'🏰 שני חברים בונים טירת חול... גשו אליהם',
+  owlLines:[
+    'רואה את הטירה שהם בונים? יפה, נכון? ואתה עומד פה... ומחכה.',
+    'למה אתה מחכה? שיקראו לך? הרשה לי לגלות לך סוד: <b>לפעמים ההזמנה פשוט לא מגיעה</b>.',
+    'לא כי לא רוצים אותך! פשוט כי הם עסוקים בטירה שלהם ולא חשבו על זה.',
+    'בשביל זה יש את הכלי הבא: <b>יוזמה חברתית</b> 🙋 — להיות זה שאומר את המילה הראשונה.',
+    'אבל יש דרך: לא פורצים פנימה בכוח. קודם <b>מחמאה אמיתית</b>, ואז <b>שאלה מנומסת</b>.',
+    '"איזה מגדל מגניב! אפשר לעזור?" — שש מילים שפותחות עולמות 😉',
+    'קדימה, גש אליהם. המילה הראשונה שלך!'
+  ],
+  scenePos:new THREE.Vector3(-26,0,13),sceneR:5.5,sceneBtn:'🙋 לגשת לבונים',smY:3.4,mo:[1,3,1.5],
+  setup(){
+    CLSKIDS[0].target=null;CLSKIDS[0].g.position.set(-25,0,12.2);face(CLSKIDS[0],CASTLE.position);
+    CLSKIDS[1].target=null;CLSKIDS[1].g.position.set(-27.6,0,14.4);face(CLSKIDS[1],CASTLE.position);
+    const ct=CASTLE.getObjectByName('ctop');ct.position.set(0,2.05,0);ct.visible=true;
+    playA(CLSKIDS[0],'Interact',true);
+  },
+  startScene(){
+    MODE='cine';camMode='follow';actBtn.style.display='none';questEl.style.display='none';
+    player.target=new THREE.Vector3(-24.1,0,15.4);player.speed=3.6;
+    player.onArrive=()=>{face(player,CASTLE.position)};
+    playA(CLSKIDS[1],'Interact',true);
+    setTimeout(()=>{
+      say([
+        {who:'',t:'הם שקועים בבנייה. מגדל, חומה, אפילו דגל קטן. נראה כיף אמיתי...'},
+        {who:'',t:'אתה עומד קרוב. הם אפילו לא שמו לב אליך. הלב קצת דופק — מה עושים?'}
+      ],showChoicesN);
+    },1800);
+  },
+  prompt:'<b>מה עושים?</b> 🤔',
+  choices:[
+    '😔 לחכות בצד: "אם הם ירצו אותי — הם כבר יקראו לי..."',
+    '😾 להתפרץ: לקפוץ לארגז — "זוזו, אני בונה איתכם עכשיו!"',
+    '🙋 יוזמה מנומסת: "איזו טירה אדירה! אפשר לעזור לכם עם החומה?"'
+  ],
+  cons:[
+    function(){
+      dimTo(.55,3000);
+      playA(CLSKIDS[0],'Interact',true);
+      setTimeout(()=>{playA(CLSKIDS[1],'Interact',true)},900);
+      setTimeout(()=>{
+        CLSKIDS[0].target=new THREE.Vector3(-14,0,4);CLSKIDS[0].speed=3.4;
+        CLSKIDS[1].target=new THREE.Vector3(-12,0,6);CLSKIDS[1].speed=3.4;
+      },2100);
+      setTimeout(()=>{
+        heartSp.material=emojiSprite('🖤',2.4).material;heartSp.visible=true;
+        reflect('חיכית... והם סיימו את הטירה, טפחו כיף אחד לשני והלכו. ההזמנה אף פעם לא הגיעה.',
+                '😔 מי שרק מחכה — לפעמים מחכה לנצח. ההזמנה שחיכית לה הייתה אצלך בכיס כל הזמן.');
+      },3600);
+    },
+    function(){
+      player.target=new THREE.Vector3(-26,0,13.9);player.speed=6;
+      player.onArrive=()=>{
+        face(player,CASTLE.position);
+        snd(170,.4,'sawtooth',.1);
+        const ct=CASTLE.getObjectByName('ctop');
+        arcMove(ct,ct.position.clone(),new THREE.Vector3(1.5,.3,1.1),700,1.2);
+        spOver('❗',CLSKIDS[0],3,2400);
+        CLSKIDS.forEach(k=>{const d=new THREE.Vector3().subVectors(player.g.position,k.g.position);k.g.rotation.y=Math.atan2(d.x,d.z)});
+        setTimeout(()=>{
+          reflect('קפצת פנימה — והמגדל נפל! "היי!!! בנינו על זה חצי הפסקה!" הפנים שלהם אומרות הכל.',
+                  '😾 להצטרף בכוח זה כמו לדרוך על הטירה. גם כשמתכוונים טוב — בלי לשאול, זה מרגיש כמו פלישה.');
+        },2200);
+      };
+    },
+    function(){
+      say([
+        {who:'🙂 אתה',t:'"וואו, איזו טירה אדירה! המגדל הזה ענק! אפשר לעזור לכם עם החומה?"'},
+        {who:'👦 דני',t:'"באמת מגניבה, אה?" הוא מחייך. "בטח! אתה על החומה המזרחית — צריך שם ידיים טובות!"'}
+      ],()=>{
+        sndGood();
+        player.target=new THREE.Vector3(-25.4,0,13.8);player.speed=3;
+        player.onArrive=()=>{face(player,CASTLE.position);playA(player,'Interact',true)};
+        setTimeout(()=>{playA(CLSKIDS[0],'Interact',true);playA(CLSKIDS[1],'Interact',true)},900);
+        setTimeout(()=>{
+          /* the castle grows a flag — the three built it together */
+          const fl=new THREE.Mesh(new THREE.BoxGeometry(.5,.32,.04),M(0xe05a4e));fl.position.set(.25,2.75,0);fl.name='cflag';CASTLE.add(fl);
+          box(.04,.5,.04,0x777777,-26.4,2.55,13.1);
+          spOver('🙋',player,3.4,3000);
+          confettiBurst();sndGood();
+        },2000);
+        setTimeout(()=>{
+          reflect('מחמאה אחת + שאלה מנומסת — ואתה בפנים! הטירה קיבלה חומה חדשה ודגל, ואתה קיבלת שני חברים.',
+            '🙋 מחמאה אמיתית ← "אפשר לעזור?" ← בונים יחד. היוזמה היא המילה הראשונה — והיא אצלך!',true);
+        },4000);
+      });
+    }
+  ],
+  retry(){
+    CLSKIDS[0].target=null;CLSKIDS[0].g.position.set(-25,0,12.2);face(CLSKIDS[0],CASTLE.position);
+    CLSKIDS[1].target=null;CLSKIDS[1].g.position.set(-27.6,0,14.4);face(CLSKIDS[1],CASTLE.position);
+    const ct=CASTLE.getObjectByName('ctop');ct.position.set(0,2.05,0);
+    const fl=CASTLE.getObjectByName('cflag');if(fl)CASTLE.remove(fl);
+    player.target=new THREE.Vector3(-24.1,0,15.4);player.speed=4.4;
+    player.onArrive=()=>{face(player,CASTLE.position)};
+  }
+},
+/* ---------- chapter 6: ❓ afrat — put a question mark ---------- */
+6:{
+  owlPerch:new THREE.Vector3(17,6.15,-32.7),owlGround:new THREE.Vector3(16,0,-29),
+  questOwl:'🦉 הינשוף עף אל תורן הדגל... לכו אליו',
+  questScene:'❓ מישהו מוכר מתקרב בשביל ליד הכניסה... לכו לשם',
+  owlLines:[
+    'עכשיו כלי מיוחד. הוא לא נראה כמו כלי — הוא נראה כמו <b>סימן שאלה</b> ❓',
+    'תקשיב טוב: לא האירועים עושים לנו את הרגש. <b>הסיפור שאנחנו מספרים לעצמנו</b> על האירוע — הוא שעושה.',
+    'חבר עבר ולא אמר שלום? אפשר לספר לעצמנו: "הוא כועס עליי!" — ואז הבטן מתהפכת.',
+    'ואפשר לספר: "אולי הוא לא ראה אותי?" — ואז... כלום. סקרנות במקום כאב.',
+    'אותו אירוע בדיוק. שני סיפורים. שני רגשות שונים לגמרי. זה נקרא <b>אפר״ת</b>.',
+    'הכלי: כשהראש ממציא סיפור רע — שמים עליו סימן שאלה ❓ והולכים <b>לבדוק</b>.',
+    'אופס... נראה לי שאתה עומד לקבל הזדמנות לתרגל. תסתכל על השביל 👀'
+  ],
+  scenePos:new THREE.Vector3(2,0,-24),sceneR:6,sceneBtn:'👀 לראות מי מגיע',smY:3.4,mo:[.5,7,1],
+  setup(){
+    CLSKIDS[0].target=null;CLSKIDS[0].g.position.set(-8,0,-17);CLSKIDS[0].g.rotation.y=Math.PI/2;
+    CLSKIDS[1].target=null;CLSKIDS[1].g.position.set(12,0,-2);CLSKIDS[1].g.rotation.y=Math.PI;
+  },
+  startScene(){
+    MODE='cine';camMode='follow';actBtn.style.display='none';questEl.style.display='none';
+    player.target=new THREE.Vector3(3.5,0,-21.5);player.speed=3.4;
+    player.onArrive=()=>{face(player,CLSKIDS[0].g.position)};
+    setTimeout(()=>{
+      CLSKIDS[0].target=new THREE.Vector3(14,0,-19);CLSKIDS[0].speed=3.2;
+      say([
+        {who:'',t:'זה יואב! החבר הכי טוב שלך! אתמול שיחקתם יחד אצלך בבית...'},
+        {who:'',t:'הוא עובר ממש לידך... בלי מבט. בלי "היי". בלי כלום. פשוט ממשיך ללכת.'},
+        {who:'💭 הראש שלך',t:'"הוא כועס עליי?... אמרתי משהו?... אולי הוא כבר לא חבר שלי?!" הסיפורים מתחילים לרוץ...'}
+      ],showChoicesN);
+    },1600);
+  },
+  prompt:'<b>מה עושים עם הסיפור שבראש?</b> 💭',
+  choices:[
+    '😠 להאמין לסיפור: "הוא שונא אותי! ידעתי! איזה חבר גרוע!"',
+    '🧊 מלחמה קרה: "אה ככה?! אז גם אני לא מדבר איתו יותר. אף פעם."',
+    '❓ סימן שאלה: ללכת אליו ולשאול — "היי יואב, הכל בסדר?"'
+  ],
+  cons:[
+    function(){
+      spOver('😡',player,3.3,3000);
+      snd(170,.5,'sawtooth',.1);
+      playA(player,'Kick_Right',true);
+      dimTo(.55,2400);
+      setTimeout(()=>{
+        reflect('כל היום הרוס. אתה כועס, בטן כואבת — ויואב? הוא בכלל לא יודע שמשהו קרה. רק הסיפור שבראש שלך יודע.',
+                '😠 האמנת לסיפור בלי לבדוק אותו — והסיפור הזה גבה ממך יום שלם של כאב. חינם.');
+      },2600);
+    },
+    function(){
+      player.g.rotation.y+=Math.PI;
+      spOver('🧊',player,3.3,3000);
+      dimTo(.55,2400);
+      setTimeout(()=>{
+        reflect('שבוע שלם בלי לדבר. הוא לא מבין למה, אתה כבר לא זוכר למה... וחברות של שנים נמסה בשקט.',
+                '🧊 מלחמה קרה מענישה את שניכם — על פשע שאולי בכלל לא קרה. הסיפור ניצח, החברות הפסידה.');
+      },2800);
+    },
+    function(){
+      spOver('❓',player,3.4,2500);
+      player.target=new THREE.Vector3(12.8,0,-19.4);player.speed=4.6;
+      player.onArrive=()=>{
+        CLSKIDS[0].target=null;
+        face(player,CLSKIDS[0].g.position);face(CLSKIDS[0],player.g.position);
+        say([
+          {who:'🙂 אתה',t:'"היי יואב! ...הכל בסדר? עברת לידי ולא אמרת שלום"'},
+          {who:'👦 יואב',t:'"מה?! עברתי לידך?!" הוא פוער עיניים. "סליחה!!! יש לי מחר מבחן ענק בתורה ואני חוזר על זה בראש כל ההפסקה... בכלל לא ראיתי אותך!"'},
+          {who:'👦 יואב',t:'"רגע... חשבת שאני כועס עליך? 😂 אתה החבר הכי טוב שלי, יא תותח!"'}
+        ],()=>{
+          sndGood();
+          const q=getSp('❓');q.visible=false;
+          spOver('💡',player,3.4,3000);
+          playA(CLSKIDS[0],'Wave',true);jump(player,200);
+          confettiBurst();
+          setTimeout(()=>{
+            reflect('שאלה אחת קטנה — והסיפור המפחיד התפוצץ כמו בועת סבון. הוא בסך הכל היה לחוץ ממבחן!',
+              '❓ אירוע ← עצור! ← סימן שאלה ← בודקים. הרגש הולך אחרי הסיפור — אז תבדוק את הסיפור לפני שתאמין לו!',true);
+          },2400);
+        });
+      };
+    }
+  ],
+  retry(){
+    CLSKIDS[0].target=null;CLSKIDS[0].g.position.set(-8,0,-17);CLSKIDS[0].g.rotation.y=Math.PI/2;
+    player.target=new THREE.Vector3(3.5,0,-21.5);player.speed=4.4;player.onArrive=null;
+    setTimeout(()=>{CLSKIDS[0].target=new THREE.Vector3(14,0,-19);CLSKIDS[0].speed=3.2},900);
+  }
+},
+/* ---------- chapter 7: 🛡️ we don't stay silent ---------- */
+7:{
+  owlPerch:new THREE.Vector3(-33,1.62,28.8),owlGround:new THREE.Vector3(-32,0,27),
+  questOwl:'🦉 הינשוף מחכה על הגדר בפינה הרחוקה... לכו אליו',
+  questScene:'🛡️ משהו לא טוב קורה ליד הגדר... מהרו לשם!',
+  owlLines:[
+    'הגעת לכלי האחרון. תסתכל לי בעיניים רגע — כי זה הכלי הכי חשוב מכולם.',
+    'עד עכשיו למדת כלים בשביל <b>עצמך</b>: פנס פנימי, דולפין, פרח, תיקיה ירוקה, יוזמה, סימן שאלה...',
+    'הכלי השביעי הוא בשביל <b>מישהו אחר</b>: 🛡️ <b>לא שותקים כשפוגעים בחבר</b>.',
+    'כשמישהו לועג לילד — כל מי ששותק ומסתכל... משתתף. השתיקה היא חלק מהפגיעה.',
+    'אבל שים לב: הכלי הזה הוא <b>לא</b> מלחמה! לא צעקות, לא מכות.',
+    'רק משפט אחד, בקול רגוע ובטוח: <b>"אני לא מסכים לזה. זה לא בסדר"</b>. ואז מזמינים את הילד אלינו.',
+    'אני שומע קולות לא טובים מהפינה שם... נראה לי שהרגע הגיע. לך.'
+  ],
+  scenePos:new THREE.Vector3(-30,0,22),sceneR:6.5,sceneBtn:'👀 לראות מה קורה',smY:3.4,mo:[.5,3.2,-1],
+  setup(){
+    newKid.target=null;newKid.g.position.set(-30.5,0,24.2);newKid.g.rotation.y=Math.PI;
+    CLSKIDS[0].target=null;CLSKIDS[0].g.position.set(-29,0,22);face(CLSKIDS[0],newKid.g.position);
+    CLSKIDS[1].target=null;CLSKIDS[1].g.position.set(-32,0,21.6);face(CLSKIDS[1],newKid.g.position);
+  },
+  startScene(){
+    MODE='cine';camMode='follow';actBtn.style.display='none';questEl.style.display='none';
+    player.target=new THREE.Vector3(-27.5,0,19.5);player.speed=4;
+    player.onArrive=()=>{face(player,newKid.g.position)};
+    spOver('💢',CLSKIDS[0],3,5200);
+    setTimeout(()=>{
+      say([
+        {who:'',t:'שני ילדים גדולים עומדים מול הילד החדש — החבר שלך מפרק הפרח 🌸 — והוא נלחץ אל הגדר.'},
+        {who:'👦 ילד גדול',t:'"אתה גרוע בכדורגל! בגללך הפסדנו! למה אתה בכלל בא לחצר, אה?"'},
+        {who:'',t:'החבר שלך מסתכל ברצפה. הוא לבד מולם... והוא רואה שאתה שם. הלב שלך דופק חזק.'}
+      ],showChoicesN);
+    },1900);
+  },
+  prompt:'<b>הרגע הכי חשוב במסע. מה תעשה?</b> 🛡️',
+  choices:[
+    '😬 להצטרף אליהם: "כן, אתה באמת גרוע!" — העיקר שלא יתחילו איתי',
+    '🙈 להתרחק בשקט: "זה לא העניין שלי..." — ללכת ולא להסתכל אחורה',
+    '🛡️ לעמוד בין לבין ולומר רגוע: "אני לא מסכים לזה. זה לא בסדר."'
+  ],
+  cons:[
+    function(){
+      player.target=new THREE.Vector3(-30.8,0,21.2);player.speed=4;
+      player.onArrive=()=>{face(player,newKid.g.position)};
+      dimTo(.85,2600);
+      setTimeout(()=>{newKid.g.rotation.y+=Math.PI*.9;spOver('💔',newKid,3,3000)},1500);
+      setTimeout(()=>{
+        reflect('הצטרפת... והפנים של החבר שלך נפלו. הילד שפתחת אליו את הפרח — ראה אותך עומד מולו. העולם נהיה חשוך.',
+                '😬 הצטרפת ללעג כדי להרגיש חזק — אבל זה הכי חלש שיש. פגעת בחבר אמיתי כדי למצוא חן בעיני מי שלא באמת חברים שלך.');
+      },3100);
+    },
+    function(){
+      player.target=new THREE.Vector3(-18,0,12);player.speed=3.4;player.onArrive=null;
+      dimTo(.6,2600);
+      setTimeout(()=>{spOver('💔',newKid,3,3200);spOver('💢',CLSKIDS[0],3,3200)},1400);
+      setTimeout(()=>{
+        reflect('הלכת. מאחוריך הלעג ממשיך... והחבר שלך ראה אותך הולך. "אף אחד לא בא לעזור לי" — זה מה שהוא ילמד היום.',
+                '🙈 לא צעקת, לא פגעת — רק שתקת. אבל בשביל מי שפוגעים בו, שתיקה של חבר כואבת כמעט כמו הלעג עצמו.');
+      },3100);
+    },
+    function(){
+      player.target=new THREE.Vector3(-30.6,0,23);player.speed=4.6;
+      player.onArrive=()=>{
+        face(player,CLSKIDS[0].g.position);
+        say([
+          {who:'😊 אתה (בקול רגוע וברור)',t:'"אני לא מסכים לזה. זה לא בסדר."'},
+          {who:'',t:'שקט. שני הגדולים מסתכלים אחד על השני. הם חיכו לצעקות, לריב... לא לקול שקט ובטוח כזה.'},
+          {who:'👦 ילד גדול',t:'"...נו טוב. סתם צחקנו." הם ממלמלים משהו והולכים משם.'},
+          {who:'😊 אתה',t:'"בוא," אתה מושיט יד לחבר שלך, "משחקים כדורגל. אתה בקבוצה שלי."'}
+        ],()=>{
+          sndGood();
+          CLSKIDS[0].target=new THREE.Vector3(-14,0,6);CLSKIDS[0].speed=4;
+          CLSKIDS[1].target=new THREE.Vector3(-16,0,9);CLSKIDS[1].speed=4;
+          playA(newKid,'Wave',true);jump(player,200);
+          spOver('🛡️',player,3.5,3500);
+          player.target=new THREE.Vector3(3,0,3);player.speed=3.6;player.onArrive=null;
+          newKid.target=new THREE.Vector3(5,0,4.4);newKid.speed=3.6;
+          setTimeout(()=>{kids.forEach((k,i)=>{playA(k,'Wave',true)});confettiBurst()},2600);
+          /* the whole toolbag parades across the sky */
+          setTimeout(()=>{
+            TOOLS.forEach((t,i)=>{
+              setTimeout(()=>{
+                const s=getSp(t,2.6);s.visible=true;
+                arcMove(s,new THREE.Vector3(-14+i*2,2,6),new THREE.Vector3(-2+i*2,2,2),1600,6,()=>{s.visible=false});
+              },i*260);
+            });
+            confettiBurst();sndWarm();
+          },3600);
+          setTimeout(()=>{
+            reflect('משפט אחד רגוע — והלעג נגמר. החבר שלך הרים את הראש, והיום הזה הפך ליום שבו הוא גילה שיש לו מגן.',
+              '🛡️ בלי צעקות, בלי ריב: "אני לא מסכים לזה. זה לא בסדר" ← מזמינים אלינו ← הולכים יחד. זה האומץ הכי גדול בתיק!',true);
+          },6200);
+        });
+      };
+    }
+  ],
+  retry(){
+    newKid.target=null;newKid.g.position.set(-30.5,0,24.2);newKid.g.rotation.y=Math.PI;
+    CLSKIDS[0].target=null;CLSKIDS[0].g.position.set(-29,0,22);face(CLSKIDS[0],newKid.g.position);
+    CLSKIDS[1].target=null;CLSKIDS[1].g.position.set(-32,0,21.6);face(CLSKIDS[1],newKid.g.position);
+    player.target=new THREE.Vector3(-27.5,0,19.5);player.speed=4.4;
+    player.onArrive=()=>{face(player,newKid.g.position)};
+  }
+}
+};
+
 /* feelings flow (HTML overlay) */
 function feelFlow(cfg){
   ovShow('ov-feel');
@@ -1284,6 +1839,14 @@ function animate(){
     else actBtn.style.display='none';
   }else if(QUEST===4){marker.visible=true;marker.position.set(FIELD.x,3.4+Math.sin(markerT*3)*.35,FIELD.z+5.5);
     if(MODE==='explore'&&distTo(FIELD)<8){actBtn.textContent='⚽ לגשת לילדים';actBtn.style.display='block';actBtn.onclick=()=>{sndTap();actBtn.style.display='none';QUEST=5;startScenario2()}}
+    else actBtn.style.display='none';
+  }else if(QUEST>=30&&CFG&&QUEST%10===0){marker.visible=true;
+    marker.position.set(OWLPOS.x+CFG.mo[0],CFG.mo[1]+Math.sin(markerT*3)*.3,OWLPOS.z+CFG.mo[2]);
+    if(MODE==='explore'&&distTo(OWLPOS)<5){actBtn.textContent='🦉 לדבר עם הינשוף';actBtn.style.display='block';actBtn.onclick=()=>{sndTap();actBtn.style.display='none';QUEST+=.5;owlTalkN()}}
+    else actBtn.style.display='none';
+  }else if(QUEST>=30&&CFG&&QUEST%10===1){marker.visible=true;
+    marker.position.set(CFG.scenePos.x,CFG.smY+Math.sin(markerT*3)*.3,CFG.scenePos.z);
+    if(MODE==='explore'&&distTo(CFG.scenePos)<CFG.sceneR){actBtn.textContent=CFG.sceneBtn;actBtn.style.display='block';actBtn.onclick=()=>{sndTap();actBtn.style.display='none';QUEST+=1;CFG.startScene()}}
     else actBtn.style.display='none';
   }else marker.visible=false;
   /* floating heart above player */
