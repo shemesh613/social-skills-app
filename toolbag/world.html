@@ -18,6 +18,7 @@ body{font-family:'Heebo',sans-serif;background:#0d1330;color:#fff;user-select:no
 #joy{position:fixed;bottom:26px;right:26px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.25);z-index:10;touch-action:none}
 #knob{position:absolute;top:50%;left:50%;width:52px;height:52px;border-radius:50%;background:rgba(255,213,74,.85);transform:translate(-50%,-50%);box-shadow:0 4px 14px rgba(0,0,0,.4)}
 .keysHint{position:fixed;bottom:34px;left:26px;font-size:13px;opacity:.6;z-index:10}
+#sndBtn{position:fixed;top:10px;left:12px;width:52px;height:52px;border-radius:50%;background:rgba(10,14,40,.78);border:1.5px solid rgba(255,213,74,.6);font-size:26px;line-height:1;cursor:pointer;z-index:80;box-shadow:0 6px 20px rgba(0,0,0,.4)}
 
 /* ---------- overlays ---------- */
 .ov{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;z-index:20;overflow-y:auto}
@@ -91,6 +92,7 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
 <button id="act"></button>
 <div id="joy" style="display:none"><div id="knob"></div></div>
 <div class="keysHint" id="keysHint" style="display:none">🎮 חצים / WASD לתנועה</div>
+<button id="sndBtn" aria-label="הפעלה או כיבוי של הצליל">🔊</button>
 
 <!-- title -->
 <div id="fade" style="position:fixed;inset:0;background:#000;opacity:0;transition:opacity .8s;pointer-events:none;z-index:70"></div>
@@ -99,7 +101,8 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
   <div style="font-size:clamp(70px,17vw,120px);filter:drop-shadow(0 14px 30px rgba(0,0,0,.5))">🎒</div>
   <h1>תיק הכלים</h1>
   <div class="chapter">פרק 1 · הפנס הפנימי 🔦</div>
-  <button class="btn" id="startBtn" disabled onclick="ovShow('ov-char')">⏳ טוען את הדמויות...</button>
+  <button class="btn" id="startBtn" disabled onclick="ovShow('ov-char')">⏳ טוען דמויות 0/6</button>
+  <button class="btn sec" style="max-width:260px;font-size:15px;padding:11px 18px" onclick="location.href='flower.html'">🌸 תרגול הפרח</button>
   <div class="tiny">מסע של 7 כלים לחיים · הזיזו את הדמות, גשו לדמויות — והחיים יקרו</div>
 </div>
 
@@ -152,14 +155,29 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
 function $(s){return document.querySelector(s)}
 function ovShow(id){document.querySelectorAll('.ov').forEach(function(o){o.classList.remove('on')});if(id)$('#'+id).classList.add('on')}
 var AC=null;
-function snd(f,d,type,vol){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();var o=AC.createOscillator(),g=AC.createGain();o.type=type||'sine';o.frequency.value=f;g.gain.value=vol||.12;g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+(d||.25));o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+(d||.25))}catch(e){}}
+function snd(f,d,type,vol){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(!SND)return;var o=AC.createOscillator(),g=AC.createGain();o.type=type||'sine';o.frequency.value=f;g.gain.value=vol||.12;g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+(d||.25));o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+(d||.25))}catch(e){}}
 function sndTap(){snd(520,.12)} function sndGood(){snd(660,.16);setTimeout(function(){snd(880,.22)},110)}
 function sndWarm(){snd(392,.4,'triangle',.1);setTimeout(function(){snd(523,.5,'triangle',.1)},180)}
+/* ---- master sound switch (SFX + ambience + TTS), persisted ---- */
+var SND=true;try{SND=localStorage.getItem('toolbagSnd')!=='0'}catch(e){}
+/* ---- reduced motion preference ---- */
+const REDUCED=(function(){try{return matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){return false}})();
+/* ---- קריינות מושבתת בכוונה: בלי קול רובוטי של הדפדפן.
+   speak() נשאר כנקודת חיבור לקבצי קול איכותיים (Google AI Studio TTS) ---- */
+function speak(t){}
+function setSnd(on){
+  SND=on;try{localStorage.setItem('toolbagSnd',on?'1':'0')}catch(e){}
+  var b=$('#sndBtn');if(b)b.textContent=on?'🔊':'🔇';
+  if(window._windGain)try{window._windGain.gain.value=on?.016:0}catch(e){}
+  if(on)sndTap();
+}
+$('#sndBtn').onclick=function(){setSnd(!SND)};
+if(!SND)$('#sndBtn').textContent='🔇';
 (function(){var h='';for(var i=0;i<34;i++)h+='<i style="top:'+Math.random()*100+'%;right:'+Math.random()*100+'%;animation-delay:'+Math.random()*3+'s"></i>';$('#stars').innerHTML=h})();
 function confettiBurst(){
   var c=$('#confetti'),x=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;
-  var P=[],cols=['#ffd54a','#7dffa8','#8fd3ff','#ff9bb3','#fff'];
-  for(var i=0;i<130;i++)P.push({x:innerWidth/2,y:innerHeight*.4,vx:(Math.random()-.5)*13,vy:-Math.random()*11-3,s:Math.random()*7+4,c:cols[i%5],r:Math.random()*6});
+  var P=[],cols=['#ffd54a','#7dffa8','#8fd3ff','#ff9bb3','#fff'],NP=REDUCED?32:130;
+  for(var i=0;i<NP;i++)P.push({x:innerWidth/2,y:innerHeight*.4,vx:(Math.random()-.5)*13,vy:-Math.random()*11-3,s:Math.random()*7+4,c:cols[i%5],r:Math.random()*6});
   var t=0;(function fr(){x.clearRect(0,0,c.width,c.height);t++;
     P.forEach(function(p){p.x+=p.vx;p.y+=p.vy;p.vy+=.3;p.r+=.15;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;x.fillRect(-p.s/2,-p.s/2,p.s,p.s*.6);x.restore()});
     if(t<110)requestAnimationFrame(fr);else x.clearRect(0,0,c.width,c.height)})();
@@ -198,7 +216,8 @@ var FAMS=[
   '<li>מה יותר קל — לשאול מישהו על עצמו, או לספר משהו על עצמך? למה?</li>'+
   '<li>למה פרח סגור אף אחד לא יכול לראות כמה הוא יפה?</li>'+
   '<li>מה ההבדל בין לספר משהו אמיתי — לבין להמציא משהו "מגניב"?</li></ul>'+
-  '<div class="mission">🌟 <b>משימת האומץ של השבוע:</b> ספרו השבוע למישהו חדש דבר אחד <b>אמיתי</b> שאתם אוהבים — ותשאלו מה הוא אוהב. ספרו בבית מה גיליתם!</div>',
+  '<div class="mission">🌟 <b>משימת האומץ של השבוע:</b> ספרו השבוע למישהו חדש דבר אחד <b>אמיתי</b> שאתם אוהבים — ותשאלו מה הוא אוהב. ספרו בבית מה גיליתם!</div>'+
+  '<div style="text-align:center;margin-top:12px;font-weight:800;font-size:16px"><a href="flower.html" style="color:#a15c00">🌸 לתרגול הפרח — משחק תרגול</a></div>',
   '<h3>🗣️ מדברים על זה יחד</h3><ul>'+
   '<li>מה שווה יותר — לנצח בוויכוח על חוק, או להמשיך לשחק יחד?</li>'+
   '<li>אילו דברים קטנים שווה לשים ב"תיקיה הירוקה" ולהמשיך הלאה?</li>'+
@@ -230,6 +249,7 @@ function earnBadge(idx){
   $('#slots').innerHTML=h;
   var bh='';
   if(B.next)bh+='<button class="btn" onclick="nextChapter()">'+B.next+'</button>';
+  if(idx===2)bh+='<button class="btn" onclick="location.href=\'flower.html\'">🌸 לתרגול הפרח</button>';
   bh+='<button class="btn calm" onclick="showFam()">🏡 קלף למשפחה ולכיתה</button>';
   bh+='<button class="btn sec" onclick="location.reload()">🔄 לשחק שוב</button>';
   $('#bdgBtns').innerHTML=bh;
@@ -553,7 +573,9 @@ for(let i=0;i<6;i++){const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:clo
 const loader=new GLTFLoader();
 const CHAR_FILES={hoodie:'models/hoodie.glb',casual:'models/casual.glb',adventurer:'models/adventurer.glb',worker:'models/worker.glb',farmer:'models/farmer.glb',suit:'models/suit.glb'};
 const MODELS={};
-const charsReady=Promise.all(Object.entries(CHAR_FILES).map(([k,f])=>new Promise((res,rej)=>loader.load(f,gl=>{MODELS[k]=gl;res()},undefined,rej))));
+let nLoaded=0;const nTotal=Object.keys(CHAR_FILES).length;
+function loadTick(){nLoaded++;const b=document.getElementById('startBtn');if(b&&b.disabled)b.textContent='⏳ טוען דמויות '+nLoaded+'/'+nTotal}
+const charsReady=Promise.all(Object.entries(CHAR_FILES).map(([k,f])=>new Promise((res,rej)=>loader.load(f,gl=>{MODELS[k]=gl;res()},undefined,rej)).then(loadTick)));
 /* static environment models — Quaternius nature + KayKit citybits (both CC0) */
 const STAT_FILES={tree1:'models/nature/CommonTree_1.gltf',tree3:'models/nature/CommonTree_3.gltf',tree5:'models/nature/CommonTree_5.gltf',
   bush1:'models/nature/Bush_1.gltf',berry:'models/nature/BushBerries_1.gltf',flower:'models/nature/Flowers.gltf',
@@ -848,7 +870,7 @@ function startAmbience(){
     for(let i=0;i<len;i++)d[i]=Math.random()*2-1;
     const src=AC.createBufferSource();src.buffer=buf;src.loop=true;
     const f=AC.createBiquadFilter();f.type='lowpass';f.frequency.value=300;
-    const g=AC.createGain();g.gain.value=.016;
+    const g=AC.createGain();g.gain.value=SND?.016:0;window._windGain=g;
     src.connect(f);f.connect(g);g.connect(AC.destination);src.start();
   }catch(e){}
   (function birds(){
@@ -856,6 +878,7 @@ function startAmbience(){
   })();
 }
 function chirp(){
+  if(!SND)return;
   try{
     const t=AC.currentTime,n=2+Math.floor(Math.random()*3);
     for(let i=0;i<n;i++){
@@ -872,7 +895,7 @@ function chirp(){
 const dlg=document.getElementById('dlg');
 let dlgLines=[],dlgI=0,dlgDone=null,typing=false,typeTimer=null;
 function say(lines,done){MODE='dialogue';dlgLines=lines;dlgI=0;dlgDone=done||null;dlg.classList.add('on');$('#chDlg').innerHTML='';paintLine()}
-function paintLine(){const L=dlgLines[dlgI];$('#who').textContent=L.who||'';$('#who').style.display=L.who?'block':'none';$('#nextH').style.display='block';typeIt(L.t)}
+function paintLine(){const L=dlgLines[dlgI];$('#who').textContent=L.who||'';$('#who').style.display=L.who?'block':'none';$('#nextH').style.display='block';speak(L.t);typeIt(L.t)}
 function typeIt(html){typing=true;const el=$('#txt');el.innerHTML='';const chars=Array.from(html.replace(/<[^>]+>/g,''));let i=0;clearInterval(typeTimer);
   typeTimer=setInterval(()=>{i++;if(i>=chars.length){clearInterval(typeTimer);el.innerHTML=html;typing=false;return}el.textContent=chars.slice(0,i).join('')},20)}
 dlg.addEventListener('click',()=>{
@@ -1046,6 +1069,7 @@ function jump(k,delay){setTimeout(()=>{playA(k,'Wave',true)},delay)}
 /* reflect panel (after a consequence) */
 function reflect(consTxt,refTxt,isGood){
   $('#who').style.display='none';$('#nextH').style.display='none';
+  speak(consTxt+' '+refTxt);
   $('#txt').innerHTML=consTxt;
   dlg.classList.add('on');
   let h='<div class="reflect">'+refTxt+'</div>';
@@ -1885,7 +1909,7 @@ function animate(){
   /* quest markers + triggers */
   markerT+=dt;
   marker.rotation.y=markerT*2.4;
-  clouds.forEach(c=>{c.position.x+=dt*.55;if(c.position.x>72)c.position.x=-72});
+  if(!REDUCED)clouds.forEach(c=>{c.position.x+=dt*.55;if(c.position.x>72)c.position.x=-72});
   /* owl life: gentle bob, follows the player with its gaze, blinks */
   if(owl.userData.baseY){
     owl.position.y=owl.userData.baseY+Math.sin(markerT*1.6)*.05;

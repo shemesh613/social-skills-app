@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta name="theme-color" content="#fdf8ee">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌸</text></svg>">
+<title>🌸 הפרח — תרגול: הפרח שנפתח</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;800&family=Frank+Ruhl+Libre:wght@700;900&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   הפרח — practice module. Soft, calm, predictable (ASD UX).
+   ============================================================ */
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:'Heebo',-apple-system,'Segoe UI',Arial,sans-serif;background:linear-gradient(180deg,#fdf8ee 0%,#f7ecd8 70%,#f2e6cd 100%);color:#4a3a22;user-select:none;overflow-x:hidden}
+button{font-family:inherit;cursor:pointer;border:none;-webkit-tap-highlight-color:transparent}
+
+/* ---------- screens ---------- */
+.screen{display:none;min-height:100dvh;flex-direction:column;align-items:center;padding:76px 14px 22px}
+.screen.on{display:flex}
+
+/* ---------- top bar (identical on every screen) ---------- */
+.topbar{position:fixed;top:0;left:0;right:0;height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;background:rgba(253,248,238,.92);backdrop-filter:blur(6px);border-bottom:2px solid #eadfc8;z-index:30}
+.tbBtn{min-width:52px;min-height:52px;border-radius:16px;background:#fffdf7;border:2px solid #eadfc8;font-size:19px;font-weight:800;color:#8a6a35;padding:0 12px;box-shadow:0 3px 0 #e5d7ba;transition:transform .1s}
+.tbBtn:active{transform:translateY(2px);box-shadow:none}
+.tbTitle{font-family:'Frank Ruhl Libre',serif;font-size:clamp(17px,4.2vw,23px);font-weight:900;color:#b0742a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 6px}
+
+/* ---------- generic buttons ---------- */
+.btn{display:block;width:100%;max-width:420px;margin:8px auto;padding:16px 22px;min-height:64px;border-radius:18px;font-size:19px;font-weight:800;background:linear-gradient(180deg,#ffd98a,#f5b445);color:#5a3c08;box-shadow:0 5px 0 #d99a2b,0 8px 18px rgba(180,130,40,.18);transition:transform .1s}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 #d99a2b}
+.btn.sec{background:#fffdf7;border:2px solid #eadfc8;color:#8a6a35;box-shadow:0 5px 0 #e5d7ba}
+.btn.grn{background:linear-gradient(180deg,#b9e8a5,#7fb069);color:#1e3d12;box-shadow:0 5px 0 #5e8d4b}
+.btn[disabled]{opacity:.45;pointer-events:none}
+
+h1{font-family:'Frank Ruhl Libre',serif;font-size:clamp(26px,6.5vw,40px);color:#b0742a;text-align:center;line-height:1.3}
+h2{font-family:'Frank Ruhl Libre',serif;font-size:clamp(20px,5vw,27px);color:#b0742a;text-align:center;line-height:1.35}
+.sub{font-size:16px;color:#8a7350;text-align:center;line-height:1.6;max-width:460px}
+
+/* ---------- home ---------- */
+.homeFlower{margin:2px auto 0}
+.greet{font-size:17px;font-weight:600;color:#8a7350;text-align:center;margin:2px 0 10px}
+.lvGrid{display:flex;flex-direction:column;gap:10px;width:100%;max-width:460px;margin:8px auto}
+.lvCard{display:flex;align-items:center;gap:14px;width:100%;min-height:72px;padding:10px 16px;border-radius:20px;background:#fffdf7;border:2px solid #eadfc8;box-shadow:0 4px 0 #e5d7ba;font-size:17px;font-weight:800;color:#4a3a22;text-align:right;transition:transform .1s}
+.lvCard:active{transform:translateY(3px);box-shadow:none}
+.lvCard .ic{font-size:34px;flex:0 0 44px;text-align:center}
+.lvCard .nm{flex:1}
+.lvCard .st{font-size:14px;color:#c9a227;letter-spacing:1px}
+.lvCard.locked{opacity:.5;filter:grayscale(.6)}
+.lvCard.locked .st{color:#a99}
+.homeRow{display:flex;gap:10px;width:100%;max-width:460px;margin-top:6px}
+.homeRow .btn{margin:0;flex:1;min-height:58px;font-size:17px}
+.classToggle{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:14px;font-size:15.5px;font-weight:700;color:#8a7350}
+.sw{position:relative;width:56px;height:32px;border-radius:20px;background:#e5d7ba;transition:background .2s;flex:0 0 auto}
+.sw.on{background:#7fb069}
+.sw i{position:absolute;top:3px;right:3px;width:26px;height:26px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 2px 5px rgba(0,0,0,.2)}
+.sw.on i{transform:translateX(-24px)}
+.budLine{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:15px;font-weight:700;color:#7c9e63;background:#f2f7ec;border:2px dashed #b9d3a5;border-radius:16px;padding:8px 16px}
+
+/* ---------- setup ---------- */
+.pickGrid{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;width:100%;max-width:480px;margin:16px auto}
+.pickCard{min-width:96px;min-height:96px;padding:12px;border-radius:20px;background:#fffdf7;border:3px solid #eadfc8;font-size:16.5px;font-weight:800;color:#4a3a22;box-shadow:0 4px 0 #e5d7ba;transition:transform .12s}
+.pickCard:active{transform:scale(.94)}
+.pickCard .big{display:block;font-size:38px;margin-bottom:4px}
+
+/* ---------- level layout (identical every level) ---------- */
+.lvWrap{display:flex;flex-direction:column;align-items:center;gap:6px;width:100%;max-width:560px}
+#flowerBox{line-height:0}
+.dots{display:flex;gap:8px;justify-content:center;margin:2px 0 8px}
+.dots i{width:14px;height:14px;border-radius:50%;background:#e5d7ba;border:2px solid #d9c9a5;transition:background .3s,transform .3s}
+.dots i.f{background:#f5b445;border-color:#d99a2b;transform:scale(1.15)}
+.stage{width:100%;display:flex;flex-direction:column;align-items:center;gap:10px}
+.qTitle{font-size:clamp(19px,4.6vw,24px);font-weight:800;color:#7a5c2e;text-align:center;line-height:1.4}
+.optGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;width:100%;max-width:520px}
+.optCard{min-height:88px;padding:12px 8px;border-radius:20px;background:#fffdf7;border:2px solid #eadfc8;box-shadow:0 4px 0 #e5d7ba;font-size:16.5px;font-weight:800;color:#4a3a22;transition:transform .12s}
+.optCard:active{transform:scale(.95)}
+.optCard .big{display:block;font-size:36px;margin-bottom:4px;pointer-events:none}
+.optCard.hint{animation:pulse 1s infinite;border-color:#7fb069;background:#f2f7ec}
+.optCard.dim{opacity:.35;pointer-events:none}
+.optCard.picked{border-color:#f5b445;background:#fff6df}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+
+/* speech bubble */
+.bub{position:relative;width:100%;max-width:520px;background:#fffdf7;border:2px solid #eadfc8;border-radius:20px;padding:14px 18px;font-size:clamp(16px,4vw,19px);font-weight:600;line-height:1.6;color:#4a3a22;box-shadow:0 6px 16px rgba(180,130,40,.12);animation:fadeUp .4s ease}
+.bub .who{position:absolute;top:-14px;right:14px;background:#f5b445;color:#5a3c08;font-size:13px;font-weight:800;border-radius:20px;padding:2px 12px}
+.bub.me{background:#f2f7ec;border-color:#b9d3a5}
+.bub.me .who{background:#7fb069;color:#fff}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.avRow{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:520px;padding:0 14px;position:relative;height:78px}
+.avatar{font-size:52px;line-height:1;transition:transform .3s}
+.avatar.talk{animation:bob .8s ease-in-out 2}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+#l4ball{position:absolute;top:8px;font-size:32px;left:calc(100% - 78px);transition:left .8s cubic-bezier(.4,.1,.4,1)}
+.sentence{font-size:clamp(20px,5.4vw,27px);font-weight:800;color:#5a3c08;background:#fff6df;border:2px solid #f5cd7e;border-radius:18px;padding:14px 20px;text-align:center;line-height:1.5;max-width:520px;animation:fadeUp .4s ease}
+.sayLoud{font-size:18px;font-weight:800;color:#7c9e63;text-align:center;animation:pulse 1.4s infinite}
+
+/* level 5 rings */
+.ringRow{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;width:100%;max-width:520px}
+.ringBtn{min-height:84px;border-radius:20px;font-size:16px;font-weight:800;border:3px solid;transition:transform .12s;background:#fffdf7}
+.ringBtn:active{transform:scale(.95)}
+.ringBtn .big{display:block;font-size:32px;margin-bottom:2px}
+.ringBtn.r0{border-color:#7ea6e0;color:#2d5a9e}.ringBtn.r1{border-color:#8cc07a;color:#2f6b1e}
+.ringBtn.r2{border-color:#e8c34f;color:#8a6a10}.ringBtn.r3{border-color:#b9b4ac;color:#6d6a63}
+.ringBtn.dim{opacity:.3;pointer-events:none}
+.shareCard{min-width:220px;background:#fffdf7;border:3px solid #eadfc8;border-radius:22px;padding:18px 24px;font-size:clamp(19px,5vw,24px);font-weight:800;color:#4a3a22;text-align:center;box-shadow:0 8px 20px rgba(180,130,40,.15);transition:transform .5s ease}
+.shareCard .big{display:block;font-size:46px;margin-bottom:6px}
+.shareCard.fold{transform:scaleY(.06);opacity:.4}
+
+/* ---------- overlays ---------- */
+.ov{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:22px;z-index:50;background:rgba(74,58,34,.45);backdrop-filter:blur(3px)}
+.ov.on{display:flex}
+.ovCard{width:100%;max-width:440px;background:#fdf8ee;border-radius:26px;padding:26px 20px;display:flex;flex-direction:column;align-items:center;gap:12px;box-shadow:0 20px 50px rgba(0,0,0,.3);animation:fadeUp .35s ease}
+.heart{font-size:84px;line-height:1;filter:grayscale(.9) brightness(.5);transition:filter .5s}
+.heart.lit{filter:none;animation:beat 1.1s infinite}
+@keyframes beat{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.chargeRing{width:130px;height:130px;border-radius:50%;background:conic-gradient(#f5b445 calc(var(--p,0)*1%),#eee3cd 0);display:flex;align-items:center;justify-content:center;transition:background .1s}
+#torchBtn{width:104px;height:104px;border-radius:50%;background:#fffdf7;border:3px solid #eadfc8;font-size:46px;touch-action:none;box-shadow:0 4px 0 #e5d7ba}
+#torchBtn:active{transform:scale(.96)}
+.bigCheck{width:110px;height:110px;border-radius:50%;background:linear-gradient(180deg,#b9e8a5,#7fb069);font-size:56px;color:#fff;box-shadow:0 6px 0 #5e8d4b;transition:transform .1s}
+.bigCheck:active{transform:translateY(4px);box-shadow:0 1px 0 #5e8d4b}
+
+/* ---------- garden ---------- */
+.gardenGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:14px;width:100%;max-width:520px;margin-top:10px}
+.gItem{position:relative;background:#fffdf7;border:2px solid #eadfc8;border-radius:20px;padding:10px 6px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12.5px;font-weight:700;color:#8a7350}
+.gItem .bfly{position:absolute;top:-6px;left:8px;font-size:26px;animation:flutter 2.4s ease-in-out infinite}
+@keyframes flutter{0%,100%{transform:translateY(0) rotate(-8deg)}50%{transform:translateY(-8px) rotate(10deg)}}
+.gEmpty{font-size:16px;color:#8a7350;text-align:center;line-height:1.7;margin-top:24px}
+
+/* flower petals */
+.petal{transform-box:fill-box;transform-origin:50% 100%;transform:scale(.2);transition:transform .9s cubic-bezier(.3,1.35,.45,1)}
+.petal.open{transform:scale(1)}
+.flowerSvg{filter:drop-shadow(0 6px 10px rgba(150,110,40,.18))}
+
+/* sparkles / confetti */
+.spark{position:fixed;font-size:22px;pointer-events:none;z-index:80}
+canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:70}
+
+@media (min-width:760px){
+  .lvWrap{flex-direction:row;align-items:flex-start;max-width:860px;gap:24px}
+  .flowerSide{flex:0 0 240px;position:sticky;top:76px}
+  .stage{flex:1}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.15s!important}
+}
+</style>
+</head>
+<body>
+<canvas id="confetti"></canvas>
+
+<!-- ================= HOME ================= -->
+<div class="screen" id="scr-home">
+  <div class="topbar">
+    <button class="tbBtn" onclick="location.href='world.html'">🎒 חזרה לעולם</button>
+    <div class="tbTitle">🌸 הַפֶּרַח שֶׁנִּפְתָּח</div>
+    <button class="tbBtn muteBtn" onclick="toggleSound()">🔊</button>
+  </div>
+  <div class="homeFlower" id="homeFlower"></div>
+  <div class="greet" id="greet"></div>
+  <div class="lvGrid" id="lvGrid"></div>
+  <div class="homeRow">
+    <button class="btn grn" onclick="openGarden()">🌷 הגינה שלי <span id="gCount"></span></button>
+  </div>
+  <div class="classToggle" onclick="toggleClass()">🍎 מצב כיתה <div class="sw" id="swClass"><i></i></div></div>
+  <div class="budLine" id="homeBud" style="display:none"><span id="budMini"></span> ניצן חדש מחכה לך מחר! 🌱</div>
+</div>
+
+<!-- ================= SETUP ================= -->
+<div class="screen" id="scr-setup">
+  <div class="topbar">
+    <button class="tbBtn" onclick="location.href='world.html'">🎒</button>
+    <div class="tbTitle">🌸 הפרח שלי</div>
+    <button class="tbBtn muteBtn" onclick="toggleSound()">🔊</button>
+  </div>
+  <div id="setupStage" style="width:100%;display:flex;flex-direction:column;align-items:center"></div>
+</div>
+
+<!-- ================= LEVEL (shared layout) ================= -->
+<div class="screen" id="scr-level">
+  <div class="topbar">
+    <button class="tbBtn" onclick="goHome()">🏠</button>
+    <div class="tbTitle" id="lvTitle"></div>
+    <button class="tbBtn muteBtn" onclick="toggleSound()">🔊</button>
+  </div>
+  <div class="lvWrap">
+    <div class="flowerSide">
+      <div id="flowerBox"></div>
+      <div class="dots" id="dots"></div>
+    </div>
+    <div class="stage" id="stage"></div>
+  </div>
+</div>
+
+<!-- ================= GARDEN ================= -->
+<div class="screen" id="scr-garden">
+  <div class="topbar">
+    <button class="tbBtn" onclick="goHome()">🏠</button>
+    <div class="tbTitle">🌷 הגינה שלי</div>
+    <button class="tbBtn muteBtn" onclick="toggleSound()">🔊</button>
+  </div>
+  <div class="sub" id="gardenSub"></div>
+  <div class="gardenGrid" id="gardenGrid"></div>
+  <div class="budLine" style="margin-top:20px"><span id="budMini2"></span> ועוד ניצן מחכה לך מחר! 🌱</div>
+</div>
+
+<!-- ============ overlay: flashlight courage ============ -->
+<div class="ov" id="ov-torch">
+  <div class="ovCard">
+    <div class="heart" id="torchHeart">💗</div>
+    <h2 id="torchH">רגע — נקשיב ללב 💛</h2>
+    <div class="sub" id="torchSub">נדליק את הפנס הפנימי ונאיר על הלב 🔦</div>
+    <div id="torchStage" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:10px"></div>
+  </div>
+</div>
+
+<!-- ============ overlay: class mode ============ -->
+<div class="ov" id="ov-class">
+  <div class="ovCard">
+    <div style="font-size:64px">🗣️</div>
+    <h2>עכשיו ספר לחבר אמיתי!</h2>
+    <div class="sub">אמרו את מה ששיתפתם עכשיו — לחבר בכיתה או למורה.<br>אחר כך לחצו על הווי הגדול ✓</div>
+    <button class="bigCheck" id="classCheck">✓</button>
+  </div>
+</div>
+
+<!-- ============ overlay: flower complete ============ -->
+<div class="ov" id="ov-bloom">
+  <div class="ovCard">
+    <div id="bloomFlower"></div>
+    <h2 id="bloomH">הפרח נפתח כולו! 🎉</h2>
+    <div class="sub" id="bloomSub">כל עלי הכותרת נפתחו — הפרח נשמר בגינה שלך לתמיד 🌷</div>
+    <button class="btn" id="bloomGo">להמשיך ▶️</button>
+    <button class="btn sec" onclick="hideOv('ov-bloom');openGarden()">🌷 לראות את הגינה</button>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* ============================================================
+   0. tiny utils
+   ============================================================ */
+const $=s=>document.querySelector(s);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const rnd=a=>a[(Math.random()*a.length)|0];
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function shade(hex,f){ /* f>0 lighten toward white, f<0 darken */
+  const n=parseInt(hex.slice(1),16);let r=n>>16,g=(n>>8)&255,b=n&255;
+  const m=c=>Math.max(0,Math.min(255,Math.round(f>0?c+(255-c)*f:c*(1+f))));
+  return '#'+((m(r)<<16)|(m(g)<<8)|m(b)).toString(16).padStart(6,'0');
+}
+/* date-seeded PRNG — same variety for the whole day, fresh tomorrow */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const DAYSEED=+new Date().toISOString().slice(0,10).replace(/-/g,'');
+function dayShuffle(arr,salt){const r=mulberry32(DAYSEED+salt*97);const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){const j=(r()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]]}return a}
+
+/* ============================================================
+   1. state — one localStorage key: perachV1
+   ============================================================ */
+const DEF={
+  levels:{1:{done:0,stars:0,plays:0},2:{done:0,stars:0,plays:0},3:{done:0,stars:0,plays:0},4:{done:0,stars:0,plays:0},5:{done:0,stars:0,plays:0}},
+  bank:[],            // [{c:category,e:emoji,t:text}]
+  garden:[],          // [{date,color,petals,topic}]
+  settings:{sound:true,classMode:false},
+  profile:{color:null,topic:null},
+  cur:{petals:0}      // current flower progress (persists!)
+};
+let S;
+function load(){
+  try{const raw=JSON.parse(localStorage.getItem('perachV1'));
+    S=Object.assign({},DEF,raw||{});
+    S.levels=Object.assign({},DEF.levels,S.levels);
+    S.settings=Object.assign({},DEF.settings,S.settings);
+    S.profile=Object.assign({},DEF.profile,S.profile);
+    S.cur=Object.assign({},DEF.cur,S.cur);
+    S.bank=Array.isArray(S.bank)?S.bank:[];S.garden=Array.isArray(S.garden)?S.garden:[];
+  }catch(e){S=JSON.parse(JSON.stringify(DEF))}
+}
+function save(){try{localStorage.setItem('perachV1',JSON.stringify(S))}catch(e){}}
+load();
+
+/* ============================================================
+   2. sound — WebAudio oscillators only (no assets), pentatonic
+   ============================================================ */
+let AC=null;
+const actx=()=>AC||(AC=new (window.AudioContext||window.webkitAudioContext)());
+function tone(f,dur,type,when,vol){
+  if(!S.settings.sound)return;
+  try{const c=actx(),o=c.createOscillator(),g=c.createGain(),t=c.currentTime+(when||0);
+    o.type=type||'sine';o.frequency.value=f;o.connect(g);g.connect(c.destination);
+    g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol||.16,t+.02);
+    g.gain.exponentialRampToValueAtTime(.0001,t+(dur||.2));o.start(t);o.stop(t+(dur||.2));
+  }catch(e){}
+}
+const PENTA=[523,587,659,784,880,1047];
+const sndTap=()=>tone(rnd(PENTA),.1,'sine',0,.1);
+const sndPetal=()=>{tone(523,.25,'triangle',0,.14);tone(659,.25,'triangle',.09,.14);tone(784,.35,'triangle',.18,.14);};
+const sndWin=()=>[523,659,784,1047].forEach((f,i)=>tone(f,.22,'triangle',i*.1,.18));
+const sndSoft=()=>{tone(300,.18,'sine',0,.12);tone(240,.22,'sine',.12,.1);};
+const sndWarm=()=>{tone(392,.4,'triangle',0,.1);tone(523,.5,'triangle',.18,.1);};
+document.addEventListener('pointerdown',()=>{try{actx().resume()}catch(e){}},{passive:true});
+
+/* ============================================================
+   3. קריינות — מושבתת בכוונה (בלי קול רובוטי של הדפדפן).
+   speak() נשאר כנקודת חיבור: כשיהיו קבצי קול איכותיים
+   (Google AI Studio TTS) — מחברים אותם כאן.
+   ============================================================ */
+function speak(txt){}
+
+/* ============================================================
+   4. mute + class-mode toggles
+   ============================================================ */
+function paintSound(){document.querySelectorAll('.muteBtn').forEach(b=>b.textContent=S.settings.sound?'🔊':'🔇')}
+function toggleSound(){S.settings.sound=!S.settings.sound;save();paintSound();
+  if(!S.settings.sound){try{speechSynthesis.cancel()}catch(e){}}else sndTap();}
+function toggleClass(){S.settings.classMode=!S.settings.classMode;save();
+  $('#swClass').classList.toggle('on',S.settings.classMode);sndTap();}
+
+/* ============================================================
+   5. sparkles + confetti (calm amounts)
+   ============================================================ */
+function sparklesAt(x,y,n){
+  const ss=['✨','⭐','🌟','💫'];n=RM?2:(n||5);
+  for(let i=0;i<n;i++){const e=document.createElement('div');e.className='spark';e.textContent=ss[i%4];
+    e.style.left=x+'px';e.style.top=y+'px';document.body.appendChild(e);
+    const dx=(Math.random()-.5)*150,dy=-50-Math.random()*110;
+    e.animate([{transform:'translate(0,0) scale(1)',opacity:1},{transform:`translate(${dx}px,${dy}px) scale(.3)`,opacity:0}],{duration:800,easing:'ease-out'});
+    setTimeout(()=>e.remove(),820);}
+}
+function confettiBurst(){
+  if(RM){sparklesAt(innerWidth/2,innerHeight*.4,4);return}
+  const c=$('#confetti'),x=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;
+  const cols=['#f5b445','#7fb069','#8fd3ff','#ff9ec4','#fff'];const P=[];
+  for(let i=0;i<90;i++)P.push({x:innerWidth/2,y:innerHeight*.4,vx:(Math.random()-.5)*11,vy:-Math.random()*10-3,s:Math.random()*7+4,c:cols[i%5],r:Math.random()*6});
+  let t=0;(function fr(){x.clearRect(0,0,c.width,c.height);t++;
+    P.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.3;p.r+=.15;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;x.fillRect(-p.s/2,-p.s/2,p.s,p.s*.6);x.restore()});
+    if(t<100)requestAnimationFrame(fr);else x.clearRect(0,0,c.width,c.height)})();
+}
+
+/* ============================================================
+   6. flower + bud SVG
+   ============================================================ */
+const NPETALS=8;
+function flowerSVG(open,color,size){
+  color=color||'#ff9ec4';
+  const dark=shade(color,-.18),light=shade(color,.4);
+  let petals='';
+  for(let i=0;i<NPETALS;i++){
+    petals+=`<g transform="rotate(${i*45})"><path class="petal${i<open?' open':''}" d="M0,8 C24,-6 21,-54 0,-70 C-21,-54 -24,-6 0,8" fill="${i%2?color:light}" stroke="${dark}" stroke-width="2"/></g>`;
+  }
+  return `<svg viewBox="0 0 200 270" style="width:${size}px" class="flowerSvg" aria-hidden="true">
+    <path d="M100,110 C100,150 96,195 100,242" stroke="#6f9e58" stroke-width="7" fill="none" stroke-linecap="round"/>
+    <path d="M100,188 C72,178 56,192 53,208 C76,215 96,203 100,188" fill="#8fbc73"/>
+    <path d="M100,208 C128,198 144,212 147,228 C124,235 104,223 100,208" fill="#7fb069"/>
+    <g transform="translate(100,96)">${petals}
+      <circle r="26" fill="#ffdf8e" stroke="#e8b64f" stroke-width="3"/>
+      <circle cx="-8" cy="-4" r="3.2" fill="#7a5c2e"/><circle cx="8" cy="-4" r="3.2" fill="#7a5c2e"/>
+      <path d="M-9,6 Q0,14 9,6" stroke="#7a5c2e" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+    </g></svg>`;
+}
+function budSVG(size){
+  return `<svg viewBox="0 0 60 90" style="width:${size}px" aria-hidden="true">
+    <path d="M30,54 C30,66 29,78 30,86" stroke="#6f9e58" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <path d="M30,58 C42,46 40,18 30,10 C20,18 18,46 30,58" fill="#8fbc73" stroke="#6f9e58" stroke-width="2.5"/>
+    <path d="M30,58 C36,50 35,34 30,28 C25,34 24,50 30,58" fill="#a9d18e"/>
+  </svg>`;
+}
+
+/* ============================================================
+   7. content banks (deep — outlasts novelty)
+   ============================================================ */
+const COLORS=[['#ff9ec4','ורוד'],['#b79bf5','סגול'],['#7ec3f7','כחול'],['#ffb46b','כתום'],['#ff8f8f','אדום']];
+const TOPICS=[
+  {k:'animals',n:'חיות',e:'🐾'},{k:'soccer',n:'כדורגל',e:'⚽'},{k:'dino',n:'דינוזאורים',e:'🦖'},
+  {k:'music',n:'מוזיקה',e:'🎵'},{k:'cars',n:'רכבים',e:'🚗'},{k:'games',n:'משחקים',e:'🎮'}];
+const TOPIC_LINE={
+  animals:'שמעתי שאתה אוהב חיות! גם אני מת על חיות 🐾',
+  soccer:'שמעתי שאתה אוהב כדורגל! באיזו קבוצה אתה? ⚽',
+  dino:'שמעתי שאתה אוהב דינוזאורים! הטי-רקס הכי חזק 🦖',
+  music:'שמעתי שאתה אוהב מוזיקה! גם אני אוהב לשיר 🎵',
+  cars:'שמעתי שאתה אוהב רכבים! ראיתי אתמול משאית ענקית 🚗',
+  games:'שמעתי שאתה אוהב משחקים! איזה משחק הכי כיף לך? 🎮'};
+const TOPIC_TILE={animals:['🐾','חיות'],soccer:['⚽','כדורגל'],dino:['🦖','דינוזאורים'],music:['🎵','מוזיקה'],cars:['🚗','מכוניות'],games:['🎮','משחקי מחשב']};
+
+/* --- level 1: self inventory (7 categories × 5) --- */
+const L1CATS=[
+  {k:'food',q:'איזה אוכל אתה הכי אוהב? 🍽️',opts:[['🍕','פיצה'],['🍦','גלידה'],['🍫','שוקולד'],['🍔','המבורגר'],['🍉','אבטיח']]},
+  {k:'game',q:'במה הכי כיף לך לשחק? 🎲',opts:[['⚽','כדורגל'],['🎮','משחקי מחשב'],['🧩','פאזלים'],['🛝','מגרש משחקים'],['🧱','לגו']]},
+  {k:'animal',q:'איזו חיה אתה הכי אוהב? 🐾',opts:[['🐶','כלבים'],['🐱','חתולים'],['🦖','דינוזאורים'],['🐬','דולפינים'],['🦜','תוכים']]},
+  {k:'place',q:'איפה הכי כיף לך? 📍',opts:[['🏖️','הים'],['🏞️','הטבע'],['🎡','הלונה פארק'],['🏠','הבית שלי'],['🏊','הבריכה']]},
+  {k:'family',q:'עם מי במשפחה הכי כיף לך? 👨‍👩‍👧',opts:[['👩','אמא'],['👨','אבא'],['🧒','אח או אחות'],['👵','סבא וסבתא'],['🐕','חיית המחמד']]},
+  {k:'feel',q:'מה אתה מרגיש היום? 💗',opts:[['😊','שמח'],['😌','רגוע'],['🤩','נרגש'],['😴','עייף'],['😢','קצת עצוב']]},
+  {k:'exp',q:'איזו חוויה כיף לך לזכור? ⭐',opts:[['🎂','יום הולדת'],['🚗','טיול משפחתי'],['🏊','יום בבריכה'],['🎬','סרט בקולנוע'],['🎪','הצגה או קרקס']]}
+];
+
+/* --- level 2: sentence starters --- */
+function bPrefix(t){return t.startsWith('ה')?'ב'+t.slice(1):'ב'+t}
+const STARTERS=[
+  {t:'אני אוהב...',e:'💛',cats:['food','game','animal'],make:x=>'אני אוהב '+x},
+  {t:'הכי כיף לי...',e:'🎈',cats:['place','exp'],make:x=>'הכי כיף לי '+bPrefix(x)},
+  {t:'כיף לי עם...',e:'🤗',cats:['family'],make:x=>'כיף לי עם '+x},
+  {t:'הרגשתי...',e:'💗',cats:['feel'],make:x=>'הרגשתי '+x}
+];
+
+/* --- level 3: add-a-thought scenarios (friend shares, pick connected reply) --- */
+const FRIENDS=[['🐻','דובי'],['🦊','שועלי'],['🐰','ארנבת'],['🦉','ינשוף']];
+const L3SCEN=[
+ {f:'אני אוהב פיצה 🍕',ok:'גם אני אוהב פיצה! איזו תוספת אתה אוהב?',bad:['יש לי נעליים חדשות 👟','אתמול ראיתי ציפור 🐦']},
+ {f:'יש לי כלב בבית 🐶',ok:'איזה כיף! איך קוראים לכלב שלך?',bad:['אני רעב עכשיו 🍞','המחשב שלי מהיר 💻']},
+ {f:'הייתי אתמול בים 🏖️',ok:'וואו, הים! בנית ארמון בחול?',bad:['אני יודע לספור עד מאה 🔢','הכובע שלי כחול 🧢']},
+ {f:'אני קצת עצוב היום 😢',ok:'חבל לי שאתה עצוב. רוצה לספר לי מה קרה?',bad:['אני שמח! בוא נשחק ⚽','קניתי גלידה אתמול 🍦']},
+ {f:'קיבלתי משחק חדש 🎮',ok:'איזה כיף! איזה משחק קיבלת?',bad:['אני אוהב לישון 😴','יש לי קלמר ירוק ✏️']},
+ {f:'אני מפחד מכלבים גדולים 🐕',ok:'זה בסדר לפחד. גם לי יש דברים שמפחידים אותי',bad:['משעמם לי, בוא נדבר על משהו אחר','אני רץ הכי מהר בכיתה 🏃']},
+ {f:'היה לי יום הולדת בשבת 🎂',ok:'מזל טוב! איזו עוגה הייתה לך?',bad:['מחר יש טיול','הטלפון של אבא שלי חדש 📱']},
+ {f:'אני אוהב לצייר 🎨',ok:'איזה יופי! מה אתה הכי אוהב לצייר?',bad:['אני הולך הביתה עוד מעט 🏠','יש לי גרביים אדומות 🧦']},
+ {f:'נסעתי לסבתא בחופש 👵',ok:'כיף לך! מה עשיתם ביחד?',bad:['אני צמא 🥤','ראית את הענן הזה? ☁️']},
+ {f:'ניצחתי היום במשחק כדורגל ⚽',ok:'כל הכבוד! כמה שערים הבקעת?',bad:['אני אוהב שוקולד 🍫','הכיסא שלי מתנדנד 🪑']},
+ {f:'אני אוהב דינוזאורים 🦖',ok:'מגניב! איזה דינוזאור הכי חזק לדעתך?',bad:['מחר יש מבחן 📃','אני רוצה מים']},
+ {f:'הלכתי אתמול לרופא שיניים 🦷',ok:'איך היה אצל הרופא? זה כאב?',bad:['אני אוהב לרוץ בחצר 🏃','המורה שלנו נחמדה 👩‍🏫']},
+ {f:'למדתי לרכוב על אופניים 🚲',ok:'וואו, כל הכבוד! זה היה קשה?',bad:['בוא נאכל צהריים 🍽️','אתמול ירד גשם 🌧️']},
+ {f:'החתולה שלי ילדה גורים 🐱',ok:'איזה חמוד! כמה גורים נולדו?',bad:['אני יודע לשרוק 😗','התיק שלי כבד 🎒']},
+ {f:'אני מתרגש מהטיול מחר 🚌',ok:'גם אני מתרגש! ליד מי תשב באוטובוס?',bad:['אני כבר הייתי בטיול פעם','עכשיו שיעור חשבון 📐']},
+ {f:'ראיתי סרט מצחיק בסוף השבוע 🎬',ok:'נשמע כיף! על מה היה הסרט?',bad:['אני רוצה לשתות מים 🥤','יש לי מדבקות חדשות ✨']},
+ {f:'אני אוהב לשיר 🎤',ok:'איזה יופי! איזה שיר אתה הכי אוהב?',bad:['השולחן שלי מלוכלך','אני הולך למכולת אחר כך 🛒']},
+ {f:'אבא שלי בנה איתי מגדל מלגו 🧱',ok:'איזה מגניב! כמה גבוה היה המגדל?',bad:['אני לא אוהב לגו','תראה את השרוך שלי 👟']}
+];
+
+/* --- level 4: friend answers for the ask-back rally --- */
+const L4ANS=[
+ 'אני הכי אוהב גלידת שוקולד 🍦','אני אוהב לשחק בחוץ בהפסקה 🛝','החיה האהובה עליי היא דולפין 🐬',
+ 'אני אוהב לבנות מגדלים מלגו 🧱','הצבע האהוב עליי הוא כחול 💙','אני אוהב לשיר בקול רם 🎵',
+ 'בסוף השבוע הייתי אצל סבא וסבתא 🏡','אני קצת מפחד מחושך, אבל פנס עוזר לי 🔦','הכי כיף לי בבריכה 🏊',
+ 'אני אוהב לצייר ציורים של חלל 🚀','המשחק האהוב עליי הוא תופסת 🏃','אני אוהב לאכול תפוח בהפסקה 🍎',
+ 'יש לי אח קטן שמצחיק אותי 👶','אני אוהב ימי גשם עם שוקו חם ☕'];
+const L4EXTRA=[['🌈','אני אוהב קשת בענן'],['🎈','אני אוהב בלונים'],['📚','אני אוהב סיפורים לפני השינה'],['🍪','אני אוהב עוגיות של סבתא'],['🚲','אני אוהב לרכוב על אופניים']];
+
+/* --- level 5: circles of closeness --- */
+const RINGS=[['💙','משפחה'],['💚','חבר טוב'],['💛','מכר'],['🩶','זר']];
+const L5CARDS=[
+ {t:'הצבע האהוב עליי',e:'🎨',max:3},{t:'המשחק האהוב עליי',e:'🎮',max:3},
+ {t:'החיה האהובה עליי',e:'🐶',max:3},{t:'השיר שאני אוהב',e:'🎵',max:3},
+ {t:'מה אכלתי היום בצהריים',e:'🥪',max:3},
+ {t:'החלום שלי כשאהיה גדול',e:'🌟',max:2},{t:'מה עשיתי בסוף השבוע',e:'🚗',max:2},
+ {t:'באיזו כיתה אני לומד',e:'🏫',max:2},{t:'משהו מצחיק שקרה לי',e:'😄',max:2},
+ {t:'סוד שמעציב אותי',e:'💧',max:1},{t:'משהו שמפחיד אותי',e:'😨',max:1},
+ {t:'תמונה שלי',e:'📷',max:1},{t:'ריב שהיה לי עם חבר',e:'😤',max:1},
+ {t:'הכתובת של הבית שלי',e:'🏠',max:0},{t:'מספר הטלפון שלי',e:'📱',max:0},
+ {t:'הסיסמה שלי',e:'🔑',max:0},{t:'מתי אני לבד בבית',e:'🕐',max:0}
+];
+const L5EXPL={
+ 0:'אופס... את זה שומרים רק למשפחה! 💙 פרטים כאלה הם פרטיים מאוד — לא מספרים אותם לאף אחד אחר.',
+ 1:'רגע... את זה משתפים רק עם משפחה או עם חבר ממש טוב 💚 — מישהו שסומכים עליו מאוד.',
+ 2:'כמעט! את זה אפשר לספר לאנשים שמכירים — אבל לא לזר שלא מכירים בכלל 🩶'};
+const L5PRAISE=['שיתוף בטוח! 🌸','בחירה חכמה! 🌟','בדיוק! זה בטוח לשתף 💚','נכון מאוד! 🌷'];
+
+/* ============================================================
+   8. navigation + petal engine
+   ============================================================ */
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));$('#'+id).classList.add('on');window.scrollTo(0,0)}
+function hideOv(id){$('#'+id).classList.remove('on')}
+function showOv(id){$('#'+id).classList.add('on')}
+function goHome(){try{speechSynthesis.cancel()}catch(e){}renderHome();showScreen('scr-home')}
+
+let LV=0,PROG=0,GOAL=0,sessionTorch=false;
+const LEVELS={}; // filled below: {name,icon,goal,start}
+
+function renderFlower(){
+  $('#flowerBox').innerHTML=flowerSVG(S.cur.petals,S.profile.color,Math.min(230,innerWidth*.5));
+}
+function renderDots(){
+  let h='';for(let i=0;i<GOAL;i++)h+='<i class="'+(i<PROG?'f':'')+'"></i>';
+  $('#dots').innerHTML=h;
+}
+/* open one petal — <300ms feedback start, never closes */
+function openPetal(cb){
+  const i=S.cur.petals;
+  sndPetal();
+  const ps=document.querySelectorAll('#flowerBox .petal');
+  if(ps[i])ps[i].classList.add('open');
+  const fb=$('#flowerBox').getBoundingClientRect();
+  sparklesAt(fb.left+fb.width/2,fb.top+fb.height/3,4);
+  S.cur.petals++;save();
+  if(S.cur.petals>=NPETALS){setTimeout(()=>flowerBloom(cb),1000)}
+  else setTimeout(cb,750);
+}
+function flowerBloom(cb){
+  confettiBurst();sndWin();setTimeout(sndWarm,400);
+  const hasBfly=Math.random()<.3; /* variable reward */
+  $('#bloomFlower').innerHTML=flowerSVG(NPETALS,S.profile.color,170)+(hasBfly?'<div style="font-size:40px;margin-top:-30px" class="gItem-b">🦋</div>':'');
+  $('#bloomH').textContent=hasBfly?'הפרח נפתח — ופרפר בא לבקר! 🦋':'הפרח נפתח כולו! 🎉';
+  speak(hasBfly?'הפרח נפתח כולו! ופרפר בא לבקר!':'הפרח נפתח כולו! כל הכבוד!');
+  S.garden.push({date:new Date().toISOString().slice(0,10),color:S.profile.color,petals:NPETALS,topic:S.profile.topic,bfly:hasBfly});
+  S.cur.petals=0;save();
+  showOv('ov-bloom');
+  $('#bloomGo').onclick=()=>{sndTap();hideOv('ov-bloom');renderFlower();cb()};
+}
+
+/* success pipeline: petal → (class mode gate) → next step / round done */
+function success(next){
+  PROG++;renderDots();
+  openPetal(()=>classGate(()=>{ if(PROG>=GOAL)roundDone(); else next(); }));
+}
+function classGate(cb){
+  if(!S.settings.classMode){cb();return}
+  showOv('ov-class');
+  $('#classCheck').onclick=()=>{hideOv('ov-class');sndWin();
+    sparklesAt(innerWidth/2,innerHeight/2,7);setTimeout(cb,350)};
+}
+function roundDone(){
+  const lv=S.levels[LV];lv.done++;lv.stars=Math.min(3,lv.stars+1);save();
+  confettiBurst();sndWin();speak('כל הכבוד! סיימת את השלב!');
+  const nxt=LV<5&&S.levels[LV+1]&&S.levels[LV].done>=1?LV+1:null;
+  $('#stage').innerHTML=`
+    <div style="font-size:64px">🎉</div>
+    <h2>כל הכבוד! סיימת את השלב!</h2>
+    <div style="font-size:26px;letter-spacing:3px;color:#c9a227">${'⭐'.repeat(lv.stars)}</div>
+    <div class="budLine">${budSVG(26)} ניצן חדש מחכה לך מחר! 🌱</div>
+    <button class="btn" onclick="startLevel(${LV})">🔁 לשחק שוב</button>
+    ${nxt&&S.levels[nxt].done===0&&(nxt===2?true:S.levels[nxt-1].done>=1)?`<button class="btn grn" onclick="startLevel(${nxt})">${LEVELS[nxt].icon} לשלב הבא!</button>`:''}
+    <button class="btn sec" onclick="goHome()">🏠 חזרה הביתה</button>`;
+}
+
+/* ---------- הפנס הפנימי (הכלי הראשון): להאיר על הלב, לשאול אותו
+   מה הוא מרגיש, לחבק אותו, ולהגיד "מותר לי להרגיש ככה" ---------- */
+const FEELS=[['😳','ביישנות'],['😟','קצת פחד'],['🤔','חוסר ביטחון'],['🤗','התרגשות']];
+function torchGate(cb){
+  const need=!sessionTorch||Math.random()<.12;
+  if(!need){cb();return}
+  sessionTorch=true;
+  const heart=$('#torchHeart'),h=$('#torchH'),sub=$('#torchSub'),st=$('#torchStage');
+  heart.classList.remove('lit');
+  heart.style.filter='grayscale(.9) brightness(.5)';
+  h.textContent='רגע — נקשיב ללב 💛';
+  sub.textContent='נדליק את הפנס הפנימי ונאיר על הלב 🔦';
+  st.innerHTML='<div class="chargeRing" id="chargeRing"><button id="torchBtn">🔦</button></div>';
+  showOv('ov-torch');
+  let p=0,iv=null,done=false;
+  const ring=$('#chargeRing'),btn=$('#torchBtn');
+  function step(){
+    p=Math.min(100,p+3);ring.style.setProperty('--p',p);
+    if(p%15===0)tone(200+p*5,.08,'sine',0,.08);
+    heart.style.filter=`grayscale(${.9-(p/100)*.9}) brightness(${.5+(p/100)*.5})`;
+    if(p>=100&&!done){done=true;clearInterval(iv);askHeart();}
+  }
+  const start=e=>{e.preventDefault();if(done)return;sndTap();iv=setInterval(step,45)};
+  const stop=()=>{if(iv){clearInterval(iv);iv=null}};
+  btn.onpointerdown=start;btn.onpointerup=stop;btn.onpointerleave=stop;btn.onpointercancel=stop;
+  function askHeart(){
+    sndWarm();
+    h.textContent='לב שלי, מה אתה מרגיש?';
+    sub.textContent='שואלים את הלב — ומקשיבים לתשובה';
+    st.innerHTML='<div class="optGrid" style="grid-template-columns:1fr 1fr">'+
+      FEELS.map((f,i)=>`<button class="optCard" data-i="${i}"><span class="big">${f[0]}</span>${f[1]}</button>`).join('')+'</div>';
+    st.querySelectorAll('.optCard').forEach(b=>b.onclick=()=>{sndTap();hugHeart(FEELS[+b.dataset.i])});
+  }
+  function hugHeart(f){
+    h.textContent='עכשיו — לחבק את הלב';
+    sub.textContent='חיבוק גדול ללב שמרגיש '+f[1]+' '+f[0];
+    st.innerHTML='<button class="btn grn" id="hugBtn" style="font-size:20px">🫂 לחבק את הלב</button>';
+    $('#hugBtn').onclick=()=>{
+      sndWarm();heart.classList.add('lit');heart.style.filter='';
+      sparklesAt(innerWidth/2,innerHeight/2-80,6);
+      h.textContent='מותק, מותר לך להרגיש '+f[1]+' 💛';
+      sub.textContent='זה נורמלי להרגיש ככה. לכולם זה קורה לפעמים.';
+      st.innerHTML='<button class="btn grn" id="torchGo">עכשיו אפשר לשתף 🌸</button>';
+      $('#torchGo').onclick=()=>{sndTap();hideOv('ov-torch');cb()};
+    };
+  }
+}
+
+/* ============================================================
+   9. home + setup + garden
+   ============================================================ */
+const LVMETA=[null,
+  {icon:'🌸',name:'מה יש בפרח שלי'},
+  {icon:'💬',name:'משפט שיתוף'},
+  {icon:'🤝',name:'שיתוף מחובר'},
+  {icon:'🏓',name:'פינג־פונג'},
+  {icon:'🔒',name:'כמה ולמי'}];
+function unlocked(n){return n===1||S.levels[n-1].done>=1}
+function renderHome(){
+  paintSound();
+  $('#swClass').classList.toggle('on',S.settings.classMode);
+  $('#homeFlower').innerHTML=flowerSVG(S.cur.petals,S.profile.color,120);
+  const tp=TOPICS.find(t=>t.k===S.profile.topic);
+  $('#greet').textContent='איזה כיף שבאת! כל שיתוף פותח עלה בפרח '+(tp?tp.e:'🌸');
+  let h='';
+  for(let n=1;n<=5;n++){
+    const u=unlocked(n),lv=S.levels[n];
+    h+=`<button class="lvCard${u?'':' locked'}" onclick="${u?`startLevel(${n})`:`lockedMsg(${n})`}">
+      <span class="ic">${u?LVMETA[n].icon:'🔒'}</span>
+      <span class="nm">שלב ${n} · ${LVMETA[n].name}</span>
+      <span class="st">${u?('⭐'.repeat(lv.stars)||'חדש!'):''}</span></button>`;
+  }
+  $('#lvGrid').innerHTML=h;
+  $('#gCount').textContent=S.garden.length?('('+S.garden.length+')'):'';
+  const anyPlay=S.garden.length>0||Object.values(S.levels).some(l=>l.plays>0);
+  $('#homeBud').style.display=anyPlay?'flex':'none';
+  $('#budMini').innerHTML=budSVG(26);
+}
+function lockedMsg(n){sndSoft();speak('קודם מסיימים את שלב '+(n-1));
+  const c=document.querySelectorAll('.lvCard')[n-1];c.animate([{transform:'translateX(0)'},{transform:'translateX(6px)'},{transform:'translateX(-6px)'},{transform:'translateX(0)'}],{duration:300})}
+
+function openGarden(){
+  sndTap();paintSound();
+  $('#budMini2').innerHTML=budSVG(26);
+  const g=$('#gardenGrid');
+  if(!S.garden.length){
+    $('#gardenSub').textContent='';
+    g.innerHTML='<div class="gEmpty" style="grid-column:1/-1">הגינה עוד ריקה 🌱<br>כל פרח שנפתח עד הסוף — נשמר כאן לתמיד!</div>';
+  }else{
+    $('#gardenSub').textContent='כל פרח כאן הוא שיתופים אמיתיים שלך — אפשר להראות למורה ולמשפחה!';
+    const bflyVisit=Math.random()<.2?(Math.random()*S.garden.length|0):-1; /* bonus visit */
+    g.innerHTML=S.garden.map((f,i)=>`<div class="gItem">
+      ${(f.bfly||i===bflyVisit)?'<span class="bfly">🦋</span>':''}
+      ${flowerSVG(NPETALS,f.color,74)}
+      <span>${f.date.slice(8,10)}.${f.date.slice(5,7)} ${(TOPICS.find(t=>t.k===f.topic)||{e:''}).e}</span></div>`).join('');
+  }
+  showScreen('scr-garden');
+}
+
+/* ---------- first-run setup ---------- */
+function setup(){
+  paintSound();showScreen('scr-setup');
+  $('#setupStage').innerHTML=`
+    <h1 style="margin-bottom:4px">🌸 הפרח שלי</h1>
+    <div class="sub">איזה צבע יהיה לפרח שלך?</div>
+    <div class="pickGrid">${COLORS.map(c=>`<button class="pickCard" onclick="pickColor('${c[0]}')">
+      ${flowerSVG(NPETALS,c[0],64)}<span>${c[1]}</span></button>`).join('')}</div>`;
+  /* no speak() here — TTS must never autoplay before the first user gesture */
+}
+function pickColor(c){
+  S.profile.color=c;save();sndPetal();
+  $('#setupStage').innerHTML=`
+    <div style="margin-top:6px">${flowerSVG(NPETALS,c,110)}</div>
+    <div class="sub">איזה יופי! ומה אתה הכי אוהב?</div>
+    <div class="pickGrid">${TOPICS.map(t=>`<button class="pickCard" onclick="pickTopic('${t.k}')">
+      <span class="big">${t.e}</span>${t.n}</button>`).join('')}</div>`;
+  speak('איזה יופי! ומה אתה הכי אוהב?');
+}
+function pickTopic(k){
+  S.profile.topic=k;save();sndWin();confettiBurst();
+  setTimeout(goHome,700);
+}
+
+/* ============================================================
+   10. level engine
+   ============================================================ */
+function startLevel(n){
+  sndTap();LV=n;PROG=0;GOAL=LEVELS[n].goal;
+  S.levels[n].plays++;save();
+  $('#lvTitle').textContent=LVMETA[n].icon+' שלב '+n+' · '+LVMETA[n].name;
+  paintSound();renderFlower();renderDots();
+  showScreen('scr-level');
+  torchGate(()=>LEVELS[n].start());
+}
+function addBank(c,e,t){
+  if(!S.bank.some(b=>b.t===t))S.bank.push({c,e,t});
+  save();
+}
+function bankTiles(cats,fill){ /* tiles from the child's own bank first, then defaults */
+  let tiles=S.bank.filter(b=>cats.includes(b.c)).map(b=>[b.e,b.t]);
+  (fill||[]).forEach(f=>{if(tiles.length<5&&!tiles.some(t=>t[1]===f[1]))tiles.push(f)});
+  L1CATS.filter(cc=>cats.includes(cc.k)).forEach(cc=>cc.opts.forEach(o=>{
+    if(tiles.length<5&&!tiles.some(t=>t[1]===o[1]))tiles.push(o)}));
+  return tiles.slice(0,5);
+}
+
+/* ---------------- level 1: מה יש בפרח שלי ---------------- */
+LEVELS[1]={goal:7,start(){this.order=dayShuffle(L1CATS,1);this.i=0;this.step()},
+step(){
+  const cat=this.order[this.i];
+  $('#stage').innerHTML=`
+    <div class="qTitle">${cat.q}</div>
+    <div class="sub">אין תשובה לא נכונה — הכל עליך אמיתי! 💛</div>
+    <div class="optGrid">${cat.opts.map((o,j)=>`<button class="optCard" data-j="${j}">
+      <span class="big">${o[0]}</span>${o[1]}</button>`).join('')}</div>`;
+  speak(cat.q);
+  document.querySelectorAll('#stage .optCard').forEach(b=>b.onclick=()=>{
+    const o=cat.opts[+b.dataset.j];
+    b.classList.add('picked');sndTap();
+    const r=b.getBoundingClientRect();sparklesAt(r.left+r.width/2,r.top,4);
+    addBank(cat.k,o[0],o[1]);
+    speak(o[1]+'! נכנס לפרח שלך');
+    document.querySelectorAll('#stage .optCard').forEach(x=>x.onclick=null);
+    this.i++;
+    setTimeout(()=>success(()=>this.step()),350);
+  });
+}};
+
+/* ---------------- level 2: משפט שיתוף ---------------- */
+LEVELS[2]={goal:3,start(){this.step()},
+step(){
+  const st=dayShuffle(STARTERS,2+PROG);
+  $('#stage').innerHTML=`
+    <div class="qTitle">בחר התחלה למשפט שלך 💬</div>
+    <div class="optGrid">${st.map((s,j)=>`<button class="optCard" data-j="${j}">
+      <span class="big">${s.e}</span>${s.t}</button>`).join('')}</div>`;
+  speak('בחר התחלה למשפט שלך');
+  document.querySelectorAll('#stage .optCard').forEach(b=>b.onclick=()=>{sndTap();this.pickTile(st[+b.dataset.j])});
+},
+pickTile(starter){
+  let tiles=bankTiles(starter.cats,S.profile.topic&&starter.cats.includes('game')?[TOPIC_TILE[S.profile.topic]]:[]);
+  tiles=shuffle(tiles).slice(0,5);
+  $('#stage').innerHTML=`
+    <div class="qTitle">${starter.t} — מה נוסיף? 🧩</div>
+    <div class="optGrid">${tiles.map((t,j)=>`<button class="optCard" data-j="${j}">
+      <span class="big">${t[0]}</span>${t[1]}</button>`).join('')}</div>`;
+  document.querySelectorAll('#stage .optCard').forEach(b=>b.onclick=()=>{
+    sndTap();this.saySentence(starter,tiles[+b.dataset.j]);
+  });
+},
+saySentence(starter,tile){
+  const sen=starter.make(tile[1]);
+  $('#stage').innerHTML=`
+    <div class="sentence">${tile[0]} ${sen}</div>
+    <button class="btn sec" id="hearBtn" style="max-width:260px">🔊 לשמוע שוב</button>
+    <div class="sayLoud">עכשיו אמור את זה בקול! 🎤</div>
+    <button class="btn grn" id="saidBtn">אמרתי בקול! ✅</button>`;
+  speak(sen);
+  $('#hearBtn').onclick=()=>{sndTap();speak(sen)};
+  $('#saidBtn').onclick=()=>{
+    sndWin();speak('איזה משפט יפה שיתפת!');
+    $('#saidBtn').onclick=null;
+    setTimeout(()=>success(()=>this.step()),300);
+  };
+}};
+
+/* ---------------- level 3: שיתוף מחובר ---------------- */
+LEVELS[3]={goal:5,start(){
+  this.scens=dayShuffle(L3SCEN,3).slice(0,this.goal);this.i=0;this.step()},
+step(){
+  const sc=this.scens[this.i],fr=FRIENDS[this.i%FRIENDS.length];
+  const opts=shuffle([{t:sc.ok,ok:true},{t:sc.bad[0]},{t:sc.bad[1]}]);
+  $('#stage').innerHTML=`
+    <div class="avRow"><div class="avatar talk">${fr[0]}</div><div class="avatar">🙂</div></div>
+    <div class="bub"><div class="who">${fr[1]}</div>${sc.f}</div>
+    <div class="qTitle" style="font-size:18px">מה תגיד בחזרה? 🤔</div>
+    <div class="optGrid" style="grid-template-columns:1fr">${opts.map((o,j)=>`<button class="optCard" data-j="${j}" style="min-height:64px">${o.t}</button>`).join('')}</div>`;
+  speak(fr[1]+' אומר: '+sc.f);
+  document.querySelectorAll('#stage .optCard').forEach(b=>{
+    b.onclick=()=>{
+      const o=opts[+b.dataset.j];
+      if(o.ok){
+        b.classList.add('picked');sndWin();
+        const r=b.getBoundingClientRect();sparklesAt(r.left+r.width/2,r.top,5);
+        speak('גם אני! איזה כיף לדבר איתך!');
+        document.querySelectorAll('#stage .optCard').forEach(x=>x.onclick=null);
+        this.i++;
+        setTimeout(()=>success(()=>this.step()),400);
+      }else{
+        /* errorless gentle modeling — no penalty, petal never closes */
+        sndSoft();b.classList.add('dim');
+        speak('רגע... על מה '+fr[1]+' דיבר?');
+        const bubs=$('#stage .bub');
+        bubs.innerHTML=`<div class="who">${fr[1]}</div>רגע, על מה דיברתי? 🤔<br>דיברתי על: <b>"${sc.f}"</b> — איזו תשובה ממשיכה אותי?`;
+        document.querySelectorAll('#stage .optCard').forEach((x,xi)=>{
+          if(opts[xi].ok)x.classList.add('hint');
+          else x.classList.add('dim');
+        });
+      }
+    };
+  });
+}};
+
+/* ---------------- level 4: פינג-פונג (reciprocity rally) ---------------- */
+LEVELS[4]={goal:4,start(){
+  this.streak=0;this.round=0;
+  this.fr=FRIENDS[(DAYSEED+S.levels[4].plays)%FRIENDS.length];
+  this.answers=dayShuffle(L4ANS,4);
+  this.usedTopic=false;
+  this.step();
+},
+frame(inner){
+  $('#stage').innerHTML=`
+    <div class="avRow"><div class="avatar" id="l4fr">${this.fr[0]}</div><span id="l4ball">🦋</span><div class="avatar" id="l4me">🙂</div></div>
+    <div id="l4inner" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:10px">${inner}</div>`;
+},
+step(){ /* child chooses what to share */
+  let pool=bankTiles(['food','game','animal','place','exp'],L4EXTRA);
+  pool=shuffle(pool.concat(L4EXTRA)).slice(0,3);
+  this.frame(`
+    <div class="qTitle" style="font-size:18px">בחר מה לספר ל${this.fr[1]} 💬</div>
+    <div class="optGrid">${pool.map((p,j)=>`<button class="optCard" data-j="${j}">
+      <span class="big">${p[0]}</span>${p[1]}</button>`).join('')}</div>`);
+  if(this.round===0&&this.streak===0)speak('בחר מה לספר ל'+this.fr[1]);
+  document.querySelectorAll('#stage .optCard').forEach(b=>b.onclick=()=>{
+    const p=pool[+b.dataset.j];sndTap();
+    const sen=p[1].startsWith('אני')?p[1]:(p[1].startsWith('ה')?'אני אוהב את '+p[1]:'אני אוהב '+p[1]);
+    this.shared(sen,p[0]);
+  });
+},
+shared(sen,em){
+  speak(sen);
+  this.frame(`
+    <div class="bub me"><div class="who">אני</div>${em} ${sen}</div>
+    ${this.streak>=2?`<div class="bub"><div class="who">${this.fr[1]}</div>רגע, גם החבר רוצה לספר! 🦋 שאל אותו "ואתה?"</div>`:''}
+    <button class="btn grn ${this.streak>=2?'':''}" id="askBtn" ${this.streak>=2?'style="animation:pulse 1.2s infinite"':''}>🦋 ואתה?</button>
+    <button class="btn sec" id="moreBtn">עוד סיפור שלי ➕</button>`);
+  if(this.streak>=2){sndSoft();speak('רגע, גם החבר רוצה לספר! שאל אותו: ואתה?')}
+  $('#askBtn').onclick=()=>{sndTap();this.askBack()};
+  $('#moreBtn').onclick=()=>{sndTap();this.streak++;this.step()};
+},
+askBack(){
+  this.streak=0;
+  speak('ואתה?');
+  /* butterfly flies to the friend */
+  this.frame(`<div class="bub me"><div class="who">אני</div>ואתה? 😊</div>`);
+  const ball=$('#l4ball');
+  requestAnimationFrame(()=>{ball.style.left='46px'});
+  setTimeout(()=>{
+    let ans;
+    if(!this.usedTopic&&S.profile.topic){ans=TOPIC_LINE[S.profile.topic];this.usedTopic=true}
+    else ans=this.answers[this.round%this.answers.length];
+    $('#l4fr').classList.add('talk');
+    $('#l4inner').innerHTML=`
+      <div class="bub"><div class="who">${this.fr[1]}</div>${ans}<br><b>ואתה?</b> 😊</div>`;
+    speak(this.fr[1]+' עונה: '+ans);
+    this.round++;
+    setTimeout(()=>success(()=>this.step()),1400);
+  },900);
+}};
+
+/* ---------------- level 5: כמה ולמי (circles of closeness) ---------------- */
+LEVELS[5]={goal:6,start(){
+  this.cards=dayShuffle(L5CARDS,5).slice(0,this.goal);this.i=0;this.tried=false;this.step()},
+step(){
+  const c=this.cards[this.i];this.tried=false;
+  $('#stage').innerHTML=`
+    <div class="qTitle">למי בטוח לספר את זה? 🤔</div>
+    <div class="shareCard" id="l5card"><span class="big">${c.e}</span>${c.t}</div>
+    <div class="ringRow">${RINGS.map((r,j)=>`<button class="ringBtn r${j}" data-j="${j}">
+      <span class="big">${r[0]}</span>${r[1]}</button>`).join('')}</div>
+    <div class="sub" id="l5msg" style="min-height:24px"></div>`;
+  speak('למי בטוח לספר: '+c.t+'?');
+  document.querySelectorAll('#stage .ringBtn').forEach(b=>b.onclick=()=>this.place(c,+b.dataset.j,b));
+},
+place(c,j,btn){
+  if(j<=c.max){ /* safe */
+    sndWin();btn.classList.add('picked');
+    const r=btn.getBoundingClientRect();sparklesAt(r.left+r.width/2,r.top,5);
+    let msg=rnd(L5PRAISE);
+    if(c.max===0)msg='נכון מאוד! את זה שומרים רק למשפחה 💙';
+    $('#l5msg').textContent=msg;speak(msg);
+    document.querySelectorAll('#stage .ringBtn').forEach(x=>x.onclick=null);
+    this.i++;
+    setTimeout(()=>success(()=>this.step()),500);
+  }else{ /* unsafe — gently close the card back, explain, guided retry */
+    sndSoft();
+    const card=$('#l5card');card.classList.add('fold');
+    setTimeout(()=>card.classList.remove('fold'),700);
+    const ex=L5EXPL[c.max];
+    $('#l5msg').textContent=ex;speak(ex);
+    document.querySelectorAll('#stage .ringBtn').forEach((x,xi)=>{
+      if(xi>c.max)x.classList.add('dim'); else x.classList.add('hint');
+    });
+  }
+}};
+
+/* attach meta */
+for(let n=1;n<=5;n++){LEVELS[n].icon=LVMETA[n].icon;LEVELS[n].name=LVMETA[n].name}
+
+/* ============================================================
+   11. boot
+   ============================================================ */
+if(!S.profile.color||!S.profile.topic)setup();
+else goHome();
+</script>
+</body>
+</html>
