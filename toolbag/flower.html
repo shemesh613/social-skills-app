@@ -31,6 +31,12 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
 #dots i{width:13px;height:13px;border-radius:50%;background:rgba(255,255,255,.22);border:1.5px solid rgba(255,255,255,.3);transition:background .3s,transform .3s}
 #dots i.f{background:#ffd54a;border-color:#f5a623;transform:scale(1.18)}
 
+/* ---------- free-roam controls (matches world.html) ---------- */
+#joy{position:fixed;bottom:26px;right:26px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.28);z-index:25;touch-action:none;display:none}
+#knob{position:absolute;top:50%;left:50%;width:52px;height:52px;border-radius:50%;background:rgba(255,213,74,.85);transform:translate(-50%,-50%);box-shadow:0 4px 14px rgba(0,0,0,.4)}
+.keysHint{position:fixed;bottom:30px;right:26px;background:rgba(20,14,50,.6);color:#ffe9a8;font-size:13px;font-weight:700;padding:8px 14px;border-radius:14px;z-index:25;display:none}
+#act{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);z-index:24;display:none;min-height:56px;padding:0 22px;border-radius:16px;font-size:17px;font-weight:800;background:linear-gradient(180deg,#ffd54a,#f5a623);color:#4a2c00;box-shadow:0 6px 0 #b57712,0 10px 24px rgba(0,0,0,.35)}
+
 /* ---------- dialogue bubble (bottom, over 3D) ---------- */
 #dlg{position:fixed;left:0;right:0;bottom:0;padding:14px;z-index:22;display:none}
 #dlg.on{display:block}
@@ -141,6 +147,11 @@ h2{font-family:'Frank Ruhl Libre',serif;font-size:clamp(19px,4.5vw,26px);color:#
 </div>
 <div id="dots"></div>
 
+<!-- free-roam controls -->
+<div id="joy"><div id="knob"></div></div>
+<div class="keysHint" id="keysHint">🎮 חצים / WASD לתנועה</div>
+<button id="act"></button>
+
 <!-- dialogue -->
 <div id="dlg">
   <div class="bubble"><div class="who" id="who"></div><div id="txt"></div>
@@ -215,7 +226,7 @@ function dayShuffle(arr,salt){const r=mulberry32(DAYSEED+salt*97);const a=arr.sl
 const DEF={
   levels:{1:{done:0,stars:0,plays:0},2:{done:0,stars:0,plays:0},3:{done:0,stars:0,plays:0},4:{done:0,stars:0,plays:0},5:{done:0,stars:0,plays:0}},
   bank:[],garden:[],settings:{sound:true,classMode:false},
-  profile:{color:null,topic:null},cur:{petals:0}
+  profile:{color:null,topic:null},cur:{petals:0},storyDone:false
 };
 let S;
 function load(){
@@ -316,10 +327,7 @@ const L1CATS=[
   {k:'food',q:'איזה אוכל אתה הכי אוהב? 🍽️',opts:[['🍕','פיצה'],['🍦','גלידה'],['🍫','שוקולד'],['🍔','המבורגר'],['🍉','אבטיח']]},
   {k:'game',q:'במה הכי כיף לך לשחק? 🎲',opts:[['⚽','כדורגל'],['🎮','משחקי מחשב'],['🧩','פאזלים'],['🛝','מגרש משחקים'],['🧱','לגו']]},
   {k:'animal',q:'איזו חיה אתה הכי אוהב? 🐾',opts:[['🐶','כלבים'],['🐱','חתולים'],['🦖','דינוזאורים'],['🐬','דולפינים'],['🦜','תוכים']]},
-  {k:'place',q:'איפה הכי כיף לך? 📍',opts:[['🏖️','הים'],['🏞️','הטבע'],['🎡','הלונה פארק'],['🏠','הבית שלי'],['🏊','הבריכה']]},
-  {k:'family',q:'עם מי במשפחה הכי כיף לך? 👨‍👩‍👧',opts:[['👩','אמא'],['👨','אבא'],['🧒','אח או אחות'],['👵','סבא וסבתא'],['🐕','חיית המחמד']]},
-  {k:'feel',q:'מה אתה מרגיש היום? 💗',opts:[['😊','שמח'],['😌','רגוע'],['🤩','נרגש'],['😴','עייף'],['😢','קצת עצוב']]},
-  {k:'exp',q:'איזו חוויה כיף לך לזכור? ⭐',opts:[['🎂','יום הולדת'],['🚗','טיול משפחתי'],['🏊','יום בבריכה'],['🎬','סרט בקולנוע'],['🎪','הצגה או קרקס']]}
+  {k:'place',q:'איפה הכי כיף לך? 📍',opts:[['🏖️','הים'],['🏞️','הטבע'],['🎡','הלונה פארק'],['🏠','הבית שלי'],['🏊','הבריכה']]}
 ];
 function bPrefix(t){return t.startsWith('ה')?'ב'+t.slice(1):'ב'+t}
 const STARTERS=[
@@ -328,56 +336,10 @@ const STARTERS=[
   {t:'כיף לי עם...',e:'🤗',cats:['family'],make:x=>'כיף לי עם '+x},
   {t:'הרגשתי...',e:'💗',cats:['feel'],make:x=>'הרגשתי '+x}
 ];
-const FRIENDS=[['🐻','דובי'],['🦊','שועלי'],['🐰','ארנבת'],['🦉','ינשוף']];
-const L3SCEN=[
- {f:'אני אוהב פיצה 🍕',ok:'גם אני אוהב פיצה! איזו תוספת אתה אוהב?',bad:['יש לי נעליים חדשות 👟','אתמול ראיתי ציפור 🐦']},
- {f:'יש לי כלב בבית 🐶',ok:'איזה כיף! איך קוראים לכלב שלך?',bad:['אני רעב עכשיו 🍞','המחשב שלי מהיר 💻']},
- {f:'הייתי אתמול בים 🏖️',ok:'וואו, הים! בנית ארמון בחול?',bad:['אני יודע לספור עד מאה 🔢','הכובע שלי כחול 🧢']},
- {f:'אני קצת עצוב היום 😢',ok:'חבל לי שאתה עצוב. רוצה לספר לי מה קרה?',bad:['אני שמח! בוא נשחק ⚽','קניתי גלידה אתמול 🍦']},
- {f:'קיבלתי משחק חדש 🎮',ok:'איזה כיף! איזה משחק קיבלת?',bad:['אני אוהב לישון 😴','יש לי קלמר ירוק ✏️']},
- {f:'אני מפחד מכלבים גדולים 🐕',ok:'זה בסדר לפחד. גם לי יש דברים שמפחידים אותי',bad:['משעמם לי, בוא נדבר על משהו אחר','אני רץ הכי מהר בכיתה 🏃']},
- {f:'היה לי יום הולדת בשבת 🎂',ok:'מזל טוב! איזו עוגה הייתה לך?',bad:['מחר יש טיול','הטלפון של אבא שלי חדש 📱']},
- {f:'אני אוהב לצייר 🎨',ok:'איזה יופי! מה אתה הכי אוהב לצייר?',bad:['אני הולך הביתה עוד מעט 🏠','יש לי גרביים אדומות 🧦']},
- {f:'נסעתי לסבתא בחופש 👵',ok:'כיף לך! מה עשיתם ביחד?',bad:['אני צמא 🥤','ראית את הענן הזה? ☁️']},
- {f:'ניצחתי היום במשחק כדורגל ⚽',ok:'כל הכבוד! כמה שערים הבקעת?',bad:['אני אוהב שוקולד 🍫','הכיסא שלי מתנדנד 🪑']},
- {f:'אני אוהב דינוזאורים 🦖',ok:'מגניב! איזה דינוזאור הכי חזק לדעתך?',bad:['מחר יש מבחן 📃','אני רוצה מים']},
- {f:'הלכתי אתמול לרופא שיניים 🦷',ok:'איך היה אצל הרופא? זה כאב?',bad:['אני אוהב לרוץ בחצר 🏃','המורה שלנו נחמדה 👩‍🏫']},
- {f:'למדתי לרכוב על אופניים 🚲',ok:'וואו, כל הכבוד! זה היה קשה?',bad:['בוא נאכל צהריים 🍽️','אתמול ירד גשם 🌧️']},
- {f:'החתולה שלי ילדה גורים 🐱',ok:'איזה חמוד! כמה גורים נולדו?',bad:['אני יודע לשרוק 😗','התיק שלי כבד 🎒']},
- {f:'אני מתרגש מהטיול מחר 🚌',ok:'גם אני מתרגש! ליד מי תשב באוטובוס?',bad:['אני כבר הייתי בטיול פעם','עכשיו שיעור חשבון 📐']},
- {f:'ראיתי סרט מצחיק בסוף השבוע 🎬',ok:'נשמע כיף! על מה היה הסרט?',bad:['אני רוצה לשתות מים 🥤','יש לי מדבקות חדשות ✨']},
- {f:'אני אוהב לשיר 🎤',ok:'איזה יופי! איזה שיר אתה הכי אוהב?',bad:['השולחן שלי מלוכלך','אני הולך למכולת אחר כך 🛒']},
- {f:'אבא שלי בנה איתי מגדל מלגו 🧱',ok:'איזה מגניב! כמה גבוה היה המגדל?',bad:['אני לא אוהב לגו','תראה את השרוך שלי 👟']}
-];
-const L4ANS=[
- 'אני הכי אוהב גלידת שוקולד 🍦','אני אוהב לשחק בחוץ בהפסקה 🛝','החיה האהובה עליי היא דולפין 🐬',
- 'אני אוהב לבנות מגדלים מלגו 🧱','הצבע האהוב עליי הוא כחול 💙','אני אוהב לשיר בקול רם 🎵',
- 'בסוף השבוע הייתי אצל סבא וסבתא 🏡','אני קצת מפחד מחושך, אבל פנס עוזר לי 🔦','הכי כיף לי בבריכה 🏊',
- 'אני אוהב לצייר ציורים של חלל 🚀','המשחק האהוב עליי הוא תופסת 🏃','אני אוהב לאכול תפוח בהפסקה 🍎',
- 'יש לי אח קטן שמצחיק אותי 👶','אני אוהב ימי גשם עם שוקו חם ☕'];
-const L4EXTRA=[['🌈','אני אוהב קשת בענן'],['🎈','אני אוהב בלונים'],['📚','אני אוהב סיפורים לפני השינה'],['🍪','אני אוהב עוגיות של סבתא'],['🚲','אני אוהב לרכוב על אופניים']];
-const RINGS=[['💙','משפחה'],['💚','חבר טוב'],['💛','מכר'],['🩶','זר']];
-const L5CARDS=[
- {t:'הצבע האהוב עליי',e:'🎨',max:3},{t:'המשחק האהוב עליי',e:'🎮',max:3},
- {t:'החיה האהובה עליי',e:'🐶',max:3},{t:'השיר שאני אוהב',e:'🎵',max:3},
- {t:'מה אכלתי היום בצהריים',e:'🥪',max:3},
- {t:'החלום שלי כשאהיה גדול',e:'🌟',max:2},{t:'מה עשיתי בסוף השבוע',e:'🚗',max:2},
- {t:'באיזו כיתה אני לומד',e:'🏫',max:2},{t:'משהו מצחיק שקרה לי',e:'😄',max:2},
- {t:'סוד שמעציב אותי',e:'💧',max:1},{t:'משהו שמפחיד אותי',e:'😨',max:1},
- {t:'תמונה שלי',e:'📷',max:1},{t:'ריב שהיה לי עם חבר',e:'😤',max:1},
- {t:'הכתובת של הבית שלי',e:'🏠',max:0},{t:'מספר הטלפון שלי',e:'📱',max:0},
- {t:'הסיסמה שלי',e:'🔑',max:0},{t:'מתי אני לבד בבית',e:'🕐',max:0}
-];
-const L5EXPL={
- 0:'אופס... את זה שומרים רק למשפחה! 💙 פרטים כאלה הם פרטיים מאוד — לא מספרים אותם לאף אחד אחר.',
- 1:'רגע... את זה משתפים רק עם משפחה או עם חבר ממש טוב 💚 — מישהו שסומכים עליו מאוד.',
- 2:'כמעט! את זה אפשר לספר לאנשים שמכירים — אבל לא לזר שלא מכירים בכלל 🩶'};
-const L5PRAISE=['שיתוף בטוח! 🌸','בחירה חכמה! 🌟','בדיוק! זה בטוח לשתף 💚','נכון מאוד! 🌷'];
 const FEELS=[['😳','ביישנות'],['😟','קצת פחד'],['🤔','חוסר ביטחון'],['🤗','התרגשות'],['🤷','לא בטוח']];
 const LVMETA=[null,
-  {icon:'🌸',name:'מה יש בפרח שלי'},{icon:'💬',name:'משפט שיתוף'},{icon:'🤝',name:'שיתוף מחובר'},
-  {icon:'🏓',name:'פינג־פונג'},{icon:'🔒',name:'כמה ולמי'}];
-const NPETALS=8;
+  {icon:'🌸',name:'מה יש בפרח שלי'},{icon:'💬',name:'משפט שיתוף'}];
+const NPETALS=8; /* the 3D flower mesh has exactly 8 petal slots — L1 goal 4 + L2 goal 4 */
 </script>
 <script type="module">
 import * as THREE from 'three';
@@ -618,11 +580,35 @@ homeFlower3D.position.set(1.6,0,10.6);homeFlower3D.scale.setScalar(1.35);
 scene.add(homeFlower3D);
 for(let i=0;i<S.cur.petals;i++){const P=homeFlower3D.userData.petals[i];P.pivot.scale.set(1,1,1);P.open=true}
 
-/* ================= camera spot system — glides between named spots, no free roam ================= */
+/* ================= camera: free-roam follow + cinematic glide spots ================= */
 let camPos=new THREE.Vector3(0,5,16),camLook=new THREE.Vector3(0,1.2,8);
 let camTargetPos=camPos.clone(),camTargetLook=camLook.clone();
-function camSpot(pos,look){camTargetPos=pos.clone();camTargetLook=look.clone()}
+let camMode='fixed'; /* 'follow' = trails the player during free walking; 'fixed' = cinematic glide to a spot */
+function camSpot(pos,look){camMode='fixed';camTargetPos=pos.clone();camTargetLook=look.clone()}
 camSpot(new THREE.Vector3(6,4.4,17),new THREE.Vector3(1,1.3,9));
+
+/* ================= free movement — WASD / arrows / on-screen joystick, matches world.html ================= */
+let MODE='cine'; /* 'cine' (dialogue/ritual, no movement) | 'explore' (free walking) */
+const BOUNDS={x1:-37,x2:37,z1:-26,z2:32};
+const keys={};
+addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true});
+addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false});
+let joyV={x:0,y:0};
+const joyEl=document.getElementById('joy'),knobEl=document.getElementById('knob');
+function joyHandle(e){
+  const t=e.touches?e.touches[0]:e;const r=joyEl.getBoundingClientRect();
+  let dx=(t.clientX-(r.left+60))/48,dy=(t.clientY-(r.top+60))/48;
+  const l=Math.hypot(dx,dy);if(l>1){dx/=l;dy/=l}
+  joyV={x:dx,y:dy};knobEl.style.transform='translate(calc(-50% + '+dx*34+'px), calc(-50% + '+dy*34+'px))';
+}
+joyEl.addEventListener('pointerdown',e=>{joyEl.setPointerCapture(e.pointerId);joyHandle(e)});
+joyEl.addEventListener('pointermove',e=>{if(e.buttons)joyHandle(e)});
+joyEl.addEventListener('pointerup',()=>{joyV={x:0,y:0};knobEl.style.transform='translate(-50%,-50%)'});
+function enterExplore(){MODE='explore';camMode='follow';
+  const touch='ontouchstart' in window;
+  document.getElementById(touch?'joy':'keysHint').style.display='block';
+}
+function enterCine(){MODE='cine';document.getElementById('joy').style.display='none';document.getElementById('keysHint').style.display='none';document.getElementById('act').style.display='none'}
 
 /* ================= animate loop ================= */
 const clock=new THREE.Clock();let markerT=0,running=true;
@@ -634,6 +620,20 @@ function animate(){
   markerT+=dt;
   if(!RM)clouds.forEach(c=>{c.position.x+=dt*.5;if(c.position.x>60)c.position.x=-60});
   starsMat.opacity+=(NIGHT*.9-starsMat.opacity)*Math.min(dt*2,1);
+  /* player free movement */
+  let moving=false;
+  if(MODE==='explore'&&player){
+    let vx=(keys['arrowright']||keys['d']?1:0)-(keys['arrowleft']||keys['a']?1:0)+joyV.x;
+    let vz=(keys['arrowdown']||keys['s']?1:0)-(keys['arrowup']||keys['w']?1:0)+joyV.y;
+    const l=Math.hypot(vx,vz);
+    if(l>.15){vx/=Math.max(l,1);vz/=Math.max(l,1);
+      player.g.position.x+=vx*dt*6.2;player.g.position.z+=vz*dt*6.2;
+      player.g.position.x=Math.max(BOUNDS.x1,Math.min(BOUNDS.x2,player.g.position.x));
+      player.g.position.z=Math.max(BOUNDS.z1,Math.min(BOUNDS.z2,player.g.position.z));
+      player.g.rotation.y=Math.atan2(vx,vz);moving=true;
+    }
+  }
+  if(player)playA(player,moving?'Walk':'Idle_Neutral');
   /* owl life: bob, gaze at player, blink */
   owl.position.y=owl.userData.baseY+Math.sin(markerT*1.6)*.05;
   if(player){
@@ -645,8 +645,13 @@ function animate(){
   if(markerT>owl.userData.nextBlink){owl.userData.blinkUntil=markerT+.13;owl.userData.nextBlink=markerT+2.2+Math.random()*2.8}
   const bs=markerT<owl.userData.blinkUntil?.1:1;
   owl.userData.eyes.forEach(e=>{e.scale.y+=(bs-e.scale.y)*Math.min(dt*30,1)});
-  /* camera glide */
-  camPos.lerp(camTargetPos,Math.min(dt*2.4,1));camLook.lerp(camTargetLook,Math.min(dt*2.4,1));
+  /* camera: follow while exploring, glide to a fixed cinematic spot otherwise */
+  if(camMode==='follow'&&player){
+    camTargetPos.copy(player.g.position).add(new THREE.Vector3(0,4.4,6.4));
+    camTargetLook.copy(player.g.position).add(new THREE.Vector3(0,1.3,0));
+  }
+  camPos.lerp(camTargetPos,Math.min(dt*(camMode==='follow'?3.2:2.4),1));
+  camLook.lerp(camTargetLook,Math.min(dt*(camMode==='follow'?3.2:2.4),1));
   cam.position.copy(camPos);cam.lookAt(camLook);
   renderer.render(scene,cam);
 }
@@ -655,7 +660,9 @@ animate();
 function worldToScreen(v){const p=v.clone().project(cam);return{x:(p.x*.5+.5)*innerWidth,y:(-p.y*.5+.5)*innerHeight}}
 function snapPhotoNow(){renderer.render(scene,cam);try{return renderer.domElement.toDataURL('image/png')}catch(e){return null}}
 window.FLOWER3D={buildFlower3D,openPetal3D,resetFlower3D,homeFlower3D,camSpot,scene,cam,renderer,owl,emojiSprite,setNight,
-  torchLight,get player(){return player},THREE,place,STAT,worldToScreen,snapPhotoNow,shade3};
+  torchLight,get player(){return player},THREE,place,STAT,worldToScreen,snapPhotoNow,shade3,
+  enterExplore,enterCine,get MODE(){return MODE},set actLabel(t){document.getElementById('act').textContent=t},
+  get actBtn(){return document.getElementById('act')}};
 }catch(err){
   console.error('flower.html 3D init failed',err);
   document.getElementById('loading').style.display='none';
@@ -708,7 +715,7 @@ function renderHome(){
   const tp=TOPICS.find(t=>t.k===S.profile.topic);
   $('#greet').textContent='איזה כיף שחזרת לשדה! כל שיתוף פותח עלה בפרח שלך '+(tp?tp.e:'🌸');
   let h='';
-  for(let n=1;n<=5;n++){const u=unlocked(n),lv=S.levels[n];
+  for(let n=1;n<=2;n++){const u=unlocked(n),lv=S.levels[n];
     h+=`<button class="lvCard${u?'':' locked'}" onclick="${u?`startLevel(${n})`:`lockedMsg(${n})`}">
       <span class="ic">${u?LVMETA[n].icon:'🔒'}</span>
       <span class="nm">שלב ${n} · ${LVMETA[n].name}</span>
@@ -736,7 +743,7 @@ function applyFlowerColor(hex){
   F.homeFlower3D.userData.color=base;
   F.homeFlower3D.userData.petals.forEach((P,i)=>{P.mesh.material.color.setHex(i%2?base:parseInt(F.shade3(hex,.4).toString(16).padStart(6,'0'),16))});
 }
-function pickTopic(k){S.profile.topic=k;save();sndWin();confettiBurst();setTimeout(goHome,700)}
+function pickTopic(k){S.profile.topic=k;save();sndWin();confettiBurst();setTimeout(()=>S.storyDone?goHome():startStory(),700)}
 
 /* ================= petal + level engine ================= */
 function renderDots(){let h='';for(let i=0;i<GOAL;i++)h+='<i class="'+(i<PROG?'f':'')+'"></i>';$('#dots').innerHTML=h;$('#dots').classList.add('on')}
@@ -787,24 +794,37 @@ function classGate(cb){
 function roundDone(){
   const lv=S.levels[LV];lv.done++;lv.stars=Math.min(3,lv.stars+1);save();
   confettiBurst();sndWin();
-  const nxt=LV<5&&S.levels[LV+1]&&S.levels[LV].done>=1?LV+1:null;
+  const nxt=LV<2&&S.levels[LV+1]&&S.levels[LV].done>=1?LV+1:null;
+  const nxtAction=nxt===2?'goShareWithFriend()':`startLevel(${nxt})`;
   openPanel(`<div style="font-size:56px">🎉</div><h2>כל הכבוד! סיימת את השלב!</h2>
     <div style="font-size:24px;letter-spacing:3px;color:#ffd54a">${'⭐'.repeat(lv.stars)}</div>
     <button class="btn" onclick="startLevel(${LV})">🔁 לשחק שוב</button>
-    ${nxt&&S.levels[nxt].done===0?`<button class="btn grn" onclick="startLevel(${nxt})">${LEVELS[nxt].icon} לשלב הבא!</button>`:''}
+    ${nxt&&S.levels[nxt].done===0?`<button class="btn grn" onclick="${nxtAction}">${LEVELS[nxt].icon} לשלב הבא!</button>`:''}
     <button class="btn sec" onclick="goHome()">🏠 חזרה הביתה</button>`);
+}
+/* bridge from level 1 (private thinking) to level 2 (saying it out loud to a friend) —
+   the owl's advice alone isn't quite enough; this is where it's still hard, and the torch helps */
+function goShareWithFriend(){
+  closePanel();sndTap();
+  if(window.FLOWER3D)window.FLOWER3D.enterCine();
+  say([
+    {who:'🦉 הינשוף',t:'יפה מאוד! עכשיו בוא ננסה לספר אחד מהדברים האלה לחבר, בקול.'},
+    {who:'',t:'קצת מפחיד לגשת ולהגיד את זה בקול... 😳'}
+  ],()=>startLevel(2));
 }
 function startLevel(n){
   sndTap();LV=n;PROG=0;GOAL=LEVELS[n].goal;S.levels[n].plays++;save();
+  if(window.FLOWER3D)window.FLOWER3D.enterCine();
   hideAllOv();$('#backBtn').style.display='none';$('#homeBtn').style.display='block';
   $('#tbTitle').textContent=LVMETA[n].icon+' שלב '+n+' · '+LVMETA[n].name;
   paintSound();renderDots();goSpot(n);
-  torchGate(()=>LEVELS[n].start());
+  /* הפנס הפנימי שייך לרגע שבו קשה לגשת ולשתף בקול (שלב 2) — לא לחשיבה השקטה על עצמי (שלב 1) */
+  if(n===2)torchGate(()=>LEVELS[n].start());else LEVELS[n].start();
 }
 $('#homeBtn').onclick=goHome;
 
 /* ---------------- level 1: מה יש בפרח שלי ---------------- */
-LEVELS[1]={goal:7,start(){this.order=dayShuffle(L1CATS,1);this.i=0;this.step()},
+LEVELS[1]={goal:L1CATS.length,start(){this.order=L1CATS.slice();this.i=0;this.step()}, /* סדר קבוע, קל וללא סיכון — כולו היכרות עם עצמי */
 step(){const cat=this.order[this.i];
   openPanel(`<div class="qTitle">${cat.q}</div><div class="sub">אין תשובה לא נכונה — הכל עליך אמיתי! 💛</div>
     <div class="optGrid">${cat.opts.map((o,j)=>`<button class="optCard" data-j="${j}"><span class="big">${o[0]}</span>${o[1]}</button>`).join('')}</div>`);
@@ -817,9 +837,12 @@ step(){const cat=this.order[this.i];
   });
 }};
 
-/* ---------------- level 2: משפט שיתוף ---------------- */
-LEVELS[2]={goal:3,start(){this.step()},
-step(){const st=dayShuffle(STARTERS,2+PROG);
+/* ---------------- level 2: משפט שיתוף (הדרגתי: קל בהתחלה, אישי יותר בהמשך) ---------------- */
+LEVELS[2]={goal:STARTERS.length,start(){this.step()},
+step(){
+  const cap=Math.min(PROG+1,STARTERS.length);
+  if(cap===1){this.pickTile(STARTERS[0]);return} /* הראשון תמיד "אני אוהב..." — הכי קל, בלי צורך לבחור */
+  const st=shuffle(STARTERS.slice(0,cap));
   openPanel(`<div class="qTitle">בחר התחלה למשפט שלך 💬</div>
     <div class="optGrid">${st.map((s,j)=>`<button class="optCard" data-j="${j}"><span class="big">${s.e}</span>${s.t}</button>`).join('')}</div>`);
   document.querySelectorAll('#stage .optCard').forEach(b=>b.onclick=()=>{sndTap();this.pickTile(st[+b.dataset.j])});
@@ -839,80 +862,7 @@ saySentence(starter,tile){
   $('#saidBtn').onclick=()=>{sndWin();$('#saidBtn').onclick=null;setTimeout(()=>success(()=>this.step()),300)};
 }};
 
-/* ---------------- level 3: שיתוף מחובר ---------------- */
-LEVELS[3]={goal:5,start(){this.scens=dayShuffle(L3SCEN,3).slice(0,this.goal);this.i=0;this.step()},
-step(){const sc=this.scens[this.i],fr=FRIENDS[this.i%FRIENDS.length];
-  const opts=shuffle([{t:sc.ok,ok:true},{t:sc.bad[0]},{t:sc.bad[1]}]);
-  openPanel(`<div class="bub"><div class="who2">${fr[0]} ${fr[1]}</div>${sc.f}</div>
-    <div class="qTitle" style="font-size:17px">מה תגיד בחזרה? 🤔</div>
-    <div class="optGrid one">${opts.map((o,j)=>`<button class="optCard" data-j="${j}">${o.t}</button>`).join('')}</div>`);
-  document.querySelectorAll('#stage .optCard').forEach(b=>{
-    b.onclick=()=>{const o=opts[+b.dataset.j];
-      if(o.ok){b.classList.add('picked');sndWin();
-        const r=b.getBoundingClientRect();sparklesAt(r.left+r.width/2,r.top,5);
-        document.querySelectorAll('#stage .optCard').forEach(x=>x.onclick=null);
-        this.i++;setTimeout(()=>success(()=>this.step()),400);
-      }else{sndSoft();b.classList.add('dim');
-        const bubs=$('#stage .bub');
-        bubs.innerHTML=`<div class="who2">${fr[0]} ${fr[1]}</div>רגע, על מה דיברתי? 🤔<br>דיברתי על: <b>"${sc.f}"</b> — איזו תשובה ממשיכה אותי?`;
-        document.querySelectorAll('#stage .optCard').forEach((x,xi)=>{if(opts[xi].ok)x.classList.add('hint');else x.classList.add('dim')});
-      }};
-  });
-}};
-
-/* ---------------- level 4: פינג-פונג ---------------- */
-LEVELS[4]={goal:4,start(){this.streak=0;this.round=0;this.fr=FRIENDS[(DAYSEED+S.levels[4].plays)%FRIENDS.length];
-  this.answers=dayShuffle(L4ANS,4);this.usedTopic=false;this.step()},
-step(){let pool=bankTiles(['food','game','animal','place','exp'],L4EXTRA);pool=shuffle(pool.concat(L4EXTRA)).slice(0,3);
-  openPanel(`<div class="qTitle" style="font-size:17px">בחר מה לספר ל${this.fr[1]} ${this.fr[0]} 💬</div>
-    <div class="optGrid">${pool.map((p,j)=>`<button class="optCard" data-j="${j}"><span class="big">${p[0]}</span>${p[1]}</button>`).join('')}</div>`);
-  document.querySelectorAll('#stage .optCard').forEach(b=>b.onclick=()=>{
-    const p=pool[+b.dataset.j];sndTap();
-    const sen=p[1].startsWith('אני')?p[1]:(p[1].startsWith('ה')?'אני אוהב את '+p[1]:'אני אוהב '+p[1]);
-    this.shared(sen,p[0]);
-  });
-},
-shared(sen,em){
-  openPanel(`<div class="bub me"><div class="who2">אני</div>${em} ${sen}</div>
-    ${this.streak>=2?`<div class="bub"><div class="who2">${this.fr[0]} ${this.fr[1]}</div>רגע, גם החבר רוצה לספר! שאל אותו "ואתה?"</div>`:''}
-    <button class="btn grn" id="askBtn">🦋 ואתה?</button>
-    <button class="btn sec" id="moreBtn">עוד סיפור שלי ➕</button>`);
-  if(this.streak>=2)sndSoft();
-  $('#askBtn').onclick=()=>{sndTap();this.askBack()};
-  $('#moreBtn').onclick=()=>{sndTap();this.streak++;this.step()};
-},
-askBack(){this.streak=0;
-  openPanel(`<div class="bub me"><div class="who2">אני</div>ואתה? 😊</div>`);
-  setTimeout(()=>{let ans;
-    if(!this.usedTopic&&S.profile.topic){ans=TOPIC_LINE[S.profile.topic];this.usedTopic=true}
-    else ans=this.answers[this.round%this.answers.length];
-    openPanel(`<div class="bub"><div class="who2">${this.fr[0]} ${this.fr[1]}</div>${ans}<br><b>ואתה?</b> 😊</div>`);
-    this.round++;setTimeout(()=>success(()=>this.step()),1400);
-  },900);
-}};
-
-/* ---------------- level 5: כמה ולמי ---------------- */
-LEVELS[5]={goal:6,start(){this.cards=dayShuffle(L5CARDS,5).slice(0,this.goal);this.i=0;this.step()},
-step(){const c=this.cards[this.i];
-  openPanel(`<div class="qTitle">למי בטוח לספר את זה? 🤔</div>
-    <div class="shareCard" id="l5card"><span class="big">${c.e}</span>${c.t}</div>
-    <div class="ringRow">${RINGS.map((r,j)=>`<button class="ringBtn r${j}" data-j="${j}"><span class="big">${r[0]}</span>${r[1]}</button>`).join('')}</div>
-    <div class="sub" id="l5msg" style="min-height:22px"></div>`);
-  document.querySelectorAll('#stage .ringBtn').forEach(b=>b.onclick=()=>this.place(c,+b.dataset.j,b));
-},
-place(c,j,btn){
-  if(j<=c.max){sndWin();btn.classList.add('picked');
-    const r=btn.getBoundingClientRect();sparklesAt(r.left+r.width/2,r.top,5);
-    let msg=rnd(L5PRAISE);if(c.max===0)msg='נכון מאוד! את זה שומרים רק למשפחה 💙';
-    $('#l5msg').textContent=msg;
-    document.querySelectorAll('#stage .ringBtn').forEach(x=>x.onclick=null);
-    this.i++;setTimeout(()=>success(()=>this.step()),500);
-  }else{sndSoft();const card=$('#l5card');card.classList.add('fold');setTimeout(()=>card.classList.remove('fold'),700);
-    const ex=L5EXPL[c.max];$('#l5msg').textContent=ex;
-    document.querySelectorAll('#stage .ringBtn').forEach((x,xi)=>{if(xi>c.max)x.classList.add('dim');else x.classList.add('hint')});
-  }
-}};
-for(let n=1;n<=5;n++){LEVELS[n].icon=LVMETA[n].icon;LEVELS[n].name=LVMETA[n].name}
+for(let n=1;n<=2;n++){LEVELS[n].icon=LVMETA[n].icon;LEVELS[n].name=LVMETA[n].name}
 
 /* ================= הפנס הפנימי — real 3D dimming + pointer-follow torch ================= */
 let heartSprite=null,heartPos=null,stopBeat=null;
@@ -1092,11 +1042,36 @@ $('#backBtn').addEventListener('click',ev=>{
   });
 },{capture:true});
 
+/* ================= opening story: alone in the field on the class trip ================= */
+function startStory(){
+  S.storyDone=true;save();
+  hideAllOv();$('#homeBtn').style.display='none';$('#backBtn').style.display='none';
+  const F=window.FLOWER3D;
+  if(F&&F.player){
+    F.player.g.position.set(11,0,-9);F.player.g.rotation.y=Math.PI*.3;
+    /* the rest of the class, together, far from the child who wandered off alone */
+    ['🧒','👧'].forEach((em,i)=>{const sp=F.emojiSprite(em,1.15);sp.position.set(-2.6+i*1.6,1.25,20.4);F.scene.add(sp)});
+  }
+  if(F)F.enterExplore(); /* a quiet moment alone in the field, free to look around */
+  setTimeout(()=>{
+    if(F){F.enterCine();F.camSpot(new F.THREE.Vector3(14.4,3.5,-4.6),new F.THREE.Vector3(10,1.3,-9))}
+    say([
+      {who:'🦉 הינשוף',t:'היי... רואה אותך פה לבד בשדה, בזמן שכולם ליד השמיכה 💛'},
+      {who:'🦉 הינשוף',t:'קצת קשה ככה, נכון? זה בסדר להרגיש ככה.'},
+      {who:'🦉 הינשוף',t:'תראה כמה פרחים יש כאן. כל אחד מהם היה פעם סגור לגמרי.'},
+      {who:'🦉 הינשוף',t:'כשמשתפים משהו קטן ואמיתי על עצמנו — זה כמו עלה כותרת שנפתח.'},
+      {who:'🦉 הינשוף',t:'בוא נראה קודם מה יש בפרח שלך.'}
+    ],()=>startLevel(1));
+  },1500);
+}
+
 /* boot: wait for the 3D world to finish loading its assets */
 function bootUI(){
   applyFlowerColor(S.profile.color||'#ff9ec4');
   openingCeremony();
-  if(!S.profile.color||!S.profile.topic)setup();else goHome();
+  if(!S.profile.color||!S.profile.topic)setup();
+  else if(!S.storyDone)startStory();
+  else goHome();
 }
 if(window.FLOWER3D)bootUI();else window.addEventListener('flowerReady',bootUI,{once:true});
 </script>
