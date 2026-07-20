@@ -226,7 +226,7 @@ function dayShuffle(arr,salt){const r=mulberry32(DAYSEED+salt*97);const a=arr.sl
 const DEF={
   levels:{1:{done:0,stars:0,plays:0},2:{done:0,stars:0,plays:0},3:{done:0,stars:0,plays:0},4:{done:0,stars:0,plays:0},5:{done:0,stars:0,plays:0}},
   bank:[],garden:[],settings:{sound:true,classMode:false},
-  profile:{color:null,topic:null},cur:{petals:0},storyDone:false
+  profile:{color:null,topic:null},cur:{petals:0}
 };
 let S;
 function load(){
@@ -468,11 +468,17 @@ function buildOwl(){
   owl.userData.eyes=eyes;owl.userData.blinkUntil=0;owl.userData.nextBlink=2;owl.userData.baseY=0;
   return owl;
 }
-const owl=buildOwl();owl.position.set(-6,1.3,-16);owl.userData.baseY=1.3;scene.add(owl);
+/* a short wooden perch stump — the owl sits ON something, not floating in mid-air.
+   Placed a natural conversational distance from where the child ends up alone,
+   so the dialogue camera can frame both, and the child can turn to face it. */
+const OWLX=16,OWLZ=-13;
+const owlPerchTrunk=box(.22,.9,.22,0x8a6a3f,OWLX,.45,OWLZ);owlPerchTrunk.rotation.z=.06;
+box(.6,.08,.6,0x6d4f2c,OWLX,.88,OWLZ);
+const owl=buildOwl();owl.position.set(OWLX,.9,OWLZ);owl.userData.baseY=.9;scene.add(owl);
 
 /* ================= character (only the child's chosen one) + nature props ================= */
 const loader=new GLTFLoader();
-let nLoaded=0;const nTotal=9; /* 1 char + 8 nature props */
+let nLoaded=0;const nTotal=13; /* 1 char + 4 classmate chars (same as the soccer chapter) + 8 nature props */
 function loadTick(){nLoaded++;const t=document.getElementById('loadTxt');if(t)t.textContent='טוענים את שדה הפרחים... '+nLoaded+'/'+nTotal}
 function loadGLTF(path){return new Promise((res,rej)=>loader.load(path,gl=>{loadTick();res(gl)},undefined,rej))}
 let CHARNAME='hoodie';try{CHARNAME=localStorage.getItem('toolbagChar')||'hoodie'}catch(e){}
@@ -482,6 +488,10 @@ const NATURE_FILES={tree1:'models/nature/CommonTree_1.gltf',tree3:'models/nature
   grass1:'models/nature/Grass_1.gltf',grass2:'models/nature/Grass_2.gltf'};
 const STAT={};
 const charGL=loadGLTF(CHAR_FILES[CHARNAME]||CHAR_FILES.hoodie);
+/* same 4 models+tints as the soccer-circle kids in world.html — recognizable as "the same class" */
+const KIDMODELS=['casual','adventurer','worker','farmer'];
+const KIDCOL=[0x333333,0x884422,0x2255aa,0x117755]; /* small kippah colors, same as world.html's soccer kids — NOT body tints */
+const kidGL=KIDMODELS.map(k=>loadGLTF(CHAR_FILES[k]));
 const statP=Object.entries(NATURE_FILES).map(([k,f])=>loadGLTF(f).then(gl=>{STAT[k]=gl.scene}));
 
 function playA(k,name,once){
@@ -492,18 +502,64 @@ function playA(k,name,once){
   if(once){a.setLoop(THREE.LoopOnce,1);k.busy=true}else a.setLoop(THREE.LoopRepeat,Infinity);
   k.cur=a;k.curName=name;
 }
-function makeChar(src,targetH,kidHead){
+function makeChar(src,targetH,kidHead,kipColor){
   const inner=SkeletonUtils.clone(src.scene);
-  inner.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false;o.material=new THREE.MeshLambertMaterial({color:o.material.color})}});
+  /* keep each model's own clothing colors/texture — only flatten PBR->Lambert (matches world.html) */
+  inner.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false;
+    o.material=new THREE.MeshLambertMaterial({color:o.material.color})}});
   const s=targetH/2.35;inner.scale.setScalar(s);
   const g=new THREE.Group();g.add(inner);scene.add(g);
   const mixer=new THREE.AnimationMixer(inner);const actions={};
   src.animations.forEach(c=>{actions[c.name.replace(/^.*\|/,'')]=mixer.clipAction(c)});
   const k={g,inner,mixer,actions,cur:null,curName:'',busy:false};
   mixer.addEventListener('finished',()=>{k.busy=false;k.cur=null;k.curName='';playA(k,'Idle_Neutral')});
+  /* optional small colored kippah on the head, sized to follow it */
+  if(kipColor!==undefined){
+    const head=inner.getObjectByName('Head');
+    if(head){
+      inner.updateMatrixWorld(true);
+      const ws=new THREE.Vector3();head.getWorldScale(ws);
+      const r=(.06*targetH)/ws.y;
+      const kip=new THREE.Mesh(new THREE.SphereGeometry(r,14,10),new THREE.MeshLambertMaterial({color:kipColor}));
+      kip.scale.y=.4;kip.position.y=(.098*targetH)/ws.y;kip.castShadow=false;
+      head.add(kip);
+    }
+  }
+  /* kid proportions: enlarge the head bone so it reads as a child, not a small adult */
   if(kidHead){const h=inner.getObjectByName('Head');if(h)h.scale.multiplyScalar(kidHead)}
   playA(k,'Idle_Neutral');
   return k;
+}
+/* ---- classmates walking in pairs — the same 4 kids (models+colors) from the soccer chapter ---- */
+const NPCS=[];
+function spawnPairWalkers(kidGLResolved){
+  /* kept in a tight cluster around the blanket (-2,20) — a narrow-portrait establishing shot
+     has a much narrower horizontal FOV than vertical, so a wide spread falls outside the frame */
+  const pairs=[
+    {a:new THREE.Vector3(-4.5,0,18.5),b:new THREE.Vector3(-3,0,19),path:[new THREE.Vector3(-4.5,0,18.5),new THREE.Vector3(-1,0,20.5),new THREE.Vector3(-3.5,0,21.5)]},
+    {a:new THREE.Vector3(0,0,21),b:new THREE.Vector3(1.3,0,20.5),path:[new THREE.Vector3(0,0,21),new THREE.Vector3(-2,0,19),new THREE.Vector3(1,0,18.5)]}
+  ];
+  pairs.forEach((p,pi)=>{
+    [p.a,p.b].forEach((start,side)=>{
+      const idx=pi*2+side;
+      const k=makeChar(kidGLResolved[idx],1.52,1.55,KIDCOL[idx]);
+      k.g.position.copy(start);
+      NPCS.push({k,path:p.path,side,wi:1,speed:1.5+Math.random()*.3});
+    });
+  });
+}
+function updateNPCs(dt){
+  NPCS.forEach(n=>{
+    const target=n.path[n.wi].clone();
+    if(n.side===1)target.x+=1.7; /* walk shoulder-to-shoulder, offset from the pair's path */
+    const d=new THREE.Vector3().subVectors(target,n.k.g.position);d.y=0;
+    const dist=d.length();
+    if(dist<.3){n.wi=(n.wi+1)%n.path.length;return}
+    d.normalize();
+    n.k.g.position.x+=d.x*n.speed*dt;n.k.g.position.z+=d.z*n.speed*dt;
+    n.k.g.rotation.y=Math.atan2(d.x,d.z);
+    playA(n.k,'Walk');n.k.mixer.update(dt);
+  });
 }
 function place(key,x,z,targetH,ry,tint){
   const m=STAT[key].clone(true);
@@ -514,9 +570,10 @@ function place(key,x,z,targetH,ry,tint){
 }
 
 let player=null;
-Promise.all([charGL,...statP]).then(([charG])=>{
+Promise.all([charGL,Promise.all(kidGL),...statP]).then(([charG,kidGLResolved])=>{
   player=makeChar(charG,1.5,1.55);
   player.g.position.set(11,0,-9);player.g.rotation.y=Math.PI*.3;
+  spawnPairWalkers(kidGLResolved); /* the rest of the class strolling in pairs near the blanket — the child is the only one alone */
   /* scatter nature props across the open field (a class-trip destination — no boundary fence, lots of flowers) */
   [[-30,6,8.5,'tree3'],[26,-10,9,'tree5'],[-14,-16,8,'tree1'],[18,14,7.5,'tree5'],[-34,-14,8.8,'tree3'],[24,-22,8.4,'tree1']].forEach(v=>place(v[3],v[0],v[1],v[2]));
   [[-10,12,1.8,'bush1'],[16,4,1.7,'berry'],[-22,-6,1.9,'bush1'],[6,-20,1.8,'berry']].forEach(v=>place(v[3],v[0],v[1],v[2]));
@@ -646,6 +703,7 @@ function animate(){
     }
   }
   if(player)playA(player,moving?'Walk':'Idle_Neutral');
+  updateNPCs(dt);
   /* owl life: bob, gaze at player, blink */
   owl.position.y=owl.userData.baseY+Math.sin(markerT*1.6)*.05;
   if(player){
@@ -671,9 +729,10 @@ animate();
 
 function worldToScreen(v){const p=v.clone().project(cam);return{x:(p.x*.5+.5)*innerWidth,y:(-p.y*.5+.5)*innerHeight}}
 function snapPhotoNow(){renderer.render(scene,cam);try{return renderer.domElement.toDataURL('image/png')}catch(e){return null}}
+function faceOwl(){if(player)player.g.rotation.y=Math.atan2(owl.position.x-player.g.position.x,owl.position.z-player.g.position.z)}
 window.FLOWER3D={buildFlower3D,openPetal3D,resetFlower3D,homeFlower3D,camSpot,scene,cam,renderer,owl,emojiSprite,setNight,
   torchLight,get player(){return player},THREE,place,STAT,worldToScreen,snapPhotoNow,shade3,
-  enterExplore,enterCine,get MODE(){return MODE},set actLabel(t){document.getElementById('act').textContent=t},
+  enterExplore,enterCine,faceOwl,get MODE(){return MODE},set actLabel(t){document.getElementById('act').textContent=t},
   get actBtn(){return document.getElementById('act')}};
 }catch(err){
   console.error('flower.html 3D init failed',err);
@@ -755,7 +814,7 @@ function applyFlowerColor(hex){
   F.homeFlower3D.userData.color=base;
   F.homeFlower3D.userData.petals.forEach((P,i)=>{P.mesh.material.color.setHex(i%2?base:parseInt(F.shade3(hex,.4).toString(16).padStart(6,'0'),16))});
 }
-function pickTopic(k){S.profile.topic=k;save();sndWin();confettiBurst();setTimeout(()=>S.storyDone?goHome():startStory(),700)}
+function pickTopic(k){S.profile.topic=k;save();sndWin();confettiBurst();setTimeout(()=>S.levels[1].plays>0?goHome():startStory(),700)}
 
 /* ================= petal + level engine ================= */
 function renderDots(){let h='';for(let i=0;i<GOAL;i++)h+='<i class="'+(i<PROG?'f':'')+'"></i>';$('#dots').innerHTML=h;$('#dots').classList.add('on')}
@@ -1053,17 +1112,23 @@ $('#backBtn').addEventListener('click',ev=>{
 
 /* ================= opening story: alone in the field on the class trip ================= */
 function startStory(){
-  S.storyDone=true;save();
+  /* whether to show this again is driven by real progress (S.levels[1].plays), not a separate
+     flag — so a page refresh/close mid-story never permanently skips it */
   hideAllOv();$('#homeBtn').style.display='none';$('#backBtn').style.display='none';
   const F=window.FLOWER3D;
   if(F&&F.player){
     F.player.g.position.set(11,0,-9);F.player.g.rotation.y=Math.PI*.3;
-    /* the rest of the class, together, far from the child who wandered off alone */
-    ['🧒','👧'].forEach((em,i)=>{const sp=F.emojiSprite(em,1.15);sp.position.set(-2.6+i*1.6,1.25,20.4);F.scene.add(sp)});
+    /* the rest of the class strolls in real walking pairs near the blanket (spawned already in the 3D boot) —
+       the child is the only one alone */
   }
-  if(F)F.enterExplore(); /* a real moment alone among the flowers, free to walk and look around */
+  /* establishing shot FIRST — guarantee every child actually sees the group together,
+     since the camera would otherwise never naturally turn that way on its own */
+  if(F){F.enterCine();F.camSpot(new F.THREE.Vector3(-2,4.6,4.5),new F.THREE.Vector3(-2,1.4,20))}
   setTimeout(()=>{
-    if(F){F.enterCine();F.camSpot(new F.THREE.Vector3(14.4,3.5,-4.6),new F.THREE.Vector3(10,1.3,-9))}
+    if(F)F.enterExplore(); /* now a real moment alone among the flowers, free to walk and look around */
+  },2200);
+  setTimeout(()=>{
+    if(F){F.enterCine();F.faceOwl();F.camSpot(new F.THREE.Vector3(25,5,3),new F.THREE.Vector3(13.5,1.2,-11))}
     say([
       {who:'🦉 הינשוף',t:'היי... רואה אותך פה לבד בשדה, בזמן שכולם ליד השמיכה 💛'},
       {who:'🦉 הינשוף',t:'תראה כמה פרחים יש כאן. כל אחד מהם היה פעם סגור לגמרי —'},
@@ -1074,7 +1139,7 @@ function startStory(){
       {who:'🦉 הינשוף',t:'זה לגמרי בסדר להרגיש ככה. לכל אחד קשה לפעמים.'},
       {who:'🦉 הינשוף',t:'יש לי כלי בדיוק בשביל רגעים כאלה — הפנס הפנימי 🔦'}
     ],askOvercome);
-  },4200);
+  },6400);
 }
 function askOvercome(){
   const F=window.FLOWER3D;
@@ -1089,7 +1154,7 @@ function bootUI(){
   applyFlowerColor(S.profile.color||'#ff9ec4');
   openingCeremony();
   if(!S.profile.color||!S.profile.topic)setup();
-  else if(!S.storyDone)startStory();
+  else if(S.levels[1].plays===0)startStory();
   else goHome();
 }
 if(window.FLOWER3D)bootUI();else window.addEventListener('flowerReady',bootUI,{once:true});
