@@ -3,267 +3,219 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<meta name="theme-color" content="#fdf8ee">
+<meta name="theme-color" content="#1a1030">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌸</text></svg>">
-<title>🌸 הפרח — תרגול: הפרח שנפתח</title>
+<title>🌸 הפרח — תרגול בשדה הפרחים</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;800&family=Frank+Ruhl+Libre:wght@700;900&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
-   הפרח — practice module. Soft, calm, predictable (ASD UX).
+   הפרח שנפתח — 3D practice meadow (continuation of world.html).
+   Calm, predictable, errorless (ASD UX). RTL Hebrew.
    ============================================================ */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%}
-body{font-family:'Heebo',-apple-system,'Segoe UI',Arial,sans-serif;background:linear-gradient(180deg,#fdf8ee 0%,#f7ecd8 70%,#f2e6cd 100%);color:#4a3a22;user-select:none;overflow-x:hidden}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Heebo',sans-serif;background:#1a1030;color:#fff;user-select:none;touch-action:manipulation}
 button{font-family:inherit;cursor:pointer;border:none;-webkit-tap-highlight-color:transparent}
+#c3d{position:fixed;inset:0;display:block}
+canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
 
-/* ---------- screens ---------- */
-.screen{display:none;min-height:100dvh;flex-direction:column;align-items:center;padding:76px 14px 22px}
-.screen.on{display:flex}
+/* ---------- top bar ---------- */
+#topbar{position:fixed;top:0;left:0;right:0;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;z-index:30;pointer-events:none}
+.tbBtn{pointer-events:auto;min-width:50px;min-height:50px;border-radius:16px;background:rgba(20,14,50,.72);border:1.5px solid rgba(255,213,74,.55);font-size:19px;font-weight:800;color:#ffd54a;padding:0 12px;box-shadow:0 6px 20px rgba(0,0,0,.35);transition:transform .1s}
+.tbBtn:active{transform:translateY(2px)}
+#tbTitle{pointer-events:none;font-family:'Frank Ruhl Libre',serif;font-size:clamp(15px,4vw,21px);font-weight:900;color:#ffd54a;text-shadow:0 2px 12px rgba(0,0,0,.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 6px}
 
-/* ---------- top bar (identical on every screen) ---------- */
-.topbar{position:fixed;top:0;left:0;right:0;height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;background:rgba(253,248,238,.92);backdrop-filter:blur(6px);border-bottom:2px solid #eadfc8;z-index:30}
-.tbBtn{min-width:52px;min-height:52px;border-radius:16px;background:#fffdf7;border:2px solid #eadfc8;font-size:19px;font-weight:800;color:#8a6a35;padding:0 12px;box-shadow:0 3px 0 #e5d7ba;transition:transform .1s}
-.tbBtn:active{transform:translateY(2px);box-shadow:none}
-.tbTitle{font-family:'Frank Ruhl Libre',serif;font-size:clamp(17px,4.2vw,23px);font-weight:900;color:#b0742a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 6px}
+/* ---------- progress dots (petals of current round) ---------- */
+#dots{position:fixed;top:64px;left:50%;transform:translateX(-50%);display:none;gap:7px;z-index:30;background:rgba(20,14,50,.55);border-radius:20px;padding:6px 12px}
+#dots.on{display:flex}
+#dots i{width:13px;height:13px;border-radius:50%;background:rgba(255,255,255,.22);border:1.5px solid rgba(255,255,255,.3);transition:background .3s,transform .3s}
+#dots i.f{background:#ffd54a;border-color:#f5a623;transform:scale(1.18)}
 
-/* ---------- generic buttons ---------- */
-.btn{display:block;width:100%;max-width:420px;margin:8px auto;padding:16px 22px;min-height:64px;border-radius:18px;font-size:19px;font-weight:800;background:linear-gradient(180deg,#ffd98a,#f5b445);color:#5a3c08;box-shadow:0 5px 0 #d99a2b,0 8px 18px rgba(180,130,40,.18);transition:transform .1s}
-.btn:active{transform:translateY(4px);box-shadow:0 1px 0 #d99a2b}
-.btn.sec{background:#fffdf7;border:2px solid #eadfc8;color:#8a6a35;box-shadow:0 5px 0 #e5d7ba}
-.btn.grn{background:linear-gradient(180deg,#b9e8a5,#7fb069);color:#1e3d12;box-shadow:0 5px 0 #5e8d4b}
-.btn[disabled]{opacity:.45;pointer-events:none}
+/* ---------- dialogue bubble (bottom, over 3D) ---------- */
+#dlg{position:fixed;left:0;right:0;bottom:0;padding:14px;z-index:22;display:none}
+#dlg.on{display:block}
+.bubble{position:relative;max-width:620px;margin:0 auto;background:#fffef2;color:#3a2c10;border-radius:20px;padding:16px 20px 12px;font-size:clamp(16px,2.4vh,19px);line-height:1.65;font-weight:600;min-height:84px;box-shadow:0 12px 34px rgba(0,0,0,.5)}
+.who{position:absolute;top:-15px;right:14px;background:#ffd54a;color:#4a2c00;font-size:13.5px;font-weight:800;border-radius:20px;padding:2px 12px}
+.next{text-align:center;font-size:13.5px;color:#a15c00;opacity:.85;margin-top:6px;animation:tw 1.6s infinite}
+@keyframes tw{0%,100%{opacity:.25}50%{opacity:.95}}
 
-h1{font-family:'Frank Ruhl Libre',serif;font-size:clamp(26px,6.5vw,40px);color:#b0742a;text-align:center;line-height:1.3}
-h2{font-family:'Frank Ruhl Libre',serif;font-size:clamp(20px,5vw,27px);color:#b0742a;text-align:center;line-height:1.35}
-.sub{font-size:16px;color:#8a7350;text-align:center;line-height:1.6;max-width:460px}
-
-/* ---------- home ---------- */
-.homeFlower{margin:2px auto 0}
-.greet{font-size:17px;font-weight:600;color:#8a7350;text-align:center;margin:2px 0 10px}
-.lvGrid{display:flex;flex-direction:column;gap:10px;width:100%;max-width:460px;margin:8px auto}
-.lvCard{display:flex;align-items:center;gap:14px;width:100%;min-height:72px;padding:10px 16px;border-radius:20px;background:#fffdf7;border:2px solid #eadfc8;box-shadow:0 4px 0 #e5d7ba;font-size:17px;font-weight:800;color:#4a3a22;text-align:right;transition:transform .1s}
-.lvCard:active{transform:translateY(3px);box-shadow:none}
-.lvCard .ic{font-size:34px;flex:0 0 44px;text-align:center}
-.lvCard .nm{flex:1}
-.lvCard .st{font-size:14px;color:#c9a227;letter-spacing:1px}
-.lvCard.locked{opacity:.5;filter:grayscale(.6)}
-.lvCard.locked .st{color:#a99}
-.homeRow{display:flex;gap:10px;width:100%;max-width:460px;margin-top:6px}
-.homeRow .btn{margin:0;flex:1;min-height:58px;font-size:17px}
-.classToggle{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:14px;font-size:15.5px;font-weight:700;color:#8a7350}
-.sw{position:relative;width:56px;height:32px;border-radius:20px;background:#e5d7ba;transition:background .2s;flex:0 0 auto}
-.sw.on{background:#7fb069}
-.sw i{position:absolute;top:3px;right:3px;width:26px;height:26px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 2px 5px rgba(0,0,0,.2)}
-.sw.on i{transform:translateX(-24px)}
-.budLine{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:15px;font-weight:700;color:#7c9e63;background:#f2f7ec;border:2px dashed #b9d3a5;border-radius:16px;padding:8px 16px}
-
-/* ---------- setup ---------- */
-.pickGrid{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;width:100%;max-width:480px;margin:16px auto}
-.pickCard{min-width:96px;min-height:96px;padding:12px;border-radius:20px;background:#fffdf7;border:3px solid #eadfc8;font-size:16.5px;font-weight:800;color:#4a3a22;box-shadow:0 4px 0 #e5d7ba;transition:transform .12s}
-.pickCard:active{transform:scale(.94)}
-.pickCard .big{display:block;font-size:38px;margin-bottom:4px}
-
-/* ---------- level layout (identical every level) ---------- */
-.lvWrap{display:flex;flex-direction:column;align-items:center;gap:6px;width:100%;max-width:560px}
-#flowerBox{line-height:0}
-.dots{display:flex;gap:8px;justify-content:center;margin:2px 0 8px}
-.dots i{width:14px;height:14px;border-radius:50%;background:#e5d7ba;border:2px solid #d9c9a5;transition:background .3s,transform .3s}
-.dots i.f{background:#f5b445;border-color:#d99a2b;transform:scale(1.15)}
-.stage{width:100%;display:flex;flex-direction:column;align-items:center;gap:10px}
-.qTitle{font-size:clamp(19px,4.6vw,24px);font-weight:800;color:#7a5c2e;text-align:center;line-height:1.4}
-.optGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;width:100%;max-width:520px}
-.optCard{min-height:88px;padding:12px 8px;border-radius:20px;background:#fffdf7;border:2px solid #eadfc8;box-shadow:0 4px 0 #e5d7ba;font-size:16.5px;font-weight:800;color:#4a3a22;transition:transform .12s}
+/* ---------- exercise panel (bottom sheet over 3D) ---------- */
+#panel{position:fixed;left:0;right:0;bottom:0;z-index:24;display:none;justify-content:center;padding:10px;max-height:72dvh;overflow-y:auto}
+#panel.on{display:flex}
+.pCard{width:100%;max-width:560px;background:rgba(22,15,52,.9);backdrop-filter:blur(4px);border:1.5px solid rgba(255,213,74,.4);border-radius:22px;padding:16px 14px;display:flex;flex-direction:column;align-items:center;gap:10px;box-shadow:0 14px 40px rgba(0,0,0,.5);animation:fadeUp .35s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.qTitle{font-size:clamp(18px,4.4vw,22px);font-weight:800;color:#ffe9a8;text-align:center;line-height:1.4}
+.sub{font-size:15px;color:#cfc4ea;text-align:center;line-height:1.6;max-width:480px}
+.optGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:9px;width:100%}
+.optGrid.one{grid-template-columns:1fr}
+.optCard{min-height:64px;padding:10px 8px;border-radius:18px;background:rgba(255,255,255,.09);border:2px solid rgba(255,255,255,.3);font-size:16px;font-weight:800;color:#fff;line-height:1.45;transition:transform .12s}
 .optCard:active{transform:scale(.95)}
-.optCard .big{display:block;font-size:36px;margin-bottom:4px;pointer-events:none}
-.optCard.hint{animation:pulse 1s infinite;border-color:#7fb069;background:#f2f7ec}
-.optCard.dim{opacity:.35;pointer-events:none}
-.optCard.picked{border-color:#f5b445;background:#fff6df}
+.optCard .big{display:block;font-size:33px;margin-bottom:3px;pointer-events:none}
+.optCard.hint{animation:pulse 1s infinite;border-color:#7dffa8;background:rgba(60,150,80,.25)}
+.optCard.dim{opacity:.32;pointer-events:none}
+.optCard.picked{border-color:#ffd54a;background:rgba(255,213,74,.2)}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
-
-/* speech bubble */
-.bub{position:relative;width:100%;max-width:520px;background:#fffdf7;border:2px solid #eadfc8;border-radius:20px;padding:14px 18px;font-size:clamp(16px,4vw,19px);font-weight:600;line-height:1.6;color:#4a3a22;box-shadow:0 6px 16px rgba(180,130,40,.12);animation:fadeUp .4s ease}
-.bub .who{position:absolute;top:-14px;right:14px;background:#f5b445;color:#5a3c08;font-size:13px;font-weight:800;border-radius:20px;padding:2px 12px}
-.bub.me{background:#f2f7ec;border-color:#b9d3a5}
-.bub.me .who{background:#7fb069;color:#fff}
-@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-.avRow{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:520px;padding:0 14px;position:relative;height:78px}
-.avatar{font-size:52px;line-height:1;transition:transform .3s}
-.avatar.talk{animation:bob .8s ease-in-out 2}
-@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-#l4ball{position:absolute;top:8px;font-size:32px;left:calc(100% - 78px);transition:left .8s cubic-bezier(.4,.1,.4,1)}
-.sentence{font-size:clamp(20px,5.4vw,27px);font-weight:800;color:#5a3c08;background:#fff6df;border:2px solid #f5cd7e;border-radius:18px;padding:14px 20px;text-align:center;line-height:1.5;max-width:520px;animation:fadeUp .4s ease}
-.sayLoud{font-size:18px;font-weight:800;color:#7c9e63;text-align:center;animation:pulse 1.4s infinite}
-
-/* level 5 rings */
-.ringRow{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;width:100%;max-width:520px}
-.ringBtn{min-height:84px;border-radius:20px;font-size:16px;font-weight:800;border:3px solid;transition:transform .12s;background:#fffdf7}
+.btn{display:block;width:100%;max-width:420px;margin:4px auto;padding:14px 22px;min-height:56px;border-radius:16px;font-size:18px;font-weight:800;background:linear-gradient(180deg,#ffd54a,#f5a623);color:#4a2c00;box-shadow:0 6px 0 #b57712,0 10px 24px rgba(0,0,0,.35);transition:transform .1s}
+.btn:active{transform:translateY(4px);box-shadow:0 2px 0 #b57712}
+.btn.sec{background:linear-gradient(180deg,#3c477f,#2a3260);color:#dfe6ff;box-shadow:0 6px 0 #1a2040}
+.btn.grn{background:linear-gradient(180deg,#7dffa8,#25c05f);color:#053514;box-shadow:0 6px 0 #128040}
+.btn[disabled]{opacity:.45;pointer-events:none}
+.sentence{font-size:clamp(19px,5vw,25px);font-weight:800;color:#ffe9a8;background:rgba(255,213,74,.12);border:2px solid rgba(255,213,74,.5);border-radius:18px;padding:12px 18px;text-align:center;line-height:1.5;width:100%}
+.sayLoud{font-size:17px;font-weight:800;color:#7dffa8;text-align:center;animation:pulse 1.4s infinite}
+.bub{position:relative;width:100%;background:#fffef2;border-radius:18px;padding:14px 16px;font-size:clamp(15px,3.8vw,18px);font-weight:600;line-height:1.6;color:#3a2c10;animation:fadeUp .4s ease}
+.bub .who2{position:absolute;top:-13px;right:14px;background:#ffd54a;color:#4a2c00;font-size:12.5px;font-weight:800;border-radius:20px;padding:2px 12px}
+.bub.me{background:#eaf7e2}
+.bub.me .who2{background:#25c05f;color:#fff}
+/* ---------- level 5 rings ---------- */
+.ringRow{display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:9px;width:100%}
+.ringBtn{min-height:78px;border-radius:18px;font-size:15px;font-weight:800;border:3px solid;transition:transform .12s;background:rgba(255,255,255,.08);color:#fff}
 .ringBtn:active{transform:scale(.95)}
-.ringBtn .big{display:block;font-size:32px;margin-bottom:2px}
-.ringBtn.r0{border-color:#7ea6e0;color:#2d5a9e}.ringBtn.r1{border-color:#8cc07a;color:#2f6b1e}
-.ringBtn.r2{border-color:#e8c34f;color:#8a6a10}.ringBtn.r3{border-color:#b9b4ac;color:#6d6a63}
+.ringBtn .big{display:block;font-size:30px;margin-bottom:2px}
+.ringBtn.r0{border-color:#7ea6e0}.ringBtn.r1{border-color:#8cc07a}
+.ringBtn.r2{border-color:#e8c34f}.ringBtn.r3{border-color:#b9b4ac}
 .ringBtn.dim{opacity:.3;pointer-events:none}
-.shareCard{min-width:220px;background:#fffdf7;border:3px solid #eadfc8;border-radius:22px;padding:18px 24px;font-size:clamp(19px,5vw,24px);font-weight:800;color:#4a3a22;text-align:center;box-shadow:0 8px 20px rgba(180,130,40,.15);transition:transform .5s ease}
-.shareCard .big{display:block;font-size:46px;margin-bottom:6px}
+.ringBtn.hint{animation:pulse 1s infinite}
+.ringBtn.picked{background:rgba(255,213,74,.2)}
+.shareCard{width:100%;background:#fffef2;border-radius:20px;padding:14px 18px;font-size:clamp(18px,4.6vw,22px);font-weight:800;color:#3a2c10;text-align:center;transition:transform .5s ease}
+.shareCard .big{display:block;font-size:40px;margin-bottom:4px}
 .shareCard.fold{transform:scaleY(.06);opacity:.4}
 
-/* ---------- overlays ---------- */
-.ov{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:22px;z-index:50;background:rgba(74,58,34,.45);backdrop-filter:blur(3px)}
+/* ---------- full-screen overlays (home/menu/ceremony) ---------- */
+.ov{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:18px;z-index:40;overflow-y:auto}
 .ov.on{display:flex}
-.ovCard{width:100%;max-width:440px;background:#fdf8ee;border-radius:26px;padding:26px 20px;display:flex;flex-direction:column;align-items:center;gap:12px;box-shadow:0 20px 50px rgba(0,0,0,.3);animation:fadeUp .35s ease}
-.heart{font-size:84px;line-height:1;filter:grayscale(.9) brightness(.5);transition:filter .5s}
-.heart.lit{filter:none;animation:beat 1.1s infinite}
-@keyframes beat{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
-.chargeRing{width:130px;height:130px;border-radius:50%;background:conic-gradient(#f5b445 calc(var(--p,0)*1%),#eee3cd 0);display:flex;align-items:center;justify-content:center;transition:background .1s}
-#torchBtn{width:104px;height:104px;border-radius:50%;background:#fffdf7;border:3px solid #eadfc8;font-size:46px;touch-action:none;box-shadow:0 4px 0 #e5d7ba}
-#torchBtn:active{transform:scale(.96)}
-.bigCheck{width:110px;height:110px;border-radius:50%;background:linear-gradient(180deg,#b9e8a5,#7fb069);font-size:56px;color:#fff;box-shadow:0 6px 0 #5e8d4b;transition:transform .1s}
-.bigCheck:active{transform:translateY(4px);box-shadow:0 1px 0 #5e8d4b}
+.ov.dimbg{background:rgba(8,6,28,.6);backdrop-filter:blur(2px)}
+h1{font-family:'Frank Ruhl Libre',serif;font-size:clamp(26px,7vw,44px);color:#ffd54a;text-shadow:0 4px 24px rgba(0,0,0,.5);text-align:center}
+h2{font-family:'Frank Ruhl Libre',serif;font-size:clamp(19px,4.5vw,26px);color:#ffd54a;text-align:center;line-height:1.35}
+.lvGrid{display:flex;flex-direction:column;gap:9px;width:100%;max-width:440px}
+.lvCard{display:flex;align-items:center;gap:12px;width:100%;min-height:64px;padding:8px 14px;border-radius:18px;background:rgba(22,15,52,.85);border:2px solid rgba(255,213,74,.4);font-size:16px;font-weight:800;color:#fff;text-align:right;transition:transform .1s}
+.lvCard:active{transform:translateY(2px)}
+.lvCard .ic{font-size:30px;flex:0 0 40px;text-align:center}
+.lvCard .nm{flex:1}
+.lvCard .st{font-size:13px;color:#ffd54a;letter-spacing:1px}
+.lvCard.locked{opacity:.45;filter:grayscale(.6)}
+.homeRow{display:flex;gap:9px;width:100%;max-width:440px}
+.homeRow .btn{margin:0;flex:1;min-height:52px;font-size:16px}
+.classToggle{display:flex;align-items:center;justify-content:center;gap:10px;font-size:15px;font-weight:700;color:#cfc4ea;cursor:pointer}
+.sw{position:relative;width:54px;height:30px;border-radius:20px;background:rgba(255,255,255,.2);transition:background .2s;flex:0 0 auto}
+.sw.on{background:#25c05f}
+.sw i{position:absolute;top:3px;right:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .2s}
+.sw.on i{transform:translateX(-24px)}
+.pickGrid{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;width:100%;max-width:460px}
+.pickCard{min-width:92px;min-height:92px;padding:10px;border-radius:18px;background:rgba(255,255,255,.09);border:3px solid rgba(255,255,255,.3);font-size:16px;font-weight:800;color:#fff;transition:transform .12s}
+.pickCard:active{transform:scale(.94)}
+.pickCard .big{display:block;font-size:40px;margin-bottom:4px}
+.pickCard .dot{display:block;width:40px;height:40px;border-radius:50%;margin:0 auto 6px;border:3px solid rgba(255,255,255,.7)}
 
-/* ---------- garden ---------- */
-.gardenGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:14px;width:100%;max-width:520px;margin-top:10px}
-.gItem{position:relative;background:#fffdf7;border:2px solid #eadfc8;border-radius:20px;padding:10px 6px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12.5px;font-weight:700;color:#8a7350}
-.gItem .bfly{position:absolute;top:-6px;left:8px;font-size:26px;animation:flutter 2.4s ease-in-out infinite}
-@keyframes flutter{0%,100%{transform:translateY(0) rotate(-8deg)}50%{transform:translateY(-8px) rotate(10deg)}}
-.gEmpty{font-size:16px;color:#8a7350;text-align:center;line-height:1.7;margin-top:24px}
+/* ---------- torch overlay (transparent — the 3D scene is the stage) ---------- */
+#ov-torch{background:transparent;pointer-events:none;justify-content:flex-end;padding-bottom:16px}
+#ov-torch .tCard{pointer-events:auto;width:100%;max-width:520px;background:rgba(12,8,34,.82);border:1.5px solid rgba(255,213,74,.45);border-radius:20px;padding:14px;display:flex;flex-direction:column;align-items:center;gap:9px;box-shadow:0 14px 40px rgba(0,0,0,.6)}
+.wordRow{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.wBtn{min-height:52px;padding:10px 16px;border-radius:14px;font-size:19px;font-weight:800;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.35);color:rgba(255,255,255,.55);transition:all .25s}
+.wBtn.lit{color:#4a2c00;background:#ffd54a;border-color:#fff3c0;box-shadow:0 0 18px rgba(255,213,74,.8)}
 
-/* flower petals */
-.petal{transform-box:fill-box;transform-origin:50% 100%;transform:scale(.2);transition:transform .9s cubic-bezier(.3,1.35,.45,1)}
-.petal.open{transform:scale(1)}
-.flowerSvg{filter:drop-shadow(0 6px 10px rgba(150,110,40,.18))}
-
-/* sparkles / confetti */
+/* ---------- loading / fallback / fade ---------- */
+#loading{position:fixed;inset:0;background:#1a1030;z-index:90;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .6s}
+#loading .fl{font-size:74px;animation:pulse 1.6s infinite}
+#loadTxt{font-size:16px;font-weight:700;color:#cfc4ea}
+#whiteFade{position:fixed;inset:0;background:#fffef2;opacity:0;transition:opacity 1.1s;pointer-events:none;z-index:85}
+#fallback{position:fixed;inset:0;background:#1a1030;z-index:95;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center}
 .spark{position:fixed;font-size:22px;pointer-events:none;z-index:80}
-canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:70}
+.gLabel{position:fixed;transform:translate(-50%,-100%);background:rgba(22,15,52,.85);border:1.5px solid rgba(255,213,74,.5);border-radius:14px;padding:4px 10px;font-size:13px;font-weight:800;color:#ffe9a8;pointer-events:none;z-index:18;white-space:nowrap}
 
-@media (min-width:760px){
-  .lvWrap{flex-direction:row;align-items:flex-start;max-width:860px;gap:24px}
-  .flowerSide{flex:0 0 240px;position:sticky;top:76px}
-  .stage{flex:1}
-}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.15s!important}
 }
 </style>
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
 </head>
 <body>
+<canvas id="c3d"></canvas>
 <canvas id="confetti"></canvas>
+<div id="whiteFade"></div>
 
-<!-- ================= HOME ================= -->
-<div class="screen" id="scr-home">
-  <div class="topbar">
-    <button class="tbBtn" onclick="location.href='world.html'">🎒 חזרה לעולם</button>
-    <div class="tbTitle">🌸 הַפֶּרַח שֶׁנִּפְתָּח</div>
-    <button class="tbBtn muteBtn" onclick="toggleSound()">🔊</button>
-  </div>
-  <div class="homeFlower" id="homeFlower"></div>
-  <div class="greet" id="greet"></div>
+<div id="topbar">
+  <button class="tbBtn" id="homeBtn" style="display:none">🏠</button>
+  <button class="tbBtn" id="backBtn">🎒 לעולם</button>
+  <div id="tbTitle">🌸 הפרח שנפתח</div>
+  <button class="tbBtn muteBtn" onclick="toggleSound()">🔊</button>
+</div>
+<div id="dots"></div>
+
+<!-- dialogue -->
+<div id="dlg">
+  <div class="bubble"><div class="who" id="who"></div><div id="txt"></div>
+    <div class="next" id="nextH">👆 לחצו להמשך</div></div>
+</div>
+
+<!-- exercise panel -->
+<div id="panel"><div class="pCard" id="stage"></div></div>
+
+<!-- home -->
+<div class="ov dimbg" id="ov-home">
+  <div style="font-size:60px">🌸</div>
+  <h1>הפרח שנפתח</h1>
+  <div class="sub" id="greet"></div>
   <div class="lvGrid" id="lvGrid"></div>
   <div class="homeRow">
     <button class="btn grn" onclick="openGarden()">🌷 הגינה שלי <span id="gCount"></span></button>
+    <button class="btn sec" id="photoBtn" onclick="snapPhoto()">📸 לשמור תמונה</button>
   </div>
   <div class="classToggle" onclick="toggleClass()">🍎 מצב כיתה <div class="sw" id="swClass"><i></i></div></div>
-  <div class="budLine" id="homeBud" style="display:none"><span id="budMini"></span> ניצן חדש מחכה לך מחר! 🌱</div>
 </div>
 
-<!-- ================= SETUP ================= -->
-<div class="screen" id="scr-setup">
-  <div class="topbar">
-    <button class="tbBtn" onclick="location.href='world.html'">🎒</button>
-    <div class="tbTitle">🌸 הפרח שלי</div>
-    <button class="tbBtn muteBtn" onclick="toggleSound()">🔊</button>
-  </div>
-  <div id="setupStage" style="width:100%;display:flex;flex-direction:column;align-items:center"></div>
+<!-- setup -->
+<div class="ov dimbg" id="ov-setup"><div id="setupStage" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:12px"></div></div>
+
+<!-- torch (inner flashlight) -->
+<div class="ov" id="ov-torch"><div class="tCard" id="torchCard"></div></div>
+
+<!-- class mode gate -->
+<div class="ov dimbg" id="ov-class">
+  <div style="font-size:58px">🗣️</div>
+  <h2>עכשיו ספר לחבר אמיתי!</h2>
+  <div class="sub">אמרו את מה ששיתפתם — לחבר בכיתה או למורה.<br>אחר כך לחצו על הווי הגדול ✓</div>
+  <button class="btn grn" id="classCheck" style="max-width:180px;font-size:30px;min-height:80px">✓</button>
 </div>
 
-<!-- ================= LEVEL (shared layout) ================= -->
-<div class="screen" id="scr-level">
-  <div class="topbar">
-    <button class="tbBtn" onclick="goHome()">🏠</button>
-    <div class="tbTitle" id="lvTitle"></div>
-    <button class="tbBtn muteBtn" onclick="toggleSound()">🔊</button>
-  </div>
-  <div class="lvWrap">
-    <div class="flowerSide">
-      <div id="flowerBox"></div>
-      <div class="dots" id="dots"></div>
+<!-- garden panel (labels drawn over 3D) -->
+<div id="gardenUI" style="display:none;position:fixed;left:0;right:0;bottom:0;z-index:24;padding:12px">
+  <div style="max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:8px">
+    <div class="sub" id="gardenSub" style="background:rgba(12,8,34,.75);border-radius:14px;padding:8px 12px;max-width:none"></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn" style="margin:0;flex:1" onclick="closeGarden()">🏠 חזרה</button>
+      <button class="btn sec" style="margin:0;flex:1" onclick="snapPhoto()">📸 תמונה</button>
     </div>
-    <div class="stage" id="stage"></div>
   </div>
 </div>
 
-<!-- ================= GARDEN ================= -->
-<div class="screen" id="scr-garden">
-  <div class="topbar">
-    <button class="tbBtn" onclick="goHome()">🏠</button>
-    <div class="tbTitle">🌷 הגינה שלי</div>
-    <button class="tbBtn muteBtn" onclick="toggleSound()">🔊</button>
-  </div>
-  <div class="sub" id="gardenSub"></div>
-  <div class="gardenGrid" id="gardenGrid"></div>
-  <div class="budLine" style="margin-top:20px"><span id="budMini2"></span> ועוד ניצן מחכה לך מחר! 🌱</div>
-</div>
+<!-- loading -->
+<div id="loading"><div class="fl">🌸</div><div id="loadTxt">טוענים את שדה הפרחים... 0/9</div></div>
 
-<!-- ============ overlay: flashlight courage ============ -->
-<div class="ov" id="ov-torch">
-  <div class="ovCard">
-    <div class="heart" id="torchHeart">💗</div>
-    <h2 id="torchH">רגע — נקשיב ללב 💛</h2>
-    <div class="sub" id="torchSub">נדליק את הפנס הפנימי ונאיר על הלב 🔦</div>
-    <div id="torchStage" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:10px"></div>
-  </div>
+<!-- webgl fallback -->
+<div id="fallback">
+  <div style="font-size:60px">🌸</div>
+  <h2>אופס — המכשיר לא הצליח לפתוח את השדה</h2>
+  <div class="sub">נסו לרענן את הדף, או חזרו לעולם התיק 🎒</div>
+  <button class="btn" onclick="location.reload()">🔄 לרענן</button>
+  <button class="btn sec" onclick="location.href='world.html'">🎒 חזרה לעולם</button>
 </div>
-
-<!-- ============ overlay: class mode ============ -->
-<div class="ov" id="ov-class">
-  <div class="ovCard">
-    <div style="font-size:64px">🗣️</div>
-    <h2>עכשיו ספר לחבר אמיתי!</h2>
-    <div class="sub">אמרו את מה ששיתפתם עכשיו — לחבר בכיתה או למורה.<br>אחר כך לחצו על הווי הגדול ✓</div>
-    <button class="bigCheck" id="classCheck">✓</button>
-  </div>
-</div>
-
-<!-- ============ overlay: flower complete ============ -->
-<div class="ov" id="ov-bloom">
-  <div class="ovCard">
-    <div id="bloomFlower"></div>
-    <h2 id="bloomH">הפרח נפתח כולו! 🎉</h2>
-    <div class="sub" id="bloomSub">כל עלי הכותרת נפתחו — הפרח נשמר בגינה שלך לתמיד 🌷</div>
-    <button class="btn" id="bloomGo">להמשיך ▶️</button>
-    <button class="btn sec" onclick="hideOv('ov-bloom');openGarden()">🌷 לראות את הגינה</button>
-  </div>
-</div>
-
 <script>
 'use strict';
-/* ============================================================
-   0. tiny utils
-   ============================================================ */
+/* ================= utils ================= */
 const $=s=>document.querySelector(s);
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]]}return a};
 const rnd=a=>a[(Math.random()*a.length)|0];
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
-function shade(hex,f){ /* f>0 lighten toward white, f<0 darken */
-  const n=parseInt(hex.slice(1),16);let r=n>>16,g=(n>>8)&255,b=n&255;
-  const m=c=>Math.max(0,Math.min(255,Math.round(f>0?c+(255-c)*f:c*(1+f))));
-  return '#'+((m(r)<<16)|(m(g)<<8)|m(b)).toString(16).padStart(6,'0');
-}
-/* date-seeded PRNG — same variety for the whole day, fresh tomorrow */
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 const DAYSEED=+new Date().toISOString().slice(0,10).replace(/-/g,'');
 function dayShuffle(arr,salt){const r=mulberry32(DAYSEED+salt*97);const a=arr.slice();
   for(let i=a.length-1;i>0;i--){const j=(r()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]]}return a}
 
-/* ============================================================
-   1. state — one localStorage key: perachV1
-   ============================================================ */
+/* ================= state — perachV1 (schema unchanged, old saves keep working) ================= */
 const DEF={
   levels:{1:{done:0,stars:0,plays:0},2:{done:0,stars:0,plays:0},3:{done:0,stars:0,plays:0},4:{done:0,stars:0,plays:0},5:{done:0,stars:0,plays:0}},
-  bank:[],            // [{c:category,e:emoji,t:text}]
-  garden:[],          // [{date,color,petals,topic}]
-  settings:{sound:true,classMode:false},
-  profile:{color:null,topic:null},
-  cur:{petals:0}      // current flower progress (persists!)
+  bank:[],garden:[],settings:{sound:true,classMode:false},
+  profile:{color:null,topic:null},cur:{petals:0}
 };
 let S;
 function load(){
@@ -279,9 +231,7 @@ function load(){
 function save(){try{localStorage.setItem('perachV1',JSON.stringify(S))}catch(e){}}
 load();
 
-/* ============================================================
-   2. sound — WebAudio oscillators only (no assets), pentatonic
-   ============================================================ */
+/* ================= WebAudio (no assets) ================= */
 let AC=null;
 const actx=()=>AC||(AC=new (window.AudioContext||window.webkitAudioContext)());
 function tone(f,dur,type,when,vol){
@@ -292,33 +242,48 @@ function tone(f,dur,type,when,vol){
     g.gain.exponentialRampToValueAtTime(.0001,t+(dur||.2));o.start(t);o.stop(t+(dur||.2));
   }catch(e){}
 }
-const PENTA=[523,587,659,784,880,1047];
-const sndTap=()=>tone(rnd(PENTA),.1,'sine',0,.1);
-const sndPetal=()=>{tone(523,.25,'triangle',0,.14);tone(659,.25,'triangle',.09,.14);tone(784,.35,'triangle',.18,.14);};
-const sndWin=()=>[523,659,784,1047].forEach((f,i)=>tone(f,.22,'triangle',i*.1,.18));
-const sndSoft=()=>{tone(300,.18,'sine',0,.12);tone(240,.22,'sine',.12,.1);};
-const sndWarm=()=>{tone(392,.4,'triangle',0,.1);tone(523,.5,'triangle',.18,.1);};
+const PENTA=[523,587,659,784,880,1047,1175,1319]; /* 8 steps — one per petal */
+const sndTap=()=>tone(rnd(PENTA.slice(0,5)),.1,'sine',0,.09);
+const sndGood=()=>{tone(660,.16,'sine',0,.13);tone(880,.22,'sine',.11,.13)};
+const sndSoft=()=>{tone(300,.18,'sine',0,.11);tone(240,.22,'sine',.12,.09)};
+const sndWarm=()=>{tone(392,.4,'triangle',0,.1);tone(523,.5,'triangle',.18,.1)};
+const sndWin=()=>[523,659,784,1047].forEach((f,i)=>tone(f,.22,'triangle',i*.1,.17));
+function sndPetalN(i){tone(PENTA[Math.min(i,7)],.5,'triangle',0,.17);tone(PENTA[Math.min(i,7)]*2,.4,'sine',.04,.05)}
+function sndMelody(){PENTA.forEach((f,i)=>tone(f,.25,'triangle',i*.16,.15))}
+function sndChime3(){[659,830,988].forEach((f,i)=>tone(f,.5,'triangle',i*.22,.13))}
+/* 60-BPM lub-dub heartbeat — returns a stop() */
+function heartbeatStart(){
+  let on=true;
+  (function beat(){if(!on)return;
+    tone(72,.14,'sine',0,.3);tone(58,.16,'sine',.16,.24);
+    if(navigator.vibrate&&!RM)try{navigator.vibrate([40,120,40])}catch(e){}
+    setTimeout(beat,1000)})();
+  return ()=>{on=false};
+}
+/* rising 3-oscillator warm pad (finish of the torch ritual) */
+function padChord(){
+  if(!S.settings.sound)return;
+  try{const c=actx(),t=c.currentTime;
+    [262,330,392].forEach((f,i)=>{
+      const o=c.createOscillator(),g=c.createGain();
+      o.type='triangle';o.frequency.setValueAtTime(f*.85,t);o.frequency.linearRampToValueAtTime(f,t+1.6);
+      g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(.09,t+1.2+i*.3);
+      g.gain.linearRampToValueAtTime(.0001,t+4.4);
+      o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+4.5)});
+  }catch(e){}
+}
 document.addEventListener('pointerdown',()=>{try{actx().resume()}catch(e){}},{passive:true});
 
-/* ============================================================
-   3. קריינות — מושבתת בכוונה (בלי קול רובוטי של הדפדפן).
-   speak() נשאר כנקודת חיבור: כשיהיו קבצי קול איכותיים
-   (Google AI Studio TTS) — מחברים אותם כאן.
-   ============================================================ */
+/* קריינות — מושבתת בכוונה (בלי קול רובוטי). נקודת חיבור ל-TTS איכותי בעתיד. */
 function speak(txt){}
 
-/* ============================================================
-   4. mute + class-mode toggles
-   ============================================================ */
+/* ================= toggles ================= */
 function paintSound(){document.querySelectorAll('.muteBtn').forEach(b=>b.textContent=S.settings.sound?'🔊':'🔇')}
-function toggleSound(){S.settings.sound=!S.settings.sound;save();paintSound();
-  if(!S.settings.sound){try{speechSynthesis.cancel()}catch(e){}}else sndTap();}
+function toggleSound(){S.settings.sound=!S.settings.sound;save();paintSound();if(S.settings.sound)sndTap()}
 function toggleClass(){S.settings.classMode=!S.settings.classMode;save();
-  $('#swClass').classList.toggle('on',S.settings.classMode);sndTap();}
+  $('#swClass').classList.toggle('on',S.settings.classMode);sndTap()}
 
-/* ============================================================
-   5. sparkles + confetti (calm amounts)
-   ============================================================ */
+/* ================= sparkles + confetti (DOM/2D — calm amounts) ================= */
 function sparklesAt(x,y,n){
   const ss=['✨','⭐','🌟','💫'];n=RM?2:(n||5);
   for(let i=0;i<n;i++){const e=document.createElement('div');e.className='spark';e.textContent=ss[i%4];
@@ -336,53 +301,17 @@ function confettiBurst(){
     P.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.3;p.r+=.15;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;x.fillRect(-p.s/2,-p.s/2,p.s,p.s*.6);x.restore()});
     if(t<100)requestAnimationFrame(fr);else x.clearRect(0,0,c.width,c.height)})();
 }
-
-/* ============================================================
-   6. flower + bud SVG
-   ============================================================ */
-const NPETALS=8;
-function flowerSVG(open,color,size){
-  color=color||'#ff9ec4';
-  const dark=shade(color,-.18),light=shade(color,.4);
-  let petals='';
-  for(let i=0;i<NPETALS;i++){
-    petals+=`<g transform="rotate(${i*45})"><path class="petal${i<open?' open':''}" d="M0,8 C24,-6 21,-54 0,-70 C-21,-54 -24,-6 0,8" fill="${i%2?color:light}" stroke="${dark}" stroke-width="2"/></g>`;
-  }
-  return `<svg viewBox="0 0 200 270" style="width:${size}px" class="flowerSvg" aria-hidden="true">
-    <path d="M100,110 C100,150 96,195 100,242" stroke="#6f9e58" stroke-width="7" fill="none" stroke-linecap="round"/>
-    <path d="M100,188 C72,178 56,192 53,208 C76,215 96,203 100,188" fill="#8fbc73"/>
-    <path d="M100,208 C128,198 144,212 147,228 C124,235 104,223 100,208" fill="#7fb069"/>
-    <g transform="translate(100,96)">${petals}
-      <circle r="26" fill="#ffdf8e" stroke="#e8b64f" stroke-width="3"/>
-      <circle cx="-8" cy="-4" r="3.2" fill="#7a5c2e"/><circle cx="8" cy="-4" r="3.2" fill="#7a5c2e"/>
-      <path d="M-9,6 Q0,14 9,6" stroke="#7a5c2e" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-    </g></svg>`;
-}
-function budSVG(size){
-  return `<svg viewBox="0 0 60 90" style="width:${size}px" aria-hidden="true">
-    <path d="M30,54 C30,66 29,78 30,86" stroke="#6f9e58" stroke-width="4" fill="none" stroke-linecap="round"/>
-    <path d="M30,58 C42,46 40,18 30,10 C20,18 18,46 30,58" fill="#8fbc73" stroke="#6f9e58" stroke-width="2.5"/>
-    <path d="M30,58 C36,50 35,34 30,28 C25,34 24,50 30,58" fill="#a9d18e"/>
-  </svg>`;
-}
-
-/* ============================================================
-   7. content banks (deep — outlasts novelty)
-   ============================================================ */
+/* ================= content banks (preserved pedagogy) ================= */
 const COLORS=[['#ff9ec4','ורוד'],['#b79bf5','סגול'],['#7ec3f7','כחול'],['#ffb46b','כתום'],['#ff8f8f','אדום']];
 const TOPICS=[
   {k:'animals',n:'חיות',e:'🐾'},{k:'soccer',n:'כדורגל',e:'⚽'},{k:'dino',n:'דינוזאורים',e:'🦖'},
   {k:'music',n:'מוזיקה',e:'🎵'},{k:'cars',n:'רכבים',e:'🚗'},{k:'games',n:'משחקים',e:'🎮'}];
 const TOPIC_LINE={
-  animals:'שמעתי שאתה אוהב חיות! גם אני מת על חיות 🐾',
-  soccer:'שמעתי שאתה אוהב כדורגל! באיזו קבוצה אתה? ⚽',
-  dino:'שמעתי שאתה אוהב דינוזאורים! הטי-רקס הכי חזק 🦖',
-  music:'שמעתי שאתה אוהב מוזיקה! גם אני אוהב לשיר 🎵',
-  cars:'שמעתי שאתה אוהב רכבים! ראיתי אתמול משאית ענקית 🚗',
-  games:'שמעתי שאתה אוהב משחקים! איזה משחק הכי כיף לך? 🎮'};
+  animals:'שמעתי שאתה אוהב חיות! גם אני מת על חיות 🐾',soccer:'שמעתי שאתה אוהב כדורגל! באיזו קבוצה אתה? ⚽',
+  dino:'שמעתי שאתה אוהב דינוזאורים! הטי-רקס הכי חזק 🦖',music:'שמעתי שאתה אוהב מוזיקה! גם אני אוהב לשיר 🎵',
+  cars:'שמעתי שאתה אוהב רכבים! ראיתי אתמול משאית ענקית 🚗',games:'שמעתי שאתה אוהב משחקים! איזה משחק הכי כיף לך? 🎮'};
 const TOPIC_TILE={animals:['🐾','חיות'],soccer:['⚽','כדורגל'],dino:['🦖','דינוזאורים'],music:['🎵','מוזיקה'],cars:['🚗','מכוניות'],games:['🎮','משחקי מחשב']};
 
-/* --- level 1: self inventory (7 categories × 5) --- */
 const L1CATS=[
   {k:'food',q:'איזה אוכל אתה הכי אוהב? 🍽️',opts:[['🍕','פיצה'],['🍦','גלידה'],['🍫','שוקולד'],['🍔','המבורגר'],['🍉','אבטיח']]},
   {k:'game',q:'במה הכי כיף לך לשחק? 🎲',opts:[['⚽','כדורגל'],['🎮','משחקי מחשב'],['🧩','פאזלים'],['🛝','מגרש משחקים'],['🧱','לגו']]},
@@ -392,8 +321,6 @@ const L1CATS=[
   {k:'feel',q:'מה אתה מרגיש היום? 💗',opts:[['😊','שמח'],['😌','רגוע'],['🤩','נרגש'],['😴','עייף'],['😢','קצת עצוב']]},
   {k:'exp',q:'איזו חוויה כיף לך לזכור? ⭐',opts:[['🎂','יום הולדת'],['🚗','טיול משפחתי'],['🏊','יום בבריכה'],['🎬','סרט בקולנוע'],['🎪','הצגה או קרקס']]}
 ];
-
-/* --- level 2: sentence starters --- */
 function bPrefix(t){return t.startsWith('ה')?'ב'+t.slice(1):'ב'+t}
 const STARTERS=[
   {t:'אני אוהב...',e:'💛',cats:['food','game','animal'],make:x=>'אני אוהב '+x},
@@ -401,8 +328,6 @@ const STARTERS=[
   {t:'כיף לי עם...',e:'🤗',cats:['family'],make:x=>'כיף לי עם '+x},
   {t:'הרגשתי...',e:'💗',cats:['feel'],make:x=>'הרגשתי '+x}
 ];
-
-/* --- level 3: add-a-thought scenarios (friend shares, pick connected reply) --- */
 const FRIENDS=[['🐻','דובי'],['🦊','שועלי'],['🐰','ארנבת'],['🦉','ינשוף']];
 const L3SCEN=[
  {f:'אני אוהב פיצה 🍕',ok:'גם אני אוהב פיצה! איזו תוספת אתה אוהב?',bad:['יש לי נעליים חדשות 👟','אתמול ראיתי ציפור 🐦']},
@@ -424,8 +349,6 @@ const L3SCEN=[
  {f:'אני אוהב לשיר 🎤',ok:'איזה יופי! איזה שיר אתה הכי אוהב?',bad:['השולחן שלי מלוכלך','אני הולך למכולת אחר כך 🛒']},
  {f:'אבא שלי בנה איתי מגדל מלגו 🧱',ok:'איזה מגניב! כמה גבוה היה המגדל?',bad:['אני לא אוהב לגו','תראה את השרוך שלי 👟']}
 ];
-
-/* --- level 4: friend answers for the ask-back rally --- */
 const L4ANS=[
  'אני הכי אוהב גלידת שוקולד 🍦','אני אוהב לשחק בחוץ בהפסקה 🛝','החיה האהובה עליי היא דולפין 🐬',
  'אני אוהב לבנות מגדלים מלגו 🧱','הצבע האהוב עליי הוא כחול 💙','אני אוהב לשיר בקול רם 🎵',
@@ -433,8 +356,6 @@ const L4ANS=[
  'אני אוהב לצייר ציורים של חלל 🚀','המשחק האהוב עליי הוא תופסת 🏃','אני אוהב לאכול תפוח בהפסקה 🍎',
  'יש לי אח קטן שמצחיק אותי 👶','אני אוהב ימי גשם עם שוקו חם ☕'];
 const L4EXTRA=[['🌈','אני אוהב קשת בענן'],['🎈','אני אוהב בלונים'],['📚','אני אוהב סיפורים לפני השינה'],['🍪','אני אוהב עוגיות של סבתא'],['🚲','אני אוהב לרכוב על אופניים']];
-
-/* --- level 5: circles of closeness --- */
 const RINGS=[['💙','משפחה'],['💚','חבר טוב'],['💛','מכר'],['🩶','זר']];
 const L5CARDS=[
  {t:'הצבע האהוב עליי',e:'🎨',max:3},{t:'המשחק האהוב עליי',e:'🎮',max:3},
@@ -452,338 +373,499 @@ const L5EXPL={
  1:'רגע... את זה משתפים רק עם משפחה או עם חבר ממש טוב 💚 — מישהו שסומכים עליו מאוד.',
  2:'כמעט! את זה אפשר לספר לאנשים שמכירים — אבל לא לזר שלא מכירים בכלל 🩶'};
 const L5PRAISE=['שיתוף בטוח! 🌸','בחירה חכמה! 🌟','בדיוק! זה בטוח לשתף 💚','נכון מאוד! 🌷'];
+const FEELS=[['😳','ביישנות'],['😟','קצת פחד'],['🤔','חוסר ביטחון'],['🤗','התרגשות'],['🤷','לא בטוח']];
+const LVMETA=[null,
+  {icon:'🌸',name:'מה יש בפרח שלי'},{icon:'💬',name:'משפט שיתוף'},{icon:'🤝',name:'שיתוף מחובר'},
+  {icon:'🏓',name:'פינג־פונג'},{icon:'🔒',name:'כמה ולמי'}];
+const NPETALS=8;
+</script>
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
+try{
+/* ================= renderer / scene ================= */
+const canvas=document.getElementById('c3d');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,preserveDrawingBuffer:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x8ecdf5);
+scene.fog=new THREE.Fog(0x8ecdf5,40,105);
+const cam=new THREE.PerspectiveCamera(50,innerWidth/innerHeight,.1,240);
+addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
 
-/* ============================================================
-   8. navigation + petal engine
-   ============================================================ */
-function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));$('#'+id).classList.add('on');window.scrollTo(0,0)}
-function hideOv(id){$('#'+id).classList.remove('on')}
+/* golden-hour light pair */
+const hemi=new THREE.HemisphereLight(0xffdec0,0x5f9e8f,1.0);scene.add(hemi);
+const sun=new THREE.DirectionalLight(0xfff2d0,1.6);
+sun.position.set(18,30,14);sun.castShadow=true;
+sun.shadow.mapSize.set(1024,1024);
+sun.shadow.camera.left=-32;sun.shadow.camera.right=32;sun.shadow.camera.top=32;sun.shadow.camera.bottom=-32;
+scene.add(sun);
+/* warm point light for the torch ritual — follows the finger, off by default */
+const torchLight=new THREE.PointLight(0xffdb8a,0,9,2.2);
+torchLight.castShadow=false;scene.add(torchLight);
+
+const M=c=>new THREE.MeshLambertMaterial({color:c});
+function box(w,h,d,c,x,y,z,parent){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),M(c));m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;(parent||scene).add(m);return m}
+function cnv(w,h,draw){const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return t}
+
+/* sky dome with a night uniform — the torch ritual dims the whole meadow */
+const SKYU={night:{value:0}};
+const sky=new THREE.Mesh(new THREE.SphereGeometry(120,24,12),new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,fog:false,uniforms:SKYU,
+  vertexShader:'varying vec3 vP;void main(){vP=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+  fragmentShader:'uniform float night;varying vec3 vP;void main(){float h=normalize(vP).y;vec3 top=vec3(.30,.57,.92);vec3 bot=vec3(.70,.84,.96);vec3 c=mix(bot,top,smoothstep(0.,.5,h));c*=mix(1.,.05,night);gl_FragColor=vec4(c,1.);}'}));
+scene.add(sky);
+const sunSp=new THREE.Sprite(new THREE.SpriteMaterial({transparent:true,depthWrite:false,map:cnv(128,128,(x,w,h)=>{
+  const g=x.createRadialGradient(64,64,8,64,64,60);g.addColorStop(0,'rgba(255,248,220,1)');g.addColorStop(.28,'rgba(255,238,170,.8)');g.addColorStop(1,'rgba(255,238,170,0)');
+  x.fillStyle=g;x.fillRect(0,0,w,h)})}));
+sunSp.scale.set(24,24,1);sunSp.position.set(40,32,-46);scene.add(sunSp);
+let NIGHT=0;
+function setNight(n){NIGHT=n;SKYU.night.value=n;hemi.intensity=1-.8*n;sun.intensity=1.6-1.4*n;
+  sunSp.material.opacity=1-n;scene.fog.color.setHSL(.6,.4,.8-.7*n)}
+/* stars, fade in with night */
+const starsGeo=new THREE.BufferGeometry();
+{const pos=[];for(let i=0;i<220;i++){const r=95,th=Math.random()*Math.PI*2,ph=Math.random()*Math.PI*.5;
+  pos.push(r*Math.sin(ph)*Math.cos(th),20+r*Math.cos(ph)*.5,r*Math.sin(ph)*Math.sin(th))}
+  starsGeo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));}
+const starsMat=new THREE.PointsMaterial({color:0xffffff,size:.6,transparent:true,opacity:0,depthWrite:false});
+const stars=new THREE.Points(starsGeo,starsMat);scene.add(stars);
+
+/* drifting clouds */
+const cloudTex=cnv(256,128,(x,w,h)=>{[[70,80,44],[120,60,52],[175,82,42],[145,95,36],[95,95,34]].forEach(c=>{
+  const g=x.createRadialGradient(c[0],c[1],4,c[0],c[1],c[2]);g.addColorStop(0,'rgba(255,255,255,.95)');g.addColorStop(1,'rgba(255,255,255,0)');
+  x.fillStyle=g;x.beginPath();x.arc(c[0],c[1],c[2],0,7);x.fill()})});
+const clouds=[];
+for(let i=0;i<5;i++){const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:cloudTex,transparent:true,opacity:.85,depthWrite:false}));
+  sp.scale.set(13+Math.random()*9,5.5+Math.random()*2.5,1);
+  sp.position.set(-44+Math.random()*88,20+Math.random()*7,-40+Math.random()*30);
+  scene.add(sp);clouds.push(sp)}
+
+/* ground meadow */
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(120,90),new THREE.MeshLambertMaterial({map:cnv(256,256,(x,w,h)=>{
+  x.fillStyle='#63b054';x.fillRect(0,0,w,h);x.fillStyle='rgba(255,255,255,.05)';
+  for(let i=0;i<400;i++){x.fillRect(Math.random()*w,Math.random()*h,2,2)}})}));
+ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
+/* dirt trail */
+[[6,10,14,4,-.18],[-6,15,13,3.6,.14],[-18,20,11,3.4,-.1]].forEach(s=>{
+  const t=new THREE.Mesh(new THREE.PlaneGeometry(s[2],s[3]),M(0xd8c39a));
+  t.rotation.x=-Math.PI/2;t.rotation.z=s[4];t.position.set(s[0],.006,s[1]);t.receiveShadow=true;scene.add(t)});
+/* checkered picnic blanket */
+(function(){const cv=document.createElement('canvas');cv.width=cv.height=128;const x=cv.getContext('2d');
+  for(let i=0;i<8;i++)for(let j=0;j<8;j++){x.fillStyle=(i+j)%2?'#e4574f':'#f3efe4';x.fillRect(i*16,j*16,16,16)}
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(3.6,2.8),new THREE.MeshLambertMaterial({map:new THREE.CanvasTexture(cv)}));
+  m.rotation.x=-Math.PI/2;m.rotation.z=.2;m.position.set(-2,.02,20);m.receiveShadow=true;scene.add(m)})();
+/* wooden fence at the meadow edge */
+(function(){const c=0xc7a15a;for(let x=-40;x<=40;x+=4){box(.22,1.5,.22,c,x,.75,-28)}
+  box(80,.18,.18,c,0,1.35,-28)})();
+
+/* ================= emoji sprite helper ================= */
+function emojiSprite(em,scale){
+  const cv=document.createElement('canvas');cv.width=cv.height=128;const x=cv.getContext('2d');
+  x.font='100px serif';x.textAlign='center';x.textBaseline='middle';x.fillText(em,64,72);
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv),transparent:true}));
+  sp.scale.set(scale,scale,1);return sp;
+}
+/* ================= owl mentor (primitives, matches world.html) ================= */
+function buildOwl(){
+  const owl=new THREE.Group();
+  const Mc=c=>new THREE.MeshLambertMaterial({color:c});
+  const brown=0x7a4f2b,dark=0x5c3a1e,cream=0xf0e0bd,orange=0xe8952f;
+  const add=(mesh)=>{mesh.castShadow=true;owl.add(mesh);return mesh};
+  const body=add(new THREE.Mesh(new THREE.SphereGeometry(.5,20,16),Mc(brown)));
+  body.scale.set(1,1.22,.9);body.position.y=.6;
+  const belly=add(new THREE.Mesh(new THREE.SphereGeometry(.38,18,14),Mc(cream)));
+  belly.scale.set(.82,1.12,.5);belly.position.set(0,.55,.28);
+  const head=add(new THREE.Mesh(new THREE.SphereGeometry(.4,20,16),Mc(brown)));
+  head.position.y=1.22;
+  const face=add(new THREE.Mesh(new THREE.SphereGeometry(.34,18,14),Mc(cream)));
+  face.scale.set(.95,.8,.45);face.position.set(0,1.2,.17);
+  const eyes=[];
+  [-1,1].forEach(s=>{
+    const eW=add(new THREE.Mesh(new THREE.SphereGeometry(.145,14,12),Mc(0xffffff)));eW.position.set(.155*s,1.27,.32);
+    const eP=add(new THREE.Mesh(new THREE.SphereGeometry(.07,10,8),Mc(0x1a1208)));eP.position.set(.155*s,1.27,.44);
+    const gl=add(new THREE.Mesh(new THREE.SphereGeometry(.025,8,6),new THREE.MeshBasicMaterial({color:0xffffff})));gl.position.set(.155*s+.03,1.31,.485);
+    eyes.push(eW,eP,gl);
+    const br=add(new THREE.Mesh(new THREE.BoxGeometry(.2,.05,.07),Mc(dark)));br.position.set(.16*s,1.44,.33);br.rotation.z=-.35*s;
+    const ear=add(new THREE.Mesh(new THREE.ConeGeometry(.09,.26,10),Mc(dark)));ear.position.set(.24*s,1.6,0);ear.rotation.z=-.3*s;
+    const w=add(new THREE.Mesh(new THREE.SphereGeometry(.3,14,12),Mc(dark)));w.scale.set(.35,1.05,.68);w.position.set(.48*s,.62,0);w.rotation.z=.22*s;
+    const f=add(new THREE.Mesh(new THREE.BoxGeometry(.14,.08,.24),Mc(orange)));f.position.set(.17*s,.04,.12);
+  });
+  const beak=add(new THREE.Mesh(new THREE.ConeGeometry(.075,.2,10),Mc(orange)));beak.position.set(0,1.14,.4);beak.rotation.x=Math.PI/2.4;
+  const tail=add(new THREE.Mesh(new THREE.SphereGeometry(.22,12,10),Mc(dark)));tail.scale.set(.8,.5,1.3);tail.position.set(0,.32,-.42);tail.rotation.x=.5;
+  owl.userData.eyes=eyes;owl.userData.blinkUntil=0;owl.userData.nextBlink=2;owl.userData.baseY=0;
+  return owl;
+}
+const owl=buildOwl();owl.position.set(-6,1.3,-16);owl.userData.baseY=1.3;scene.add(owl);
+
+/* ================= character (only the child's chosen one) + nature props ================= */
+const loader=new GLTFLoader();
+let nLoaded=0;const nTotal=9; /* 1 char + 8 nature props */
+function loadTick(){nLoaded++;const t=document.getElementById('loadTxt');if(t)t.textContent='טוענים את שדה הפרחים... '+nLoaded+'/'+nTotal}
+function loadGLTF(path){return new Promise((res,rej)=>loader.load(path,gl=>{loadTick();res(gl)},undefined,rej))}
+let CHARNAME='hoodie';try{CHARNAME=localStorage.getItem('toolbagChar')||'hoodie'}catch(e){}
+const CHAR_FILES={hoodie:'models/hoodie.glb',casual:'models/casual.glb',adventurer:'models/adventurer.glb',worker:'models/worker.glb',farmer:'models/farmer.glb',suit:'models/suit.glb'};
+const NATURE_FILES={tree1:'models/nature/CommonTree_1.gltf',tree3:'models/nature/CommonTree_3.gltf',tree5:'models/nature/CommonTree_5.gltf',
+  bush1:'models/nature/Bush_1.gltf',berry:'models/nature/BushBerries_1.gltf',flowerA:'models/nature/Flowers.gltf',
+  grass1:'models/nature/Grass_1.gltf',grass2:'models/nature/Grass_2.gltf'};
+const STAT={};
+const charGL=loadGLTF(CHAR_FILES[CHARNAME]||CHAR_FILES.hoodie);
+const statP=Object.entries(NATURE_FILES).map(([k,f])=>loadGLTF(f).then(gl=>{STAT[k]=gl.scene}));
+
+function playA(k,name,once){
+  const a=k.actions[name]||k.actions.Idle_Neutral||k.actions.Idle;if(!a)return;
+  if(k.curName===name&&!once)return;
+  if(k.cur)k.cur.fadeOut(.22);
+  a.reset().fadeIn(.22).play();
+  if(once){a.setLoop(THREE.LoopOnce,1);k.busy=true}else a.setLoop(THREE.LoopRepeat,Infinity);
+  k.cur=a;k.curName=name;
+}
+function makeChar(src,targetH,kidHead){
+  const inner=SkeletonUtils.clone(src.scene);
+  inner.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false;o.material=new THREE.MeshLambertMaterial({color:o.material.color})}});
+  const s=targetH/2.35;inner.scale.setScalar(s);
+  const g=new THREE.Group();g.add(inner);scene.add(g);
+  const mixer=new THREE.AnimationMixer(inner);const actions={};
+  src.animations.forEach(c=>{actions[c.name.replace(/^.*\|/,'')]=mixer.clipAction(c)});
+  const k={g,inner,mixer,actions,cur:null,curName:'',busy:false};
+  mixer.addEventListener('finished',()=>{k.busy=false;k.cur=null;k.curName='';playA(k,'Idle_Neutral')});
+  if(kidHead){const h=inner.getObjectByName('Head');if(h)h.scale.multiplyScalar(kidHead)}
+  playA(k,'Idle_Neutral');
+  return k;
+}
+function place(key,x,z,targetH,ry,tint){
+  const m=STAT[key].clone(true);
+  m.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;const om=o.material;o.material=new THREE.MeshLambertMaterial({color:tint!==undefined?tint:om.color,map:om.map||null})}});
+  const bb=new THREE.Box3().setFromObject(m);const s=targetH/(bb.max.y-bb.min.y);
+  m.scale.setScalar(s);m.position.set(x,-bb.min.y*s,z);m.rotation.y=(ry===undefined)?Math.random()*6.283:ry;
+  scene.add(m);return m;
+}
+
+let player=null;
+Promise.all([charGL,...statP]).then(([charG])=>{
+  player=makeChar(charG,1.5,1.55);
+  player.g.position.set(4,0,10);player.g.rotation.y=Math.PI*.85;
+  /* scatter nature props across the meadow */
+  [[-30,6,8.5,'tree3'],[26,-10,9,'tree5'],[-14,-16,8,'tree1'],[18,14,7.5,'tree5'],[-34,-14,8.8,'tree3']].forEach(v=>place(v[3],v[0],v[1],v[2]));
+  [[-10,12,1.8,'bush1'],[16,4,1.7,'berry'],[-22,-6,1.9,'bush1']].forEach(v=>place(v[3],v[0],v[1],v[2]));
+  for(let i=0;i<20;i++){const fx=-36+Math.random()*72,fz=-16+Math.random()*34;place('flowerA',fx,fz,.7+Math.random()*.3)}
+  for(let i=0;i<10;i++){const a=i/10*Math.PI*2;place('flowerA',-2+Math.cos(a)*4.2,20+Math.sin(a)*3.2,.85)}
+  for(let i=0;i<10;i++){const gx=-32+Math.random()*64,gz=-14+Math.random()*30;place(i%2?'grass1':'grass2',gx,gz,.5,undefined,0x4fae4d)}
+  document.getElementById('loading').style.opacity=0;
+  setTimeout(()=>{document.getElementById('loading').style.display='none'},650);
+  window.dispatchEvent(new Event('flowerReady'));
+}).catch(err=>{
+  console.error('asset load failed',err);
+  document.getElementById('loading').style.display='none';
+  document.getElementById('fallback').style.display='flex';
+});
+
+/* ================= the child's 3D flower — grows petal by petal ================= */
+function shade3(hex,f){const n=parseInt(hex.slice(1),16);let r=n>>16,g=(n>>8)&255,b=n&255;
+  const m=c=>Math.max(0,Math.min(255,Math.round(f>0?c+(255-c)*f:c*(1+f))));return (m(r)<<16)|(m(g)<<8)|m(b)}
+function buildFlower3D(colorHex){
+  const color=colorHex?parseInt(colorHex.slice(1),16):0xff9ec4;
+  const grp=new THREE.Group();
+  const stem=new THREE.Mesh(new THREE.CylinderGeometry(.045,.06,1.15,8),new THREE.MeshLambertMaterial({color:0x6f9e58}));
+  stem.position.y=.575;stem.castShadow=true;grp.add(stem);
+  [[.16,.72,.5],[-.16,.5,-.4]].forEach(l=>{
+    const leaf=new THREE.Mesh(new THREE.SphereGeometry(.16,10,8),new THREE.MeshLambertMaterial({color:0x7fb069}));
+    leaf.scale.set(1,.28,.55);leaf.position.set(l[0],l[1],0);leaf.rotation.z=l[2];grp.add(leaf)});
+  const head=new THREE.Group();head.position.y=1.16;grp.add(head);
+  const center=new THREE.Mesh(new THREE.SphereGeometry(.11,14,10),new THREE.MeshLambertMaterial({color:0xffdf8e,emissive:0x332200,emissiveIntensity:.15}));
+  head.add(center);
+  const petals=[];
+  for(let i=0;i<8;i++){
+    const pivot=new THREE.Group();pivot.rotation.y=i*(Math.PI*2/8);
+    const geo=new THREE.SphereGeometry(.16,10,8);
+    const mat=new THREE.MeshLambertMaterial({color:i%2?color:shade3('#'+color.toString(16).padStart(6,'0'),.4)});
+    const p=new THREE.Mesh(geo,mat);
+    p.scale.set(.62,.24,1.15);p.position.set(0,0,.19);p.rotation.x=-.55;
+    p.userData.baseRotX=p.rotation.x;
+    pivot.add(p);pivot.scale.set(.001,.001,.001);
+    head.add(pivot);petals.push({pivot,mesh:p,open:false});
+  }
+  grp.userData.petals=petals;grp.userData.head=head;grp.userData.color=color;
+  return grp;
+}
+/* animate one petal opening: quiver 0.6s, then ~2s overshoot ease + glow burst */
+function openPetal3D(flower,i,cb){
+  const P=flower.userData.petals[i];if(!P)return cb&&cb();
+  const t0=performance.now();
+  (function quiver(){const t=(performance.now()-t0)/600;
+    if(t<1){P.pivot.rotation.z=Math.sin(t*26)*.09*(1-t);requestAnimationFrame(quiver)}
+    else{P.pivot.rotation.z=0;bloomPetal()}})();
+  function bloomPetal(){
+    const t1=performance.now();
+    (function grow(){const t=Math.min((performance.now()-t1)/1900,1);
+      const k=t<1?1-Math.pow(1-t,3)*Math.cos(t*4):1; /* overshoot ease-out */
+      const s=Math.max(.001,k);
+      P.pivot.scale.set(s,s,s);
+      if(t<1)requestAnimationFrame(grow);
+      else{P.pivot.scale.set(1,1,1);P.open=true;sndPetalN(i);sparklesAt(innerWidth/2,innerHeight*.4,4);cb&&cb()}
+    })();
+  }
+}
+function resetFlower3D(flower){
+  flower.userData.petals.forEach(P=>{P.pivot.scale.set(.001,.001,.001);P.open=false});
+}
+
+/* the player's flower — placed just beside the child, at the picnic spot */
+const homeFlower3D=buildFlower3D(S.profile.color);
+homeFlower3D.position.set(1.6,0,10.6);homeFlower3D.scale.setScalar(1.35);
+scene.add(homeFlower3D);
+for(let i=0;i<S.cur.petals;i++){const P=homeFlower3D.userData.petals[i];P.pivot.scale.set(1,1,1);P.open=true}
+
+/* ================= camera spot system — glides between named spots, no free roam ================= */
+let camPos=new THREE.Vector3(0,5,16),camLook=new THREE.Vector3(0,1.2,8);
+let camTargetPos=camPos.clone(),camTargetLook=camLook.clone();
+function camSpot(pos,look){camTargetPos=pos.clone();camTargetLook=look.clone()}
+camSpot(new THREE.Vector3(6,4.4,17),new THREE.Vector3(1,1.3,9));
+
+/* ================= animate loop ================= */
+const clock=new THREE.Clock();let markerT=0,running=true;
+document.addEventListener('visibilitychange',()=>{running=!document.hidden});
+function animate(){
+  requestAnimationFrame(animate);
+  if(!running)return;
+  const dt=Math.min(clock.getDelta(),.05);
+  markerT+=dt;
+  if(!RM)clouds.forEach(c=>{c.position.x+=dt*.5;if(c.position.x>60)c.position.x=-60});
+  starsMat.opacity+=(NIGHT*.9-starsMat.opacity)*Math.min(dt*2,1);
+  /* owl life: bob, gaze at player, blink */
+  owl.position.y=owl.userData.baseY+Math.sin(markerT*1.6)*.05;
+  if(player){
+    const oa=Math.atan2(player.g.position.x-owl.position.x,player.g.position.z-owl.position.z);
+    let od=((oa-owl.rotation.y+Math.PI)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)-Math.PI;
+    owl.rotation.y+=od*Math.min(dt*2.2,1);
+    player.mixer&&player.mixer.update(dt);
+  }
+  if(markerT>owl.userData.nextBlink){owl.userData.blinkUntil=markerT+.13;owl.userData.nextBlink=markerT+2.2+Math.random()*2.8}
+  const bs=markerT<owl.userData.blinkUntil?.1:1;
+  owl.userData.eyes.forEach(e=>{e.scale.y+=(bs-e.scale.y)*Math.min(dt*30,1)});
+  /* camera glide */
+  camPos.lerp(camTargetPos,Math.min(dt*2.4,1));camLook.lerp(camTargetLook,Math.min(dt*2.4,1));
+  cam.position.copy(camPos);cam.lookAt(camLook);
+  renderer.render(scene,cam);
+}
+animate();
+
+function worldToScreen(v){const p=v.clone().project(cam);return{x:(p.x*.5+.5)*innerWidth,y:(-p.y*.5+.5)*innerHeight}}
+function snapPhotoNow(){renderer.render(scene,cam);try{return renderer.domElement.toDataURL('image/png')}catch(e){return null}}
+window.FLOWER3D={buildFlower3D,openPetal3D,resetFlower3D,homeFlower3D,camSpot,scene,cam,renderer,owl,emojiSprite,setNight,
+  torchLight,get player(){return player},THREE,place,STAT,worldToScreen,snapPhotoNow,shade3};
+}catch(err){
+  console.error('flower.html 3D init failed',err);
+  document.getElementById('loading').style.display='none';
+  document.getElementById('fallback').style.display='flex';
+}
+</script>
+<script>
+'use strict';
+/* ================= dialogue (typewriter, matches world.html) ================= */
+const dlg=$('#dlg');
+let dlgLines=[],dlgI=0,dlgDone=null,typing=false,typeTimer=null;
+function say(lines,done){dlgLines=lines;dlgI=0;dlgDone=done||null;dlg.classList.add('on');paintLine()}
+function paintLine(){const L=dlgLines[dlgI];$('#who').textContent=L.who||'';$('#who').style.display=L.who?'block':'none';
+  $('#nextH').style.display='block';typeIt(L.t)}
+function typeIt(html){typing=true;const el=$('#txt');el.innerHTML='';const chars=Array.from(html.replace(/<[^>]+>/g,''));let i=0;clearInterval(typeTimer);
+  typeTimer=setInterval(()=>{i++;if(i>=chars.length){clearInterval(typeTimer);el.innerHTML=html;typing=false;return}el.textContent=chars.slice(0,i).join('')},20)}
+dlg.addEventListener('click',()=>{
+  sndTap();
+  if(typing){clearInterval(typeTimer);$('#txt').innerHTML=dlgLines[dlgI].t;typing=false;return}
+  dlgI++;
+  if(dlgI>=dlgLines.length){dlg.classList.remove('on');const d=dlgDone;dlgDone=null;if(d)d();return}
+  paintLine();
+});
+
+/* ================= screen / overlay helpers ================= */
 function showOv(id){$('#'+id).classList.add('on')}
-function goHome(){try{speechSynthesis.cancel()}catch(e){}renderHome();showScreen('scr-home')}
+function hideOv(id){$('#'+id).classList.remove('on')}
+function hideAllOv(){document.querySelectorAll('.ov').forEach(o=>o.classList.remove('on'));$('#panel').classList.remove('on');$('#dots').classList.remove('on');$('#gardenUI').style.display='none'}
 
+/* ================= level meta / navigation state ================= */
 let LV=0,PROG=0,GOAL=0,sessionTorch=false;
-const LEVELS={}; // filled below: {name,icon,goal,start}
+const LEVELS={};
+/* camera spots per level — gentle glide to a different corner of the meadow each time */
+const SPOTS={
+  home:[[6,4.4,17],[1,1.3,9]],
+  1:[[4.4,3.6,14.5],[1.4,1.1,9.4]],           /* flower bank — beside the child's own flower */
+  2:[[-1,3.4,15.5],[-2,1.1,20]],              /* picnic blanket */
+  3:[[-9,3.2,4],[-8,1.2,-8]],                 /* friend by the bushes */
+  4:[[2,3.6,4],[0,1.2,-6]],                   /* ball spot */
+  5:[[-14,3.8,-14],[-4,1.4,-24]]              /* the fence at the edge */
+};
+function goSpot(key){const s=SPOTS[key]||SPOTS.home;window.FLOWER3D&&window.FLOWER3D.camSpot(new (window.FLOWER3D.THREE.Vector3)(...s[0]),new (window.FLOWER3D.THREE.Vector3)(...s[1]))}
+function goHome(){hideAllOv();$('#homeBtn').style.display='none';$('#backBtn').style.display='block';$('#tbTitle').textContent='🌸 הפרח שנפתח';
+  renderHome();showOv('ov-home');goSpot('home')}
 
-function renderFlower(){
-  $('#flowerBox').innerHTML=flowerSVG(S.cur.petals,S.profile.color,Math.min(230,innerWidth*.5));
+/* ================= home + setup ================= */
+function unlocked(n){return n===1||S.levels[n-1].done>=1}
+function renderHome(){
+  paintSound();$('#swClass').classList.toggle('on',S.settings.classMode);
+  const tp=TOPICS.find(t=>t.k===S.profile.topic);
+  $('#greet').textContent='איזה כיף שחזרת לשדה! כל שיתוף פותח עלה בפרח שלך '+(tp?tp.e:'🌸');
+  let h='';
+  for(let n=1;n<=5;n++){const u=unlocked(n),lv=S.levels[n];
+    h+=`<button class="lvCard${u?'':' locked'}" onclick="${u?`startLevel(${n})`:`lockedMsg(${n})`}">
+      <span class="ic">${u?LVMETA[n].icon:'🔒'}</span>
+      <span class="nm">שלב ${n} · ${LVMETA[n].name}</span>
+      <span class="st">${u?('⭐'.repeat(lv.stars)||'חדש!'):''}</span></button>`;}
+  $('#lvGrid').innerHTML=h;
+  $('#gCount').textContent=S.garden.length?('('+S.garden.length+')'):'';
 }
-function renderDots(){
-  let h='';for(let i=0;i<GOAL;i++)h+='<i class="'+(i<PROG?'f':'')+'"></i>';
-  $('#dots').innerHTML=h;
+function lockedMsg(n){sndSoft();const c=document.querySelectorAll('.lvCard')[n-1];
+  c.animate([{transform:'translateX(0)'},{transform:'translateX(6px)'},{transform:'translateX(-6px)'},{transform:'translateX(0)'}],{duration:300})}
+
+function setup(){
+  hideAllOv();$('#backBtn').style.display='block';$('#homeBtn').style.display='none';$('#tbTitle').textContent='🌸 הפרח שלי';
+  showOv('ov-setup');goSpot('home');
+  $('#setupStage').innerHTML=`<h1>🌸 הפרח שלי</h1><div class="sub">איזה צבע יהיה לפרח שלך?</div>
+    <div class="pickGrid">${COLORS.map(c=>`<button class="pickCard" onclick="pickColor('${c[0]}')"><span class="dot" style="background:${c[0]}"></span>${c[1]}</button>`).join('')}</div>`;
 }
-/* open one petal — <300ms feedback start, never closes */
+function pickColor(c){
+  S.profile.color=c;save();sndTap();
+  applyFlowerColor(c);
+  $('#setupStage').innerHTML=`<h1>🌸</h1><div class="sub">איזה יופי! ומה אתה הכי אוהב?</div>
+    <div class="pickGrid">${TOPICS.map(t=>`<button class="pickCard" onclick="pickTopic('${t.k}')"><span class="big">${t.e}</span>${t.n}</button>`).join('')}</div>`;
+}
+function applyFlowerColor(hex){
+  if(!window.FLOWER3D)return;const F=window.FLOWER3D,base=parseInt(hex.slice(1),16);
+  F.homeFlower3D.userData.color=base;
+  F.homeFlower3D.userData.petals.forEach((P,i)=>{P.mesh.material.color.setHex(i%2?base:parseInt(F.shade3(hex,.4).toString(16).padStart(6,'0'),16))});
+}
+function pickTopic(k){S.profile.topic=k;save();sndWin();confettiBurst();setTimeout(goHome,700)}
+
+/* ================= petal + level engine ================= */
+function renderDots(){let h='';for(let i=0;i<GOAL;i++)h+='<i class="'+(i<PROG?'f':'')+'"></i>';$('#dots').innerHTML=h;$('#dots').classList.add('on')}
+function openPanel(html){$('#stage').innerHTML=html;$('#panel').classList.add('on')}
+function closePanel(){$('#panel').classList.remove('on')}
+function addBank(c,e,t){if(!S.bank.some(b=>b.t===t))S.bank.push({c,e,t});save()}
+function bankTiles(cats,fill){
+  let tiles=S.bank.filter(b=>cats.includes(b.c)).map(b=>[b.e,b.t]);
+  (fill||[]).forEach(f=>{if(tiles.length<5&&!tiles.some(t=>t[1]===f[1]))tiles.push(f)});
+  L1CATS.filter(cc=>cats.includes(cc.k)).forEach(cc=>cc.opts.forEach(o=>{if(tiles.length<5&&!tiles.some(t=>t[1]===o[1]))tiles.push(o)}));
+  return tiles.slice(0,5);
+}
+/* open one petal in the real 3D flower — camera glides in close first */
 function openPetal(cb){
   const i=S.cur.petals;
-  sndPetal();
-  const ps=document.querySelectorAll('#flowerBox .petal');
-  if(ps[i])ps[i].classList.add('open');
-  const fb=$('#flowerBox').getBoundingClientRect();
-  sparklesAt(fb.left+fb.width/2,fb.top+fb.height/3,4);
+  if(window.FLOWER3D){
+    const F=window.FLOWER3D,fp=F.homeFlower3D.position;
+    F.camSpot(new F.THREE.Vector3(fp.x+2.6,fp.y+2.2,fp.z+2.4),new F.THREE.Vector3(fp.x,fp.y+1.2,fp.z));
+    F.openPetal3D(F.homeFlower3D,i,()=>{
+      const sc=F.worldToScreen(new F.THREE.Vector3(fp.x,fp.y+1.6,fp.z));
+      sparklesAt(sc.x,sc.y,4);
+    });
+  }
   S.cur.petals++;save();
-  if(S.cur.petals>=NPETALS){setTimeout(()=>flowerBloom(cb),1000)}
-  else setTimeout(cb,750);
+  if(S.cur.petals>=NPETALS){setTimeout(()=>flowerBloom(cb),1900)}
+  else setTimeout(cb,1700);
 }
 function flowerBloom(cb){
-  confettiBurst();sndWin();setTimeout(sndWarm,400);
-  const hasBfly=Math.random()<.3; /* variable reward */
-  $('#bloomFlower').innerHTML=flowerSVG(NPETALS,S.profile.color,170)+(hasBfly?'<div style="font-size:40px;margin-top:-30px" class="gItem-b">🦋</div>':'');
-  $('#bloomH').textContent=hasBfly?'הפרח נפתח — ופרפר בא לבקר! 🦋':'הפרח נפתח כולו! 🎉';
-  speak(hasBfly?'הפרח נפתח כולו! ופרפר בא לבקר!':'הפרח נפתח כולו! כל הכבוד!');
+  confettiBurst();sndMelody();setTimeout(sndWarm,650);
+  const hasBfly=Math.random()<.3;
   S.garden.push({date:new Date().toISOString().slice(0,10),color:S.profile.color,petals:NPETALS,topic:S.profile.topic,bfly:hasBfly});
   S.cur.petals=0;save();
-  showOv('ov-bloom');
-  $('#bloomGo').onclick=()=>{sndTap();hideOv('ov-bloom');renderFlower();cb()};
+  openPanel(`<div style="font-size:60px">${hasBfly?'🦋🌸':'🎉🌸'}</div>
+    <h2>${hasBfly?'הפרח נפתח — ופרפר בא לבקר!':'הפרח נפתח כולו!'}</h2>
+    <div class="sub">כל עלי הכותרת נפתחו — הפרח נשמר בגינה שלך לתמיד 🌷</div>
+    <button class="btn" id="bloomGo">להמשיך ▶️</button>`);
+  $('#bloomGo').onclick=()=>{sndTap();closePanel();if(window.FLOWER3D)window.FLOWER3D.resetFlower3D(window.FLOWER3D.homeFlower3D);teachBack(cb)};
 }
-
-/* success pipeline: petal → (class mode gate) → next step / round done */
 function success(next){
   PROG++;renderDots();
-  openPetal(()=>classGate(()=>{ if(PROG>=GOAL)roundDone(); else next(); }));
+  openPetal(()=>classGate(()=>{if(PROG>=GOAL)roundDone();else next()}));
 }
 function classGate(cb){
   if(!S.settings.classMode){cb();return}
   showOv('ov-class');
-  $('#classCheck').onclick=()=>{hideOv('ov-class');sndWin();
-    sparklesAt(innerWidth/2,innerHeight/2,7);setTimeout(cb,350)};
+  $('#classCheck').onclick=()=>{hideOv('ov-class');sndWin();sparklesAt(innerWidth/2,innerHeight/2,7);setTimeout(cb,350)};
 }
 function roundDone(){
   const lv=S.levels[LV];lv.done++;lv.stars=Math.min(3,lv.stars+1);save();
-  confettiBurst();sndWin();speak('כל הכבוד! סיימת את השלב!');
+  confettiBurst();sndWin();
   const nxt=LV<5&&S.levels[LV+1]&&S.levels[LV].done>=1?LV+1:null;
-  $('#stage').innerHTML=`
-    <div style="font-size:64px">🎉</div>
-    <h2>כל הכבוד! סיימת את השלב!</h2>
-    <div style="font-size:26px;letter-spacing:3px;color:#c9a227">${'⭐'.repeat(lv.stars)}</div>
-    <div class="budLine">${budSVG(26)} ניצן חדש מחכה לך מחר! 🌱</div>
+  openPanel(`<div style="font-size:56px">🎉</div><h2>כל הכבוד! סיימת את השלב!</h2>
+    <div style="font-size:24px;letter-spacing:3px;color:#ffd54a">${'⭐'.repeat(lv.stars)}</div>
     <button class="btn" onclick="startLevel(${LV})">🔁 לשחק שוב</button>
-    ${nxt&&S.levels[nxt].done===0&&(nxt===2?true:S.levels[nxt-1].done>=1)?`<button class="btn grn" onclick="startLevel(${nxt})">${LEVELS[nxt].icon} לשלב הבא!</button>`:''}
-    <button class="btn sec" onclick="goHome()">🏠 חזרה הביתה</button>`;
+    ${nxt&&S.levels[nxt].done===0?`<button class="btn grn" onclick="startLevel(${nxt})">${LEVELS[nxt].icon} לשלב הבא!</button>`:''}
+    <button class="btn sec" onclick="goHome()">🏠 חזרה הביתה</button>`);
 }
-
-/* ---------- הפנס הפנימי (הכלי הראשון): להאיר על הלב, לשאול אותו
-   מה הוא מרגיש, לחבק אותו, ולהגיד "מותר לי להרגיש ככה" ---------- */
-const FEELS=[['😳','ביישנות'],['😟','קצת פחד'],['🤔','חוסר ביטחון'],['🤗','התרגשות']];
-function torchGate(cb){
-  const need=!sessionTorch||Math.random()<.12;
-  if(!need){cb();return}
-  sessionTorch=true;
-  const heart=$('#torchHeart'),h=$('#torchH'),sub=$('#torchSub'),st=$('#torchStage');
-  heart.classList.remove('lit');
-  heart.style.filter='grayscale(.9) brightness(.5)';
-  h.textContent='רגע — נקשיב ללב 💛';
-  sub.textContent='נדליק את הפנס הפנימי ונאיר על הלב 🔦';
-  st.innerHTML='<div class="chargeRing" id="chargeRing"><button id="torchBtn">🔦</button></div>';
-  showOv('ov-torch');
-  let p=0,iv=null,done=false;
-  const ring=$('#chargeRing'),btn=$('#torchBtn');
-  function step(){
-    p=Math.min(100,p+3);ring.style.setProperty('--p',p);
-    if(p%15===0)tone(200+p*5,.08,'sine',0,.08);
-    heart.style.filter=`grayscale(${.9-(p/100)*.9}) brightness(${.5+(p/100)*.5})`;
-    if(p>=100&&!done){done=true;clearInterval(iv);askHeart();}
-  }
-  const start=e=>{e.preventDefault();if(done)return;sndTap();iv=setInterval(step,45)};
-  const stop=()=>{if(iv){clearInterval(iv);iv=null}};
-  btn.onpointerdown=start;btn.onpointerup=stop;btn.onpointerleave=stop;btn.onpointercancel=stop;
-  function askHeart(){
-    sndWarm();
-    h.textContent='לב שלי, מה אתה מרגיש?';
-    sub.textContent='שואלים את הלב — ומקשיבים לתשובה';
-    st.innerHTML='<div class="optGrid" style="grid-template-columns:1fr 1fr">'+
-      FEELS.map((f,i)=>`<button class="optCard" data-i="${i}"><span class="big">${f[0]}</span>${f[1]}</button>`).join('')+'</div>';
-    st.querySelectorAll('.optCard').forEach(b=>b.onclick=()=>{sndTap();hugHeart(FEELS[+b.dataset.i])});
-  }
-  function hugHeart(f){
-    h.textContent='עכשיו — לחבק את הלב';
-    sub.textContent='חיבוק גדול ללב שמרגיש '+f[1]+' '+f[0];
-    st.innerHTML='<button class="btn grn" id="hugBtn" style="font-size:20px">🫂 לחבק את הלב</button>';
-    $('#hugBtn').onclick=()=>{
-      sndWarm();heart.classList.add('lit');heart.style.filter='';
-      sparklesAt(innerWidth/2,innerHeight/2-80,6);
-      h.textContent='מותק, מותר לך להרגיש '+f[1]+' 💛';
-      sub.textContent='זה נורמלי להרגיש ככה. לכולם זה קורה לפעמים.';
-      st.innerHTML='<button class="btn grn" id="torchGo">עכשיו אפשר לשתף 🌸</button>';
-      $('#torchGo').onclick=()=>{sndTap();hideOv('ov-torch');cb()};
-    };
-  }
-}
-
-/* ============================================================
-   9. home + setup + garden
-   ============================================================ */
-const LVMETA=[null,
-  {icon:'🌸',name:'מה יש בפרח שלי'},
-  {icon:'💬',name:'משפט שיתוף'},
-  {icon:'🤝',name:'שיתוף מחובר'},
-  {icon:'🏓',name:'פינג־פונג'},
-  {icon:'🔒',name:'כמה ולמי'}];
-function unlocked(n){return n===1||S.levels[n-1].done>=1}
-function renderHome(){
-  paintSound();
-  $('#swClass').classList.toggle('on',S.settings.classMode);
-  $('#homeFlower').innerHTML=flowerSVG(S.cur.petals,S.profile.color,120);
-  const tp=TOPICS.find(t=>t.k===S.profile.topic);
-  $('#greet').textContent='איזה כיף שבאת! כל שיתוף פותח עלה בפרח '+(tp?tp.e:'🌸');
-  let h='';
-  for(let n=1;n<=5;n++){
-    const u=unlocked(n),lv=S.levels[n];
-    h+=`<button class="lvCard${u?'':' locked'}" onclick="${u?`startLevel(${n})`:`lockedMsg(${n})`}">
-      <span class="ic">${u?LVMETA[n].icon:'🔒'}</span>
-      <span class="nm">שלב ${n} · ${LVMETA[n].name}</span>
-      <span class="st">${u?('⭐'.repeat(lv.stars)||'חדש!'):''}</span></button>`;
-  }
-  $('#lvGrid').innerHTML=h;
-  $('#gCount').textContent=S.garden.length?('('+S.garden.length+')'):'';
-  const anyPlay=S.garden.length>0||Object.values(S.levels).some(l=>l.plays>0);
-  $('#homeBud').style.display=anyPlay?'flex':'none';
-  $('#budMini').innerHTML=budSVG(26);
-}
-function lockedMsg(n){sndSoft();speak('קודם מסיימים את שלב '+(n-1));
-  const c=document.querySelectorAll('.lvCard')[n-1];c.animate([{transform:'translateX(0)'},{transform:'translateX(6px)'},{transform:'translateX(-6px)'},{transform:'translateX(0)'}],{duration:300})}
-
-function openGarden(){
-  sndTap();paintSound();
-  $('#budMini2').innerHTML=budSVG(26);
-  const g=$('#gardenGrid');
-  if(!S.garden.length){
-    $('#gardenSub').textContent='';
-    g.innerHTML='<div class="gEmpty" style="grid-column:1/-1">הגינה עוד ריקה 🌱<br>כל פרח שנפתח עד הסוף — נשמר כאן לתמיד!</div>';
-  }else{
-    $('#gardenSub').textContent='כל פרח כאן הוא שיתופים אמיתיים שלך — אפשר להראות למורה ולמשפחה!';
-    const bflyVisit=Math.random()<.2?(Math.random()*S.garden.length|0):-1; /* bonus visit */
-    g.innerHTML=S.garden.map((f,i)=>`<div class="gItem">
-      ${(f.bfly||i===bflyVisit)?'<span class="bfly">🦋</span>':''}
-      ${flowerSVG(NPETALS,f.color,74)}
-      <span>${f.date.slice(8,10)}.${f.date.slice(5,7)} ${(TOPICS.find(t=>t.k===f.topic)||{e:''}).e}</span></div>`).join('');
-  }
-  showScreen('scr-garden');
-}
-
-/* ---------- first-run setup ---------- */
-function setup(){
-  paintSound();showScreen('scr-setup');
-  $('#setupStage').innerHTML=`
-    <h1 style="margin-bottom:4px">🌸 הפרח שלי</h1>
-    <div class="sub">איזה צבע יהיה לפרח שלך?</div>
-    <div class="pickGrid">${COLORS.map(c=>`<button class="pickCard" onclick="pickColor('${c[0]}')">
-      ${flowerSVG(NPETALS,c[0],64)}<span>${c[1]}</span></button>`).join('')}</div>`;
-  /* no speak() here — TTS must never autoplay before the first user gesture */
-}
-function pickColor(c){
-  S.profile.color=c;save();sndPetal();
-  $('#setupStage').innerHTML=`
-    <div style="margin-top:6px">${flowerSVG(NPETALS,c,110)}</div>
-    <div class="sub">איזה יופי! ומה אתה הכי אוהב?</div>
-    <div class="pickGrid">${TOPICS.map(t=>`<button class="pickCard" onclick="pickTopic('${t.k}')">
-      <span class="big">${t.e}</span>${t.n}</button>`).join('')}</div>`;
-  speak('איזה יופי! ומה אתה הכי אוהב?');
-}
-function pickTopic(k){
-  S.profile.topic=k;save();sndWin();confettiBurst();
-  setTimeout(goHome,700);
-}
-
-/* ============================================================
-   10. level engine
-   ============================================================ */
 function startLevel(n){
-  sndTap();LV=n;PROG=0;GOAL=LEVELS[n].goal;
-  S.levels[n].plays++;save();
-  $('#lvTitle').textContent=LVMETA[n].icon+' שלב '+n+' · '+LVMETA[n].name;
-  paintSound();renderFlower();renderDots();
-  showScreen('scr-level');
+  sndTap();LV=n;PROG=0;GOAL=LEVELS[n].goal;S.levels[n].plays++;save();
+  hideAllOv();$('#backBtn').style.display='none';$('#homeBtn').style.display='block';
+  $('#tbTitle').textContent=LVMETA[n].icon+' שלב '+n+' · '+LVMETA[n].name;
+  paintSound();renderDots();goSpot(n);
   torchGate(()=>LEVELS[n].start());
 }
-function addBank(c,e,t){
-  if(!S.bank.some(b=>b.t===t))S.bank.push({c,e,t});
-  save();
-}
-function bankTiles(cats,fill){ /* tiles from the child's own bank first, then defaults */
-  let tiles=S.bank.filter(b=>cats.includes(b.c)).map(b=>[b.e,b.t]);
-  (fill||[]).forEach(f=>{if(tiles.length<5&&!tiles.some(t=>t[1]===f[1]))tiles.push(f)});
-  L1CATS.filter(cc=>cats.includes(cc.k)).forEach(cc=>cc.opts.forEach(o=>{
-    if(tiles.length<5&&!tiles.some(t=>t[1]===o[1]))tiles.push(o)}));
-  return tiles.slice(0,5);
-}
+$('#homeBtn').onclick=goHome;
 
 /* ---------------- level 1: מה יש בפרח שלי ---------------- */
 LEVELS[1]={goal:7,start(){this.order=dayShuffle(L1CATS,1);this.i=0;this.step()},
-step(){
-  const cat=this.order[this.i];
-  $('#stage').innerHTML=`
-    <div class="qTitle">${cat.q}</div>
-    <div class="sub">אין תשובה לא נכונה — הכל עליך אמיתי! 💛</div>
-    <div class="optGrid">${cat.opts.map((o,j)=>`<button class="optCard" data-j="${j}">
-      <span class="big">${o[0]}</span>${o[1]}</button>`).join('')}</div>`;
-  speak(cat.q);
+step(){const cat=this.order[this.i];
+  openPanel(`<div class="qTitle">${cat.q}</div><div class="sub">אין תשובה לא נכונה — הכל עליך אמיתי! 💛</div>
+    <div class="optGrid">${cat.opts.map((o,j)=>`<button class="optCard" data-j="${j}"><span class="big">${o[0]}</span>${o[1]}</button>`).join('')}</div>`);
   document.querySelectorAll('#stage .optCard').forEach(b=>b.onclick=()=>{
-    const o=cat.opts[+b.dataset.j];
-    b.classList.add('picked');sndTap();
+    const o=cat.opts[+b.dataset.j];b.classList.add('picked');sndTap();
     const r=b.getBoundingClientRect();sparklesAt(r.left+r.width/2,r.top,4);
     addBank(cat.k,o[0],o[1]);
-    speak(o[1]+'! נכנס לפרח שלך');
     document.querySelectorAll('#stage .optCard').forEach(x=>x.onclick=null);
-    this.i++;
-    setTimeout(()=>success(()=>this.step()),350);
+    this.i++;setTimeout(()=>success(()=>this.step()),350);
   });
 }};
 
 /* ---------------- level 2: משפט שיתוף ---------------- */
 LEVELS[2]={goal:3,start(){this.step()},
-step(){
-  const st=dayShuffle(STARTERS,2+PROG);
-  $('#stage').innerHTML=`
-    <div class="qTitle">בחר התחלה למשפט שלך 💬</div>
-    <div class="optGrid">${st.map((s,j)=>`<button class="optCard" data-j="${j}">
-      <span class="big">${s.e}</span>${s.t}</button>`).join('')}</div>`;
-  speak('בחר התחלה למשפט שלך');
+step(){const st=dayShuffle(STARTERS,2+PROG);
+  openPanel(`<div class="qTitle">בחר התחלה למשפט שלך 💬</div>
+    <div class="optGrid">${st.map((s,j)=>`<button class="optCard" data-j="${j}"><span class="big">${s.e}</span>${s.t}</button>`).join('')}</div>`);
   document.querySelectorAll('#stage .optCard').forEach(b=>b.onclick=()=>{sndTap();this.pickTile(st[+b.dataset.j])});
 },
 pickTile(starter){
   let tiles=bankTiles(starter.cats,S.profile.topic&&starter.cats.includes('game')?[TOPIC_TILE[S.profile.topic]]:[]);
   tiles=shuffle(tiles).slice(0,5);
-  $('#stage').innerHTML=`
-    <div class="qTitle">${starter.t} — מה נוסיף? 🧩</div>
-    <div class="optGrid">${tiles.map((t,j)=>`<button class="optCard" data-j="${j}">
-      <span class="big">${t[0]}</span>${t[1]}</button>`).join('')}</div>`;
-  document.querySelectorAll('#stage .optCard').forEach(b=>b.onclick=()=>{
-    sndTap();this.saySentence(starter,tiles[+b.dataset.j]);
-  });
+  openPanel(`<div class="qTitle">${starter.t} — מה נוסיף? 🧩</div>
+    <div class="optGrid">${tiles.map((t,j)=>`<button class="optCard" data-j="${j}"><span class="big">${t[0]}</span>${t[1]}</button>`).join('')}</div>`);
+  document.querySelectorAll('#stage .optCard').forEach(b=>b.onclick=()=>{sndTap();this.saySentence(starter,tiles[+b.dataset.j])});
 },
 saySentence(starter,tile){
   const sen=starter.make(tile[1]);
-  $('#stage').innerHTML=`
-    <div class="sentence">${tile[0]} ${sen}</div>
-    <button class="btn sec" id="hearBtn" style="max-width:260px">🔊 לשמוע שוב</button>
+  openPanel(`<div class="sentence">${tile[0]} ${sen}</div>
     <div class="sayLoud">עכשיו אמור את זה בקול! 🎤</div>
-    <button class="btn grn" id="saidBtn">אמרתי בקול! ✅</button>`;
-  speak(sen);
-  $('#hearBtn').onclick=()=>{sndTap();speak(sen)};
-  $('#saidBtn').onclick=()=>{
-    sndWin();speak('איזה משפט יפה שיתפת!');
-    $('#saidBtn').onclick=null;
-    setTimeout(()=>success(()=>this.step()),300);
-  };
+    <button class="btn grn" id="saidBtn">אמרתי בקול! ✅</button>`);
+  $('#saidBtn').onclick=()=>{sndWin();$('#saidBtn').onclick=null;setTimeout(()=>success(()=>this.step()),300)};
 }};
 
 /* ---------------- level 3: שיתוף מחובר ---------------- */
-LEVELS[3]={goal:5,start(){
-  this.scens=dayShuffle(L3SCEN,3).slice(0,this.goal);this.i=0;this.step()},
-step(){
-  const sc=this.scens[this.i],fr=FRIENDS[this.i%FRIENDS.length];
+LEVELS[3]={goal:5,start(){this.scens=dayShuffle(L3SCEN,3).slice(0,this.goal);this.i=0;this.step()},
+step(){const sc=this.scens[this.i],fr=FRIENDS[this.i%FRIENDS.length];
   const opts=shuffle([{t:sc.ok,ok:true},{t:sc.bad[0]},{t:sc.bad[1]}]);
-  $('#stage').innerHTML=`
-    <div class="avRow"><div class="avatar talk">${fr[0]}</div><div class="avatar">🙂</div></div>
-    <div class="bub"><div class="who">${fr[1]}</div>${sc.f}</div>
-    <div class="qTitle" style="font-size:18px">מה תגיד בחזרה? 🤔</div>
-    <div class="optGrid" style="grid-template-columns:1fr">${opts.map((o,j)=>`<button class="optCard" data-j="${j}" style="min-height:64px">${o.t}</button>`).join('')}</div>`;
-  speak(fr[1]+' אומר: '+sc.f);
+  openPanel(`<div class="bub"><div class="who2">${fr[0]} ${fr[1]}</div>${sc.f}</div>
+    <div class="qTitle" style="font-size:17px">מה תגיד בחזרה? 🤔</div>
+    <div class="optGrid one">${opts.map((o,j)=>`<button class="optCard" data-j="${j}">${o.t}</button>`).join('')}</div>`);
   document.querySelectorAll('#stage .optCard').forEach(b=>{
-    b.onclick=()=>{
-      const o=opts[+b.dataset.j];
-      if(o.ok){
-        b.classList.add('picked');sndWin();
+    b.onclick=()=>{const o=opts[+b.dataset.j];
+      if(o.ok){b.classList.add('picked');sndWin();
         const r=b.getBoundingClientRect();sparklesAt(r.left+r.width/2,r.top,5);
-        speak('גם אני! איזה כיף לדבר איתך!');
         document.querySelectorAll('#stage .optCard').forEach(x=>x.onclick=null);
-        this.i++;
-        setTimeout(()=>success(()=>this.step()),400);
-      }else{
-        /* errorless gentle modeling — no penalty, petal never closes */
-        sndSoft();b.classList.add('dim');
-        speak('רגע... על מה '+fr[1]+' דיבר?');
+        this.i++;setTimeout(()=>success(()=>this.step()),400);
+      }else{sndSoft();b.classList.add('dim');
         const bubs=$('#stage .bub');
-        bubs.innerHTML=`<div class="who">${fr[1]}</div>רגע, על מה דיברתי? 🤔<br>דיברתי על: <b>"${sc.f}"</b> — איזו תשובה ממשיכה אותי?`;
-        document.querySelectorAll('#stage .optCard').forEach((x,xi)=>{
-          if(opts[xi].ok)x.classList.add('hint');
-          else x.classList.add('dim');
-        });
-      }
-    };
+        bubs.innerHTML=`<div class="who2">${fr[0]} ${fr[1]}</div>רגע, על מה דיברתי? 🤔<br>דיברתי על: <b>"${sc.f}"</b> — איזו תשובה ממשיכה אותי?`;
+        document.querySelectorAll('#stage .optCard').forEach((x,xi)=>{if(opts[xi].ok)x.classList.add('hint');else x.classList.add('dim')});
+      }};
   });
 }};
 
-/* ---------------- level 4: פינג-פונג (reciprocity rally) ---------------- */
-LEVELS[4]={goal:4,start(){
-  this.streak=0;this.round=0;
-  this.fr=FRIENDS[(DAYSEED+S.levels[4].plays)%FRIENDS.length];
-  this.answers=dayShuffle(L4ANS,4);
-  this.usedTopic=false;
-  this.step();
-},
-frame(inner){
-  $('#stage').innerHTML=`
-    <div class="avRow"><div class="avatar" id="l4fr">${this.fr[0]}</div><span id="l4ball">🦋</span><div class="avatar" id="l4me">🙂</div></div>
-    <div id="l4inner" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:10px">${inner}</div>`;
-},
-step(){ /* child chooses what to share */
-  let pool=bankTiles(['food','game','animal','place','exp'],L4EXTRA);
-  pool=shuffle(pool.concat(L4EXTRA)).slice(0,3);
-  this.frame(`
-    <div class="qTitle" style="font-size:18px">בחר מה לספר ל${this.fr[1]} 💬</div>
-    <div class="optGrid">${pool.map((p,j)=>`<button class="optCard" data-j="${j}">
-      <span class="big">${p[0]}</span>${p[1]}</button>`).join('')}</div>`);
-  if(this.round===0&&this.streak===0)speak('בחר מה לספר ל'+this.fr[1]);
+/* ---------------- level 4: פינג-פונג ---------------- */
+LEVELS[4]={goal:4,start(){this.streak=0;this.round=0;this.fr=FRIENDS[(DAYSEED+S.levels[4].plays)%FRIENDS.length];
+  this.answers=dayShuffle(L4ANS,4);this.usedTopic=false;this.step()},
+step(){let pool=bankTiles(['food','game','animal','place','exp'],L4EXTRA);pool=shuffle(pool.concat(L4EXTRA)).slice(0,3);
+  openPanel(`<div class="qTitle" style="font-size:17px">בחר מה לספר ל${this.fr[1]} ${this.fr[0]} 💬</div>
+    <div class="optGrid">${pool.map((p,j)=>`<button class="optCard" data-j="${j}"><span class="big">${p[0]}</span>${p[1]}</button>`).join('')}</div>`);
   document.querySelectorAll('#stage .optCard').forEach(b=>b.onclick=()=>{
     const p=pool[+b.dataset.j];sndTap();
     const sen=p[1].startsWith('אני')?p[1]:(p[1].startsWith('ה')?'אני אוהב את '+p[1]:'אני אוהב '+p[1]);
@@ -791,80 +873,232 @@ step(){ /* child chooses what to share */
   });
 },
 shared(sen,em){
-  speak(sen);
-  this.frame(`
-    <div class="bub me"><div class="who">אני</div>${em} ${sen}</div>
-    ${this.streak>=2?`<div class="bub"><div class="who">${this.fr[1]}</div>רגע, גם החבר רוצה לספר! 🦋 שאל אותו "ואתה?"</div>`:''}
-    <button class="btn grn ${this.streak>=2?'':''}" id="askBtn" ${this.streak>=2?'style="animation:pulse 1.2s infinite"':''}>🦋 ואתה?</button>
+  openPanel(`<div class="bub me"><div class="who2">אני</div>${em} ${sen}</div>
+    ${this.streak>=2?`<div class="bub"><div class="who2">${this.fr[0]} ${this.fr[1]}</div>רגע, גם החבר רוצה לספר! שאל אותו "ואתה?"</div>`:''}
+    <button class="btn grn" id="askBtn">🦋 ואתה?</button>
     <button class="btn sec" id="moreBtn">עוד סיפור שלי ➕</button>`);
-  if(this.streak>=2){sndSoft();speak('רגע, גם החבר רוצה לספר! שאל אותו: ואתה?')}
+  if(this.streak>=2)sndSoft();
   $('#askBtn').onclick=()=>{sndTap();this.askBack()};
   $('#moreBtn').onclick=()=>{sndTap();this.streak++;this.step()};
 },
-askBack(){
-  this.streak=0;
-  speak('ואתה?');
-  /* butterfly flies to the friend */
-  this.frame(`<div class="bub me"><div class="who">אני</div>ואתה? 😊</div>`);
-  const ball=$('#l4ball');
-  requestAnimationFrame(()=>{ball.style.left='46px'});
-  setTimeout(()=>{
-    let ans;
+askBack(){this.streak=0;
+  openPanel(`<div class="bub me"><div class="who2">אני</div>ואתה? 😊</div>`);
+  setTimeout(()=>{let ans;
     if(!this.usedTopic&&S.profile.topic){ans=TOPIC_LINE[S.profile.topic];this.usedTopic=true}
     else ans=this.answers[this.round%this.answers.length];
-    $('#l4fr').classList.add('talk');
-    $('#l4inner').innerHTML=`
-      <div class="bub"><div class="who">${this.fr[1]}</div>${ans}<br><b>ואתה?</b> 😊</div>`;
-    speak(this.fr[1]+' עונה: '+ans);
-    this.round++;
-    setTimeout(()=>success(()=>this.step()),1400);
+    openPanel(`<div class="bub"><div class="who2">${this.fr[0]} ${this.fr[1]}</div>${ans}<br><b>ואתה?</b> 😊</div>`);
+    this.round++;setTimeout(()=>success(()=>this.step()),1400);
   },900);
 }};
 
-/* ---------------- level 5: כמה ולמי (circles of closeness) ---------------- */
-LEVELS[5]={goal:6,start(){
-  this.cards=dayShuffle(L5CARDS,5).slice(0,this.goal);this.i=0;this.tried=false;this.step()},
-step(){
-  const c=this.cards[this.i];this.tried=false;
-  $('#stage').innerHTML=`
-    <div class="qTitle">למי בטוח לספר את זה? 🤔</div>
+/* ---------------- level 5: כמה ולמי ---------------- */
+LEVELS[5]={goal:6,start(){this.cards=dayShuffle(L5CARDS,5).slice(0,this.goal);this.i=0;this.step()},
+step(){const c=this.cards[this.i];
+  openPanel(`<div class="qTitle">למי בטוח לספר את זה? 🤔</div>
     <div class="shareCard" id="l5card"><span class="big">${c.e}</span>${c.t}</div>
-    <div class="ringRow">${RINGS.map((r,j)=>`<button class="ringBtn r${j}" data-j="${j}">
-      <span class="big">${r[0]}</span>${r[1]}</button>`).join('')}</div>
-    <div class="sub" id="l5msg" style="min-height:24px"></div>`;
-  speak('למי בטוח לספר: '+c.t+'?');
+    <div class="ringRow">${RINGS.map((r,j)=>`<button class="ringBtn r${j}" data-j="${j}"><span class="big">${r[0]}</span>${r[1]}</button>`).join('')}</div>
+    <div class="sub" id="l5msg" style="min-height:22px"></div>`);
   document.querySelectorAll('#stage .ringBtn').forEach(b=>b.onclick=()=>this.place(c,+b.dataset.j,b));
 },
 place(c,j,btn){
-  if(j<=c.max){ /* safe */
-    sndWin();btn.classList.add('picked');
+  if(j<=c.max){sndWin();btn.classList.add('picked');
     const r=btn.getBoundingClientRect();sparklesAt(r.left+r.width/2,r.top,5);
-    let msg=rnd(L5PRAISE);
-    if(c.max===0)msg='נכון מאוד! את זה שומרים רק למשפחה 💙';
-    $('#l5msg').textContent=msg;speak(msg);
+    let msg=rnd(L5PRAISE);if(c.max===0)msg='נכון מאוד! את זה שומרים רק למשפחה 💙';
+    $('#l5msg').textContent=msg;
     document.querySelectorAll('#stage .ringBtn').forEach(x=>x.onclick=null);
-    this.i++;
-    setTimeout(()=>success(()=>this.step()),500);
-  }else{ /* unsafe — gently close the card back, explain, guided retry */
-    sndSoft();
-    const card=$('#l5card');card.classList.add('fold');
-    setTimeout(()=>card.classList.remove('fold'),700);
-    const ex=L5EXPL[c.max];
-    $('#l5msg').textContent=ex;speak(ex);
-    document.querySelectorAll('#stage .ringBtn').forEach((x,xi)=>{
-      if(xi>c.max)x.classList.add('dim'); else x.classList.add('hint');
-    });
+    this.i++;setTimeout(()=>success(()=>this.step()),500);
+  }else{sndSoft();const card=$('#l5card');card.classList.add('fold');setTimeout(()=>card.classList.remove('fold'),700);
+    const ex=L5EXPL[c.max];$('#l5msg').textContent=ex;
+    document.querySelectorAll('#stage .ringBtn').forEach((x,xi)=>{if(xi>c.max)x.classList.add('dim');else x.classList.add('hint')});
   }
 }};
-
-/* attach meta */
 for(let n=1;n<=5;n++){LEVELS[n].icon=LVMETA[n].icon;LEVELS[n].name=LVMETA[n].name}
 
-/* ============================================================
-   11. boot
-   ============================================================ */
-if(!S.profile.color||!S.profile.topic)setup();
-else goHome();
+/* ================= הפנס הפנימי — real 3D dimming + pointer-follow torch ================= */
+let heartSprite=null,heartPos=null,stopBeat=null;
+function torchGate(cb){
+  const need=!sessionTorch||Math.random()<.12;
+  if(!need||!window.FLOWER3D){cb();return}
+  sessionTorch=true;
+  const F=window.FLOWER3D,T=F.THREE;
+  const pp=(F.player&&F.player.g.position)||new T.Vector3(0,0,10);
+  heartPos=new T.Vector3(pp.x,1.4,pp.z);
+  if(!heartSprite){heartSprite=F.emojiSprite('💗',1.4);F.scene.add(heartSprite)}
+  heartSprite.position.copy(heartPos);heartSprite.material.opacity=.22;heartSprite.scale.set(1.4,1.4,1);
+  F.setNight(1);F.camSpot(new T.Vector3(pp.x+1.6,1.9,pp.z+3.4),new T.Vector3(pp.x,1.4,pp.z));
+  F.torchLight.intensity=0;
+  $('#torchCard').innerHTML=`<h2 style="margin:0">רגע — נקשיב ללב 💛</h2>
+    <div class="sub">הזיזו את האצבע על המסך — הפנס יאיר את הדרך ללב 🔦</div>
+    <div class="chargeRing" style="width:110px;height:110px;border-radius:50%;background:conic-gradient(#ffd54a calc(var(--p,0)*1%),rgba(255,255,255,.15) 0)" id="chargeRing"></div>`;
+  showOv('ov-torch');
+  let p=0,raf=null,done=false;const ring=$('#chargeRing');
+  stopBeat=heartbeatStart();
+  function onMove(ev){
+    if(done)return;
+    const t=ev.touches?ev.touches[0]:ev;const nx=(t.clientX/innerWidth)*2-1,ny=-(t.clientY/innerHeight)*2+1;
+    const ray=new T.Raycaster();ray.setFromCamera({x:nx,y:ny},F.cam);
+    const dist=F.cam.position.distanceTo(heartPos);
+    const pt=ray.ray.at(dist,new T.Vector3());
+    F.torchLight.position.set(pt.x,pt.y+.3,pt.z);
+    const d=pt.distanceTo(heartPos);
+    const near=d<1.5;
+    F.torchLight.intensity=near?9:3.5;
+    heartSprite.material.opacity=Math.min(1,.22+(near?.55:0));
+    if(near){p=Math.min(100,p+1.6);if(((p/6)|0)%1===0)tone(300+p*4,.06,'sine',0,.06)}
+    ring.style.setProperty('--p',p);
+    if(p>=100&&!done){done=true;askHeart()}
+  }
+  ['pointermove','pointerdown','touchmove'].forEach(ev=>document.addEventListener(ev,onMove,{passive:true}));
+  function cleanupMove(){['pointermove','pointerdown','touchmove'].forEach(ev=>document.removeEventListener(ev,onMove))}
+  function askHeart(){
+    cleanupMove();sndWarm();F.torchLight.intensity=6;heartSprite.material.opacity=1;
+    $('#torchCard').innerHTML=`<h2 style="margin:0">לב שלי, מה אתה מרגיש?</h2>
+      <div class="optGrid">${FEELS.map((f,i)=>`<button class="optCard" data-i="${i}"><span class="big">${f[0]}</span>${f[1]}</button>`).join('')}</div>`;
+    $('#torchCard').querySelectorAll('.optCard').forEach(b=>b.onclick=()=>{sndTap();hugHeart(FEELS[+b.dataset.i])});
+  }
+  function hugHeart(f){
+    if(stopBeat){stopBeat();stopBeat=null}
+    $('#torchCard').innerHTML=`<h2 style="margin:0">עכשיו — לחבק את הלב</h2>
+      <div class="sub">חיבוק גדול ללב שמרגיש ${f[1]} ${f[0]}</div>
+      <button class="btn grn" id="hugBtn">🫂 לחבק את הלב</button>`;
+    $('#hugBtn').onclick=()=>{
+      sndWarm();const sc=F.worldToScreen(heartPos);sparklesAt(sc.x,sc.y,6);
+      handOnHeart(f);
+    };
+  }
+  function handOnHeart(f){
+    $('#torchCard').innerHTML=`<h2 style="margin:0">מותק, מותר לך להרגיש ${f[1]} ${f[0]}</h2>
+      <div class="sub">עכשיו אתה: שים יד על הלב שלך</div>
+      <button class="btn grn" id="handBtn">🖐️💛 שמתי</button>`;
+    $('#handBtn').onclick=()=>{sndTap();wordByWord(f)};
+  }
+  function wordByWord(f){
+    const words=['מותר','לי','להרגיש','ככה','💛'];let lit=0;
+    $('#torchCard').innerHTML=`<h2 style="margin:0">חזרו אחריי — מילה מילה</h2>
+      <div class="wordRow" id="wRow">${words.map((w,i)=>`<button class="wBtn" data-i="${i}">${w}</button>`).join('')}</div>
+      <button class="btn grn" id="wordDone" style="display:none">✅ סיימתי</button>`;
+    $('#wRow').querySelectorAll('.wBtn').forEach(b=>b.onclick=()=>{
+      if(+b.dataset.i!==lit)return; /* errorless: only the next word lights, tapping others does nothing */
+      b.classList.add('lit');sndTap();lit++;
+      if(lit>=words.length)$('#wordDone').style.display='block';
+    });
+    $('#wordDone').onclick=()=>{sndTap();finishTorch(cb)};
+  }
+  function finishTorch(cb){
+    hideOv('ov-torch');padChord();
+    F.setNight(0); /* warm light blooms back over the whole meadow — brighter than before */
+    F.torchLight.intensity=0;heartSprite.material.opacity=0;
+    confettiBurst();
+    setTimeout(cb,600);
+  }
+}
+
+/* ================= garden — the child's flowers, standing in the meadow ================= */
+let gardenFlowers=[],gardenPanTimer=null;
+function openGarden(){
+  sndTap();hideAllOv();$('#backBtn').style.display='none';$('#homeBtn').style.display='block';
+  $('#tbTitle').textContent='🌷 הגינה שלי';
+  document.getElementById('gardenUI').style.display='block';
+  const F=window.FLOWER3D;
+  gardenFlowers.forEach(g=>F.scene.remove(g.grp));gardenFlowers=[];
+  document.querySelectorAll('.gLabel').forEach(l=>l.remove());
+  if(!S.garden.length){
+    $('#gardenSub').textContent='הגינה עוד ריקה 🌱 כל פרח שנפתח עד הסוף — נשמר כאן לתמיד!';
+    F.camSpot(new F.THREE.Vector3(-10,3,-10),new F.THREE.Vector3(-4,1,-20));
+    return;
+  }
+  $('#gardenSub').textContent='כל פרח כאן הוא שיתופים אמיתיים שלך — אפשר להראות למורה ולמשפחה!';
+  S.garden.forEach((f,i)=>{
+    const grp=F.buildFlower3D(f.color);
+    grp.position.set(-24+(i%6)*4.6,0,-22-Math.floor(i/6)*3.4);
+    grp.scale.setScalar(1.1);F.scene.add(grp);
+    grp.userData.petals.forEach(P=>{P.pivot.scale.set(1,1,1);P.open=true});
+    const tp=TOPICS.find(t=>t.k===f.topic);
+    const lab=document.createElement('div');lab.className='gLabel';
+    lab.textContent=(f.date.slice(8,10)+'.'+f.date.slice(5,7))+(tp?' '+tp.e:'')+(f.bfly?' 🦋':'');
+    document.body.appendChild(lab);
+    gardenFlowers.push({grp,lab,pos:new F.THREE.Vector3(grp.position.x,1.7,grp.position.z)});
+  });
+  const cx=S.garden.reduce((s,_,i)=>s+(-24+(i%6)*4.6),0)/S.garden.length;
+  const cz=S.garden.reduce((s,_,i)=>s-22-Math.floor(i/6)*3.4,0)/S.garden.length;
+  F.camSpot(new F.THREE.Vector3(cx,4,cz+11),new F.THREE.Vector3(cx,1.4,cz));
+  clearInterval(gardenPanTimer);let t=0;
+  gardenPanTimer=setInterval(()=>{t+=.4;F.camSpot(new F.THREE.Vector3(cx+Math.sin(t*.3)*7,4,cz+11),new F.THREE.Vector3(cx+Math.sin(t*.3)*7,1.4,cz))},1200);
+  (function labelLoop(){
+    gardenFlowers.forEach(g=>{const sc=F.worldToScreen(g.pos);g.lab.style.left=sc.x+'px';g.lab.style.top=sc.y+'px';
+      g.lab.style.display=(sc.x<-40||sc.x>innerWidth+40)?'none':'block'});
+    if(document.getElementById('gardenUI').style.display!=='none')requestAnimationFrame(labelLoop);
+  })();
+}
+function closeGarden(){
+  clearInterval(gardenPanTimer);
+  document.getElementById('gardenUI').style.display='none';
+  document.querySelectorAll('.gLabel').forEach(l=>l.remove());
+  goHome();
+}
+
+/* ================= 📸 save photo ================= */
+function snapPhoto(){
+  if(!window.FLOWER3D)return;sndTap();
+  const data=window.FLOWER3D.snapPhotoNow();if(!data)return;
+  const a=document.createElement('a');a.href=data;a.download='הפרח-שלי.png';a.click();
+}
+
+/* ================= teach-back: the owl "forgot" how to share ================= */
+function teachBack(cb){
+  if(S.teachbackDone){cb();return}
+  S.teachbackDone=true;save();
+  const F=window.FLOWER3D;
+  say([
+    {who:'🦉 הינשוף',t:'רגע רגע... אני קצת שכחתי איך משתפים משהו על עצמי! תעזור לי לזכור את הסדר הנכון? 🤔'}
+  ],()=>{
+    const steps=shuffle([
+      {n:1,t:'לעצור ולהרגיש מה יש בלב 💗'},
+      {n:2,t:'לבחור דבר קטן ואמיתי לספר 🌸'},
+      {n:3,t:'לספר אותו בקול רגוע 🗣️'}
+    ]);
+    let next=1;
+    function render(){
+      openPanel(`<div class="qTitle">עזרו לינשוף — באיזה סדר משתפים? 🌸</div>
+        <div class="optGrid one">${steps.map((s,j)=>`<button class="optCard" data-n="${s.n}" data-j="${j}">${s.t}</button>`).join('')}</div>`);
+      document.querySelectorAll('#stage .optCard').forEach(b=>b.onclick=()=>{
+        if(+b.dataset.n!==next){sndSoft();b.animate([{transform:'translateX(0)'},{transform:'translateX(5px)'},{transform:'translateX(-5px)'},{transform:'translateX(0)'}],{duration:250});return}
+        sndTap();b.classList.add('picked');b.onclick=null;next++;
+        if(next>3)setTimeout(owlPerforms,450);
+      });
+    }
+    render();
+    function owlPerforms(){
+      closePanel();
+      say([{who:'🦉 הינשוף',t:'עכשיו אני זוכר! 💛 עוצר ומרגיש... בוחר דבר קטן ואמיתי... ומספר בקול רגוע: "אני אוהב לעוף בין הענפים בשקיעה!"'}],()=>{
+        if(F){const ofp=F.owl.position;const owlFlower=F.buildFlower3D('#ffb46b');
+          owlFlower.position.set(ofp.x+1,0,ofp.z);owlFlower.scale.setScalar(.8);F.scene.add(owlFlower);
+          let i=0;(function op(){F.openPetal3D(owlFlower,i,()=>{i++;if(i<8)op();else{confettiBurst();setTimeout(cb,900)}})})();
+        }else cb();
+      });
+    }
+  });
+}
+
+/* ================= opening / closing ceremony ================= */
+function openingCeremony(){
+  const f=$('#whiteFade');f.style.opacity=1;
+  setTimeout(()=>{sndChime3();requestAnimationFrame(()=>{f.style.opacity=0})},250);
+}
+$('#backBtn').addEventListener('click',ev=>{
+  ev.preventDefault();sndTap();
+  say([{who:'🦉 הינשוף',t:'כל הכבוד על השיתוף היום 💛 הפרח שלך ממתין כאן — נחזור אליו יחד בפעם הבאה!'}],()=>{
+    location.href='world.html';
+  });
+},{capture:true});
+
+/* boot: wait for the 3D world to finish loading its assets */
+function bootUI(){
+  applyFlowerColor(S.profile.color||'#ff9ec4');
+  openingCeremony();
+  if(!S.profile.color||!S.profile.topic)setup();else goHome();
+}
+if(window.FLOWER3D)bootUI();else window.addEventListener('flowerReady',bootUI,{once:true});
 </script>
 </body>
 </html>
