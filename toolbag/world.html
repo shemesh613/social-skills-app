@@ -19,6 +19,11 @@ body{font-family:'Heebo',sans-serif;background:#0d1330;color:#fff;user-select:no
 #knob{position:absolute;top:50%;left:50%;width:52px;height:52px;border-radius:50%;background:rgba(255,213,74,.85);transform:translate(-50%,-50%);box-shadow:0 4px 14px rgba(0,0,0,.4)}
 .keysHint{position:fixed;bottom:34px;left:26px;font-size:13px;opacity:.6;z-index:10}
 #sndBtn{position:fixed;top:10px;left:12px;width:52px;height:52px;border-radius:50%;background:rgba(10,14,40,.78);border:1.5px solid rgba(255,213,74,.6);font-size:26px;line-height:1;cursor:pointer;z-index:80;box-shadow:0 6px 20px rgba(0,0,0,.4)}
+/* ---------- tool-progress strip — continuity with the practice modules (e.g. flower.html) ---------- */
+#toolNav{position:fixed;top:56px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:15;background:rgba(10,14,40,.6);border-radius:16px;padding:5px 8px}
+#toolNav .tn{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;opacity:.35;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18)}
+#toolNav .tn.earned{opacity:.85;cursor:pointer}
+#toolNav .tn.earned:active{transform:scale(.9)}
 
 /* ---------- overlays ---------- */
 .ov{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;z-index:20;overflow-y:auto}
@@ -89,6 +94,7 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
 <div id="flyTool">🔦</div>
 
 <div id="quest" style="display:none"></div>
+<div id="toolNav"></div>
 <button id="act"></button>
 <div id="joy" style="display:none"><div id="knob"></div></div>
 <div class="keysHint" id="keysHint" style="display:none">🎮 חצים / WASD לתנועה</div>
@@ -185,6 +191,16 @@ function confettiBurst(){
 function showFam(){sndTap();$('#famBox').innerHTML=FAMS[CUR_BADGE];ovShow('ov-fam')}
 var TOOLS=['🔦','🐬','🌸','📗','🙋','❓','🛡️'];
 var CUR_BADGE=0;
+/* tool-progress strip: tapping an earned flower jumps to its practice module */
+function renderToolNav(){
+  var prog=0;try{prog=+localStorage.getItem('toolbagProg')||0}catch(e){}
+  var h='';TOOLS.forEach(function(t,i){
+    var earned=i<prog,clickable=earned&&i===2;
+    h+='<div class="tn'+(earned?' earned':'')+'"'+(clickable?' onclick="location.href=\'flower.html\'"':'')+'>'+t+'</div>';
+  });
+  $('#toolNav').innerHTML=h;
+}
+renderToolNav();
 var BADGES=[
   {h:'🎉 הכלי הראשון שלך!',sub:'הפנס הפנימי נכנס לתיק הכלים.<br>עוד 6 כלים מחכים בהמשך המסע...',
    next:'🐬 אל הכלי הבא — דולפיניות!'},
@@ -242,6 +258,7 @@ var FAMS=[
 function earnBadge(idx){
   CUR_BADGE=idx;
   try{var pr=+localStorage.getItem('toolbagProg')||0;if(idx+1>pr)localStorage.setItem('toolbagProg',String(idx+1))}catch(e){}
+  renderToolNav();
   var B=BADGES[idx];
   $('#bdgH').textContent=B.h;$('#bdgSub').innerHTML=B.sub;
   ovShow('ov-badge');
