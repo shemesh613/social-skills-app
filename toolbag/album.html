@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta name="theme-color" content="#1a1030">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📖</text></svg>">
+<title>📖 האוסף שלי — תיק הכלים</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;800&family=Frank+Ruhl+Libre:wght@700;900&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   האוסף שלי — badge case + sticker album for the 7 tools.
+   Reads: toolbagProg (badges) + albumV1 (stickers, 3/day cap).
+   Calm, predictable, RTL Hebrew — matches world.html/flower.html.
+   ============================================================ */
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Heebo',sans-serif;background:#1a1030;color:#fff;user-select:none;min-height:100dvh}
+button{font-family:inherit;cursor:pointer;border:none}
+#stars{position:fixed;inset:0;pointer-events:none;z-index:0}
+#stars i{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;opacity:.5;animation:tw 3s infinite}
+@keyframes tw{0%,100%{opacity:.15}50%{opacity:.7}}
+#wrap{position:relative;z-index:1;max-width:640px;margin:0 auto;padding:14px 12px 40px}
+
+/* ---------- top bar ---------- */
+#top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.tbBtn{min-height:48px;border-radius:16px;background:rgba(20,14,50,.72);border:1.5px solid rgba(255,213,74,.55);font-size:17px;font-weight:800;color:#ffd54a;padding:0 14px;box-shadow:0 6px 20px rgba(0,0,0,.35);transition:transform .1s}
+.tbBtn:active{transform:translateY(2px)}
+h1{font-family:'Frank Ruhl Libre',serif;font-size:clamp(20px,5.5vw,28px);color:#ffd54a;text-shadow:0 2px 12px rgba(0,0,0,.6)}
+.sub{font-size:14.5px;color:#cfc4ea;text-align:center;line-height:1.6;margin:2px 0 12px}
+
+/* ---------- badge case ---------- */
+.secH{display:flex;align-items:center;gap:8px;font-family:'Frank Ruhl Libre',serif;font-size:20px;color:#ffe9a8;margin:20px 2px 10px}
+.secH small{font-family:'Heebo';font-size:13.5px;color:#cfc4ea;font-weight:600}
+#badges{display:grid;grid-template-columns:repeat(auto-fit,minmax(76px,1fr));gap:9px}
+.bdg{display:flex;flex-direction:column;align-items:center;gap:5px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.16);border-radius:18px;padding:12px 4px 9px}
+.bdg .ic{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:27px;background:rgba(255,255,255,.08)}
+.bdg .nm{font-size:11.5px;font-weight:700;color:#cfc4ea;text-align:center;line-height:1.3}
+.bdg.earned{border-color:rgba(255,213,74,.65);background:rgba(255,213,74,.1)}
+.bdg.earned .ic{background:radial-gradient(circle at 32% 28%,#fff3c4,#ffd54a 58%,#f5a623);box-shadow:0 0 16px rgba(255,213,74,.55);animation:pop .5s ease}
+.bdg.earned .nm{color:#ffe9a8}
+.bdg.locked .ic{filter:grayscale(1);opacity:.5}
+@keyframes pop{from{transform:scale(.6)}60%{transform:scale(1.12)}to{transform:scale(1)}}
+
+/* ---------- daily counter ---------- */
+#daily{display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(20,14,50,.72);border:1.5px solid rgba(255,213,74,.4);border-radius:16px;padding:9px 14px;margin:14px auto 4px;max-width:340px;font-size:15px;font-weight:800;color:#ffe9a8}
+#daily .dot{width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3)}
+#daily .dot.f{background:#ffd54a;border-color:#f5a623;box-shadow:0 0 8px rgba(255,213,74,.6)}
+
+/* ---------- album pages ---------- */
+.page{background:#fffef2;color:#3a2c10;border-radius:22px;padding:14px 12px 16px;margin:14px 0;box-shadow:0 12px 34px rgba(0,0,0,.45);border-right:10px solid var(--ac,#ffd54a);position:relative}
+.page .ph{display:flex;align-items:center;gap:9px;margin-bottom:4px}
+.page .ph .pe{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;background:var(--acSoft,#fff3c4)}
+.page .ph h2{font-family:'Frank Ruhl Libre',serif;font-size:19px;line-height:1.2}
+.page .ph .cnt{margin-inline-start:auto;font-size:13.5px;font-weight:800;color:#8a6d3b;background:var(--acSoft,#fff3c4);border-radius:14px;padding:4px 10px;white-space:nowrap}
+.page .phint{font-size:12.5px;color:#8a7a5c;margin:0 2px 10px;line-height:1.5}
+.stkGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:420px){.stkGrid{grid-template-columns:repeat(4,1fr);gap:7px}}
+.stk{display:flex;flex-direction:column;align-items:center;gap:4px}
+.stk .c{width:100%;aspect-ratio:1;max-width:74px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(22px,7.5vw,31px)}
+.stk .t{font-size:10.5px;font-weight:700;color:#6b5636;text-align:center;line-height:1.25;min-height:26px}
+.stk.got .c{background:radial-gradient(circle at 32% 26%,#ffffff,var(--acSoft,#ffe9a8) 45%,var(--ac,#ffd54a));border:4px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.22),inset 0 -3px 8px rgba(0,0,0,.08)}
+.stk.got:nth-child(odd) .c{transform:rotate(-5deg)}
+.stk.got:nth-child(even) .c{transform:rotate(4deg)}
+.stk.miss .c{border:2.5px dashed #c9b98f;color:#c9b98f;background:rgba(0,0,0,.025);font-size:20px}
+.stk.miss .t{opacity:.55}
+.stk.new .c{animation:bounceIn .9s cubic-bezier(.3,1.4,.4,1)}
+@keyframes bounceIn{from{transform:scale(0) rotate(-30deg)}60%{transform:scale(1.25) rotate(6deg)}to{transform:scale(1)}}
+.total{font-size:14px;color:#cfc4ea;text-align:center;margin-top:16px;line-height:1.7}
+</style>
+</head>
+<body>
+<div id="stars"></div>
+<div id="wrap">
+  <div id="top">
+    <button class="tbBtn" onclick="location.href='world.html'">🌍 לעולם</button>
+    <h1>📖 האוסף שלי</h1>
+    <button class="tbBtn" onclick="location.href='practice.html'">🏋️ לאימון</button>
+  </div>
+  <div class="sub">כל כלי שמסיימים במסע נכנס לתיק — וכל תרגול אמיתי מוסיף מדבקה לאלבום! 🎒</div>
+
+  <div class="secH">🎒 הכלים שאספתי <small id="bdgCnt"></small></div>
+  <div id="badges"></div>
+
+  <div class="secH">✨ אלבום המדבקות <small>מדבקה על כל פרק שמסיימים ועל כל תרגול — עד 3 ביום</small></div>
+  <div id="daily"></div>
+  <div id="pages"></div>
+  <div class="total" id="total"></div>
+</div>
+<script>
+'use strict';
+/* stars bg */
+(function(){let h='';for(let i=0;i<30;i++)h+='<i style="top:'+Math.random()*100+'%;right:'+Math.random()*100+'%;animation-delay:'+Math.random()*3+'s"></i>';document.getElementById('stars').innerHTML=h})();
+
+const TOOLS=[
+  {k:'torch', e:'🔦',n:'הפנס הפנימי', ac:'#f5a623',soft:'#ffe9c4',hint:'שואלים את הלב מה הוא מרגיש, מחבקים אותו ואומרים: מותר לי להרגיש ככה.',
+   st:[['🔦','פנס האומץ'],['💛','לב מואר'],['🤗','חיבוק ללב'],['😌','מותר להרגיש'],['🌙','אור בחושך'],['⭐','כוכב פנימי'],['🕯️','נר קטן'],['💪','התגברתי!']]},
+  {k:'dolphin',e:'🐬',n:'דולפיניות', ac:'#4aa8d8',soft:'#d7effc',hint:'קודם צוללים פנימה לרגע של שקט — ואז מזנקים ואומרים בקול רגוע: בבקשה להפסיק.',
+   st:[['🐬','דולפין אמיץ'],['🌊','גל רגוע'],['🗣️','קול בטוח'],['✋','בבקשה להפסיק'],['😮‍💨','נשימה עמוקה'],['🐠','חבר מהים'],['🌀','צוללים פנימה'],['🏆','אלוף הרוגע']]},
+  {k:'flower',e:'🌸',n:'הפרח שנפתח', ac:'#e87ba6',soft:'#ffe1ec',hint:'כשמספרים לחבר משהו אמיתי על עצמנו — נפתח עוד עלה בפרח.',
+   st:[['🌸','פרח נפתח'],['🌷','עלה ראשון'],['🌻','חמנייה מחייכת'],['🦋','פרפר מבקר'],['🐝','דבורה חרוצה'],['🌈','קשת בשדה'],['💬','שיתפתי!'],['🌟','אמיתי שלי']]},
+  {k:'folder',e:'📗',n:'התיקיה הירוקה',ac:'#3fae67',soft:'#dcf5e5',hint:'דברים קטנים שמעצבנים — שמים בתיקיה הירוקה וממשיכים לשחק.',
+   st:[['📗','התיקיה שלי'],['🍃','עלה ירוק'],['🧘','רגוע וממשיך'],['😌','עברתי הלאה'],['🎮','ממשיכים לשחק'],['🤝','חברים שווים יותר'],['🌿','גמישות'],['🏅','מוותר בגדול']]},
+  {k:'init',  e:'🙋',n:'יוזמה חברתית', ac:'#e8903c',soft:'#ffe9d2',hint:'מחמאה קטנה + "אפשר להצטרף?" — ככה פותחים דלתות.',
+   st:[['🙋','יוזמה!'],['👋','בוא נשחק'],['💬','מחמאה קטנה'],['🏰','אפשר להצטרף?'],['⚽','משחק חדש'],['😊','פנים מחייכות'],['🎈','הזמנתי חבר'],['🌟','פותח דלתות']]},
+  {k:'efrat', e:'❓',n:'אפר״ת', ac:'#8f6fd8',soft:'#e9e1fa',hint:'לפני שמאמינים לסיפור בראש — שמים סימן שאלה ושואלים: היי, הכל בסדר?',
+   st:[['❓','סימן שאלה'],['🤔','רגע, חושבים'],['💭','אולי סיפור אחר'],['🔍','בודקים קודם'],['🗨️','שאלתי!'],['🌤️','התבהר!'],['🧩','הבנתי נכון'],['🕊️','בלי ריב']]},
+  {k:'shield',e:'🛡️',n:'מגן החברים', ac:'#4a90c9',soft:'#dcecf9',hint:'כשפוגעים בחבר אומרים בקול רגוע: זה לא בסדר — ומזמינים אותו אלינו.',
+   st:[['🛡️','מגן החברים'],['🦸','גיבור שקט'],['🗣️','זה לא בסדר'],['🤝','בוא אליי'],['💙','לב אמיץ'],['🌟','עמדתי לצידו'],['👫','לא לבד'],['🏆','האומץ הכי גדול']]}
+];
+const DAILY_CAP=3;
+function albLoad(){try{const a=JSON.parse(localStorage.getItem('albumV1'))||{};a.earned=a.earned||{};a.daily=a.daily||{};return a}catch(e){return{earned:{},daily:{}}}}
+let prog=0;try{prog=+localStorage.getItem('toolbagProg')||0}catch(e){}
+const alb=albLoad();
+const today=new Date().toISOString().slice(0,10);
+const dailyN=alb.daily.d===today?(alb.daily.n||0):0;
+const NEW=new URLSearchParams(location.search).get('new')||'';
+
+/* badges */
+document.getElementById('badges').innerHTML=TOOLS.map((t,i)=>`
+  <div class="bdg ${i<prog?'earned':'locked'}"><div class="ic">${i<prog?t.e:'🔒'}</div><div class="nm">${t.n}</div></div>`).join('');
+document.getElementById('bdgCnt').textContent=prog+' מתוך 7';
+
+/* daily dots */
+document.getElementById('daily').innerHTML='המדבקות של היום: '+
+  Array.from({length:DAILY_CAP},(_,i)=>`<span class="dot ${i<dailyN?'f':''}"></span>`).join('')+
+  (dailyN>=DAILY_CAP?' — אספת הכל! נתראה מחר 🌙':'');
+
+/* pages */
+let totalGot=0;
+document.getElementById('pages').innerHTML=TOOLS.map(t=>{
+  const got=alb.earned[t.k]||[];totalGot+=got.length;
+  return `<div class="page" style="--ac:${t.ac};--acSoft:${t.soft}">
+    <div class="ph"><div class="pe">${t.e}</div><h2>${t.n}</h2><div class="cnt">${got.length}/8 מדבקות</div></div>
+    <div class="phint">${t.hint}</div>
+    <div class="stkGrid">${t.st.map((s,i)=>{
+      const has=got.includes(i),isNew=NEW===t.k+'-'+i;
+      return `<div class="stk ${has?'got':'miss'}${isNew?' new':''}" ${isNew?'id="newStk"':''}>
+        <div class="c">${has?s[0]:'?'}</div><div class="t">${has?s[1]:'???'}</div></div>`;
+    }).join('')}</div></div>`;
+}).join('');
+document.getElementById('total').innerHTML='סה״כ מדבקות באלבום: <b>'+totalGot+'</b> מתוך '+(TOOLS.length*8)+
+  '<br>כל פרק שמסיימים במסע 🌍 וכל תרגול בשדה הפרחים 🌸 מוסיפים מדבקה — עד '+DAILY_CAP+' ביום!';
+
+/* scroll to a freshly-earned sticker */
+const ns=document.getElementById('newStk');
+if(ns)setTimeout(()=>ns.scrollIntoView({behavior:'smooth',block:'center'}),350);
+</script>
+</body>
+</html>

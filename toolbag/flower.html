@@ -20,7 +20,7 @@ button{font-family:inherit;cursor:pointer;border:none;-webkit-tap-highlight-colo
 canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
 
 /* ---------- top bar ---------- */
-#topbar{position:fixed;top:0;left:0;right:0;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;z-index:30;pointer-events:none}
+#topbar{position:fixed;top:0;left:0;right:0;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;z-index:50;pointer-events:none}
 .tbBtn{pointer-events:auto;min-width:50px;min-height:50px;border-radius:16px;background:rgba(20,14,50,.72);border:1.5px solid rgba(255,213,74,.55);font-size:19px;font-weight:800;color:#ffd54a;padding:0 12px;box-shadow:0 6px 20px rgba(0,0,0,.35);transition:transform .1s}
 .tbBtn:active{transform:translateY(2px)}
 #tbTitle{pointer-events:none;font-family:'Frank Ruhl Libre',serif;font-size:clamp(15px,4vw,21px);font-weight:900;color:#ffd54a;text-shadow:0 2px 12px rgba(0,0,0,.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 6px}
@@ -67,6 +67,7 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
 .optCard.dim{opacity:.32;pointer-events:none}
 .optCard.picked{border-color:#ffd54a;background:rgba(255,213,74,.2)}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes pop{from{transform:scale(0) rotate(-30deg)}60%{transform:scale(1.22) rotate(6deg)}to{transform:scale(1)}}
 .btn{display:block;width:100%;max-width:420px;margin:4px auto;padding:14px 22px;min-height:56px;border-radius:16px;font-size:18px;font-weight:800;background:linear-gradient(180deg,#ffd54a,#f5a623);color:#4a2c00;box-shadow:0 6px 0 #b57712,0 10px 24px rgba(0,0,0,.35);transition:transform .1s}
 .btn:active{transform:translateY(4px);box-shadow:0 2px 0 #b57712}
 .btn.sec{background:linear-gradient(180deg,#3c477f,#2a3260);color:#dfe6ff;box-shadow:0 6px 0 #1a2040}
@@ -176,6 +177,8 @@ h2{font-family:'Frank Ruhl Libre',serif;font-size:clamp(19px,4.5vw,26px);color:#
   <div class="lvGrid" id="lvGrid"></div>
   <div class="homeRow">
     <button class="btn grn" onclick="openGarden()">🌷 הגינה שלי <span id="gCount"></span></button>
+    <button class="btn" onclick="location.href='album.html'">📖 האוסף שלי</button>
+    <button class="btn" onclick="location.href='practice.html'">🏋️ אימון שאר הכלים</button>
     <button class="btn sec" id="photoBtn" onclick="snapPhoto()">📸 לשמור תמונה</button>
   </div>
   <div class="classToggle" onclick="toggleClass()">🍎 מצב כיתה <div class="sw" id="swClass"><i></i></div></div>
@@ -447,12 +450,25 @@ ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
 /* NOTE: no boundary fence here on purpose — this is an open flower field on a class trip,
    not a fenced schoolyard (a full-width fence read as "yard", not "field"). */
 
-/* ================= emoji sprite helper ================= */
+/* ================= emoji sprite helper — Fluent 3D art for mapped symbols (matches world.html) ================= */
+const EMOJI3D={'💗':'growing_heart','🖤':'black_heart','💛':'yellow_heart','💔':'broken_heart',
+  '💬':'speech_balloon','🦋':'butterfly','🌸':'cherry_blossom','🌼':'blossom','🌷':'tulip','🌺':'hibiscus'};
+const _emTexLoader=new THREE.TextureLoader(),_emTex={};
 function emojiSprite(em,scale){
-  const cv=document.createElement('canvas');cv.width=cv.height=128;const x=cv.getContext('2d');
-  x.font='100px serif';x.textAlign='center';x.textBaseline='middle';x.fillText(em,64,72);
-  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv),transparent:true}));
-  sp.scale.set(scale,scale,1);return sp;
+  let map;
+  const key=EMOJI3D[em];
+  if(key){
+    if(!_emTex[key]){_emTex[key]=_emTexLoader.load('emoji/'+key+'.png');_emTex[key].colorSpace=THREE.SRGBColorSpace}
+    map=_emTex[key];
+  }else{
+    const cv=document.createElement('canvas');cv.width=cv.height=128;const x=cv.getContext('2d');
+    x.font='100px serif';x.textAlign='center';x.textBaseline='middle';x.fillText(em,64,72);
+    map=new THREE.CanvasTexture(cv);
+  }
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map,transparent:true}));
+  /* Fluent art fills its whole canvas; system emoji glyphs only ~60% — shrink so sizes match */
+  const s=key?scale*.68:scale;
+  sp.scale.set(s,s,1);return sp;
 }
 /* ================= owl mentor (primitives, matches world.html) ================= */
 function buildOwl(){
@@ -504,9 +520,11 @@ const NATURE_FILES={tree1:'models/nature/CommonTree_1.gltf',tree3:'models/nature
   grass1:'models/nature/Grass_1.gltf',grass2:'models/nature/Grass_2.gltf'};
 const STAT={};
 const charGL=loadGLTF(CHAR_FILES[CHARNAME]||CHAR_FILES.hoodie);
-/* same 4 models+tints as the soccer-circle kids in world.html — recognizable as "the same class" */
-const KIDMODELS=['casual','adventurer','worker','farmer'];
-const KIDCOL=[0x333333,0x884422,0x2255aa,0x117755]; /* small kippah colors, same as world.html's soccer kids — NOT body tints */
+/* same kid models as world.html's soccer circle — only 'casual'/'hoodie' (the other models have a
+   baked-in beard/mustache and their own headwear, which doesn't read as a child) */
+const KIDMODELS=['casual','hoodie','casual','hoodie'];
+const KIDCOL=[0x333333,0x884422,0x2255aa,0x117755]; /* cap colors — NOT body tints */
+const KID_OUTFIT={hoodie:[0xff5a4d,0x2a5fb0],casual:[0x2fa8e0,0x3a3a3a]}; /* bright shirt + shorts per model, matches world.html */
 const kidGL=KIDMODELS.map(k=>loadGLTF(CHAR_FILES[k]));
 const statP=Object.entries(NATURE_FILES).map(([k,f])=>loadGLTF(f).then(gl=>{STAT[k]=gl.scene}));
 
@@ -518,7 +536,32 @@ function playA(k,name,once){
   if(once){a.setLoop(THREE.LoopOnce,1);k.busy=true}else a.setLoop(THREE.LoopRepeat,Infinity);
   k.cur=a;k.curName=name;
 }
-function makeChar(src,targetH,kidHead,kipColor){
+/* the 'casual' model ships with a ponytail; flatten those verts against the nape via inverse
+   skinning — same fix as world.html. Each loadGLTF parse has its own geometry, so run per-gl. */
+function deTail(gl){
+  gl.scene.updateMatrixWorld(true);
+  gl.scene.traverse(m=>{if(!m.isSkinnedMesh||!/_Head_5$/.test(m.name))return;
+    const g=m.geometry;if(g.userData.deTailed)return;g.userData.deTailed=true;
+    const pos=g.attributes.position,si=g.attributes.skinIndex,sw=g.attributes.skinWeight,sk=m.skeleton;
+    const v=new THREE.Vector3(),M=new THREE.Matrix4(),T=new THREE.Matrix4(),B=new THREE.Matrix4();
+    const bt=(m.applyBoneTransform||m.boneTransform).bind(m);
+    for(let i=0;i<pos.count;i++){
+      const wp=bt(i,v.fromBufferAttribute(pos,i).clone()).applyMatrix4(m.matrixWorld);
+      if(!(wp.z<-.008&&wp.y>1.3&&wp.y<1.68))continue; /* the tail hangs behind the nape band */
+      const me=M.elements;for(let e=0;e<16;e++)me[e]=0;
+      for(let j=0;j<4;j++){const wt=sw.getComponent(i,j);if(!wt)continue;
+        const bi=si.getComponent(i,j);
+        T.multiplyMatrices(sk.bones[bi].matrixWorld,sk.boneInverses[bi]);
+        for(let e=0;e<16;e++)me[e]+=T.elements[e]*wt;}
+      B.copy(m.bindMatrix).premultiply(M).premultiply(m.bindMatrixInverse).premultiply(m.matrixWorld);
+      wp.z=-.008;wp.x*=.35; /* onto the nape plane, narrowed toward the neck axis */
+      wp.applyMatrix4(B.invert());
+      pos.setXYZ(i,wp.x,wp.y,wp.z);
+    }
+    pos.needsUpdate=true;g.computeVertexNormals();
+  });
+}
+function makeChar(src,targetH,kidHead,capColor,outfit){
   const inner=SkeletonUtils.clone(src.scene);
   /* keep each model's own clothing colors/texture — only flatten PBR->Lambert (matches world.html) */
   inner.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false;
@@ -529,20 +572,33 @@ function makeChar(src,targetH,kidHead,kipColor){
   src.animations.forEach(c=>{actions[c.name.replace(/^.*\|/,'')]=mixer.clipAction(c)});
   const k={g,inner,mixer,actions,cur:null,curName:'',busy:false};
   mixer.addEventListener('finished',()=>{k.busy=false;k.cur=null;k.curName='';playA(k,'Idle_Neutral')});
-  /* optional small colored kippah on the head, sized to follow it */
-  if(kipColor!==undefined){
+  /* baseball cap on the head bone (crown + brim + button) — matches world.html */
+  if(capColor!==undefined){
     const head=inner.getObjectByName('Head');
     if(head){
       inner.updateMatrixWorld(true);
       const ws=new THREE.Vector3();head.getWorldScale(ws);
-      const r=(.06*targetH)/ws.y;
-      const kip=new THREE.Mesh(new THREE.SphereGeometry(r,14,10),new THREE.MeshLambertMaterial({color:kipColor}));
-      kip.scale.y=.4;kip.position.y=(.098*targetH)/ws.y;kip.castShadow=false;
-      head.add(kip);
+      const r=(.062*targetH)/ws.y,Mc=c=>new THREE.MeshLambertMaterial({color:c});
+      const cap=new THREE.Group();
+      const crown=new THREE.Mesh(new THREE.SphereGeometry(r,16,10,0,Math.PI*2,0,Math.PI*.56),Mc(capColor));
+      crown.castShadow=false;cap.add(crown);
+      const brim=new THREE.Mesh(new THREE.CylinderGeometry(r*1.32,r*1.32,r*.09,20,1,false,-Math.PI*.42,Math.PI*.84),Mc(capColor));
+      brim.position.set(0,-r*.03,r*.16);brim.castShadow=false;cap.add(brim);
+      const button=new THREE.Mesh(new THREE.SphereGeometry(r*.09,8,6),Mc(capColor));
+      button.position.y=r*.98;cap.add(button);
+      cap.position.y=(.1*targetH)/ws.y;
+      head.add(cap);
     }
   }
   /* kid proportions: enlarge the head bone so it reads as a child, not a small adult */
   if(kidHead){const h=inner.getObjectByName('Head');if(h)h.scale.multiplyScalar(kidHead)}
+  /* bright kid t-shirt + shorts recolor; skin/head meshes untouched */
+  if(outfit){
+    inner.traverse(o=>{if(!o.isMesh)return;
+      if(/_Body_1$/.test(o.name))o.material.color.setHex(outfit[0]);
+      else if(/_Legs_2$|_Legs$|_Pants$/.test(o.name))o.material.color.setHex(outfit[1]);
+    });
+  }
   playA(k,'Idle_Neutral');
   return k;
 }
@@ -558,7 +614,7 @@ function spawnPairWalkers(kidGLResolved){
   pairs.forEach((p,pi)=>{
     [p.a,p.b].forEach((start,side)=>{
       const idx=pi*2+side;
-      const k=makeChar(kidGLResolved[idx],1.52,1.55,KIDCOL[idx]);
+      const k=makeChar(kidGLResolved[idx],1.52,1.7,KIDCOL[idx],KID_OUTFIT[KIDMODELS[idx]]);
       k.g.position.copy(start);
       NPCS.push({k,path:p.path,side,wi:1,speed:1.5+Math.random()*.3});
     });
@@ -587,6 +643,7 @@ function place(key,x,z,targetH,ry,tint){
 
 let player=null;
 Promise.all([charGL,Promise.all(kidGL),...statP]).then(([charG,kidGLResolved])=>{
+  deTail(charG);kidGLResolved.forEach(deTail);
   player=makeChar(charG,1.5,1.55);
   player.g.position.set(11,0,-9);player.g.rotation.y=Math.PI*.3;
   spawnPairWalkers(kidGLResolved); /* the rest of the class strolling in pairs near the blanket — the child is the only one alone */
@@ -673,6 +730,13 @@ camSpot(new THREE.Vector3(6,4.4,17),new THREE.Vector3(1,1.3,9));
 /* ================= free movement — WASD / arrows / on-screen joystick, matches world.html ================= */
 let MODE='cine'; /* 'cine' (dialogue/ritual, no movement) | 'explore' (free walking) */
 const BOUNDS={x1:-37,x2:37,z1:-26,z2:32};
+/* solid obstacles (trees/bushes) — [x,z,radius], matches the tree/bush placements below.
+   Flowers/grass stay walk-through on purpose (too fussy to block, no real need). */
+const OBSTACLES=[
+  [-30,6,1.3],[26,-10,1.4],[-14,-16,1.15],[18,14,1.3],[-34,-14,1.35],[24,-22,1.15], /* trees */
+  [-10,12,.85],[16,4,.75],[-22,-6,.85],[6,-20,.75], /* bushes */
+  [16,-13,.6] /* the owl's perch stump */
+];
 const keys={};
 addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true});
 addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false});
@@ -716,6 +780,17 @@ function animate(){
       player.g.position.x=Math.max(BOUNDS.x1,Math.min(BOUNDS.x2,player.g.position.x));
       player.g.position.z=Math.max(BOUNDS.z1,Math.min(BOUNDS.z2,player.g.position.z));
       player.g.rotation.y=Math.atan2(vx,vz);moving=true;
+      OBSTACLES.forEach(s=>{
+        const dx=player.g.position.x-s[0],dz=player.g.position.z-s[1];
+        const d=Math.hypot(dx,dz);
+        if(d<s[2]&&d>1e-4){player.g.position.x=s[0]+dx/d*s[2];player.g.position.z=s[1]+dz/d*s[2]}
+      });
+      /* soft collision — can't walk through the classmates strolling in pairs (matches world.html) */
+      NPCS.forEach(n=>{
+        const dx=player.g.position.x-n.k.g.position.x,dz=player.g.position.z-n.k.g.position.z;
+        const d=Math.hypot(dx,dz);
+        if(d<.9&&d>1e-4){player.g.position.x=n.k.g.position.x+dx/d*.9;player.g.position.z=n.k.g.position.z+dz/d*.9}
+      });
     }
   }
   if(player)playA(player,moving?'Walk':'Idle_Neutral');
@@ -830,7 +905,13 @@ function applyFlowerColor(hex){
   F.homeFlower3D.userData.color=base;
   F.homeFlower3D.userData.petals.forEach((P,i)=>{P.mesh.material.color.setHex(i%2?base:parseInt(F.shade3(hex,.4).toString(16).padStart(6,'0'),16))});
 }
-function pickTopic(k){S.profile.topic=k;save();sndWin();confettiBurst();setTimeout(()=>S.levels[1].plays>0?goHome():startStory(),700)}
+function pickTopic(k){S.profile.topic=k;save();sndWin();confettiBurst();setTimeout(firstEntry,700)}
+/* route the first entry after setup: replay-safe (same logic as bootUI) */
+function firstEntry(){
+  if(S.levels[1].plays>0){goHome();return}
+  let prog=0;try{prog=+localStorage.getItem('toolbagProg')||0}catch(e){}
+  if(prog>=3)storyBridge();else startStory();
+}
 
 /* ================= petal + level engine ================= */
 function renderDots(){let h='';for(let i=0;i<GOAL;i++)h+='<i class="'+(i<PROG?'f':'')+'"></i>';$('#dots').innerHTML=h;$('#dots').classList.add('on')}
@@ -878,13 +959,41 @@ function classGate(cb){
   showOv('ov-class');
   $('#classCheck').onclick=()=>{hideOv('ov-class');sndWin();sparklesAt(innerWidth/2,innerHeight/2,7);setTimeout(cb,350)};
 }
+/* ---- sticker album (albumV1 — shared with album.html; flower page, 3/day cap) ---- */
+const FLOWER_STICKERS=[['🌸','פרח נפתח'],['🌷','עלה ראשון'],['🌻','חמנייה מחייכת'],['🦋','פרפר מבקר'],['🐝','דבורה חרוצה'],['🌈','קשת בשדה'],['💬','שיתפתי!'],['🌟','אמיתי שלי']];
+const DAILY_CAP=3;
+function albLoad(){try{const a=JSON.parse(localStorage.getItem('albumV1'))||{};a.earned=a.earned||{};a.daily=a.daily||{};return a}catch(e){return{earned:{},daily:{}}}}
+function awardSticker(){
+  const today=new Date().toISOString().slice(0,10);
+  const a=albLoad();
+  if(a.daily.d!==today)a.daily={d:today,n:0};
+  if(a.daily.n>=DAILY_CAP)return{cap:true};
+  const got=a.earned.flower||[];
+  const pool=FLOWER_STICKERS.map((s,i)=>i).filter(i=>!got.includes(i));
+  if(!pool.length)return{full:true};
+  const idx=pool[Math.floor(Math.random()*pool.length)];
+  got.push(idx);a.earned.flower=got;a.daily.n++;
+  try{localStorage.setItem('albumV1',JSON.stringify(a))}catch(e){}
+  return{idx,st:FLOWER_STICKERS[idx],n:a.daily.n};
+}
+function stickerHTML(res){
+  if(res.cap)return `<div class="sub" style="background:rgba(255,213,74,.12);border:1.5px solid rgba(255,213,74,.4);border-radius:14px;padding:10px 14px">אספת היום את כל ${DAILY_CAP} המדבקות — אלופים יודעים גם לנוח 🌙<br>מחר מחכה לך מדבקה חדשה!</div>`;
+  if(res.full)return `<div class="sub" style="background:rgba(125,255,168,.12);border:1.5px solid rgba(125,255,168,.4);border-radius:14px;padding:10px 14px">אלבום הפרח שלך מלא — כל 8 המדבקות! 🎉</div>`;
+  return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+    <div style="width:78px;height:78px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;border:4px solid #fff;background:radial-gradient(circle at 32% 26%,#fff,#ffe1ec 45%,#e87ba6);box-shadow:0 3px 12px rgba(0,0,0,.35);animation:pop .6s cubic-bezier(.3,1.4,.4,1)">${res.st[0]}</div>
+    <div style="font-size:15px;font-weight:800;color:#ffd0e2">מדבקה חדשה לאלבום: ${res.st[1]}!</div>
+    <div style="font-size:12.5px;color:#cfc4ea">מדבקות היום: ${res.n}/${DAILY_CAP}</div></div>`;
+}
 function roundDone(){
   const lv=S.levels[LV];lv.done++;lv.stars=Math.min(3,lv.stars+1);save();
   confettiBurst();sndWin();
+  const stk=awardSticker();
   const nxt=LV<2&&S.levels[LV+1]&&S.levels[LV].done>=1?LV+1:null;
   const nxtAction=nxt===2?'goShareWithFriend()':`startLevel(${nxt})`;
   openPanel(`<div style="font-size:56px">🎉</div><h2>כל הכבוד! סיימת את השלב!</h2>
     <div style="font-size:24px;letter-spacing:3px;color:#ffd54a">${'⭐'.repeat(lv.stars)}</div>
+    ${stickerHTML(stk)}
+    ${stk.idx!==undefined?`<button class="btn" onclick="location.href='album.html?new=flower-${stk.idx}'">📖 לראות באלבום</button>`:''}
     <button class="btn" onclick="startLevel(${LV})">🔁 לשחק שוב</button>
     ${nxt&&S.levels[nxt].done===0?`<button class="btn grn" onclick="${nxtAction}">${LEVELS[nxt].icon} לשלב הבא!</button>`:''}
     <button class="btn sec" onclick="goHome()">🏠 חזרה הביתה</button>`);
@@ -1165,13 +1274,37 @@ function askOvercome(){
   $('#tryBtn').onclick=()=>{sndTap();closePanel();torchGate(()=>startLevel(1))};
 }
 
+/* first visit AFTER finishing world.html chapter 3 — the child just LIVED the trip story there,
+   so don't replay it; the owl bridges straight from the story into practice (chapter unification) */
+function storyBridge(){
+  const F=window.FLOWER3D;if(F)F.enterCine();
+  goSpot('home');
+  say([
+    {who:'🦉 הינשוף',t:'ראיתי אותך בטיול! 🌸 הלב דפק — ובכל זאת פתחת עלה: סיפרת על אוסף האבנים שלך...'},
+    {who:'🦉 הינשוף',t:'ויואב ענה "גם אני!" — בדיוק ככה מתחילים חברים.'},
+    {who:'🦉 הינשוף',t:'עכשיו בוא נתרגל את זה יחד, צעד אחרי צעד, כדי שהעלה הבא ייפתח בקלות 💪'}
+  ],()=>torchGate(()=>startLevel(1)));
+}
+
+/* returning visit — the owl says hello first (per request), then the home screen opens */
+function returnGreeting(){
+  goSpot('home');
+  const n=S.garden.length;
+  const line=n===1?'כבר פרח אחד שלם פתחת בגינה שלך! 🌷':n>1?'כבר '+n+' פרחים שלמים פתחת בגינה שלך! 🌷':'הפרח שלך כבר מחכה לך כאן 🌸';
+  say([
+    {who:'🦉 הינשוף',t:'איזה כיף שחזרת לשדה! 💛'},
+    {who:'🦉 הינשוף',t:line},
+    {who:'🦉 הינשוף',t:'כל שיתוף אמיתי פותח עוד עלה. בוא נמשיך!'}
+  ],goHome);
+}
+
 /* boot: wait for the 3D world to finish loading its assets */
 function bootUI(){
   applyFlowerColor(S.profile.color||'#ff9ec4');
   openingCeremony();
   if(!S.profile.color||!S.profile.topic)setup();
-  else if(S.levels[1].plays===0)startStory();
-  else goHome();
+  else if(S.levels[1].plays===0)firstEntry(); /* lived the trip in world ch3 → short bridge, not a rerun */
+  else returnGreeting();
 }
 if(window.FLOWER3D)bootUI();else window.addEventListener('flowerReady',bootUI,{once:true});
 </script>
