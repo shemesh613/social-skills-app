@@ -965,12 +965,14 @@ const explored=new Set();
 const actBtn=document.getElementById('act');
 const questEl=document.getElementById('quest');
 window.enterWorld=function(){sndTap();ovShow(null);MODE='explore';
-  questEl.style.display='block';questEl.textContent='🦉 מישהו מחכה לכם על אדן החלון... לכו אליו';
   const touch='ontouchstart' in window;
   document.getElementById(touch?'joy':'keysHint').style.display='block';
   setTimeout(startAmbience,400);
   if(window._RESUME){const p=window._RESUME;window._RESUME=0;toYard(2.5,-24);
-    if(p===1)window.startCh2();else startChapterN(p+1)}
+    if(p===1)window.startCh2();else startChapterN(p+1);return}
+  /* fresh start: out in the yard, walk to the school door, then step inside */
+  toYardStart();QUEST=-1;
+  questEl.style.display='block';questEl.textContent='🏫 יום לימודים מתחיל! לכו אל דלת בית הספר';
 };
 /* leave the classroom → the schoolyard (also used by the resume flow) */
 function toYard(px,pz){
@@ -988,6 +990,27 @@ function exitClass(){
   setTimeout(()=>{
     toYard(2.5,-25);
     window.startCh2();
+    setTimeout(()=>{f.style.opacity=0},350);
+  },800);
+}
+/* opening: begin OUT in the schoolyard, walk to the entrance, then step inside to chapter 1 */
+const SCHOOL_DOOR=new THREE.Vector3(0,0,-29);
+function toYardStart(){
+  INCLASS=false;BOUNDS=YARD_B;
+  player.g.position.set(2,0,20);player.g.rotation.y=Math.PI;
+  camPos.copy(player.g.position).add(new THREE.Vector3(0,4.6,7));
+  camLook.copy(player.g.position).add(new THREE.Vector3(0,1.5,0));
+}
+function enterClass(){
+  MODE='cine';questEl.style.display='none';
+  const f=document.getElementById('fade');f.style.opacity=1;sndWarm();
+  setTimeout(()=>{
+    INCLASS=true;BOUNDS={x1:113.3,x2:126.7,z1:-5.3,z2:5.4};
+    player.g.position.set(119.5,0,3.2);player.g.rotation.y=Math.PI*.72;
+    camPos.copy(player.g.position).add(new THREE.Vector3(0,9.5,7));
+    camLook.copy(player.g.position).add(new THREE.Vector3(0,1.5,0));
+    QUEST=0;MODE='explore';
+    questEl.style.display='block';questEl.textContent='🦉 מישהו מחכה לכם על אדן החלון... לכו אליו';
     setTimeout(()=>{f.style.opacity=0},350);
   },800);
 }
@@ -2081,7 +2104,10 @@ function animate(){
     const bs=markerT<owl.userData.blinkUntil?.1:1;
     owl.userData.eyes.forEach(e=>{e.scale.y+= (bs-e.scale.y)*Math.min(dt*30,1)});
   }
-  if(QUEST===0){marker.position.set(OWLPOS.x+.9,2.8+Math.sin(markerT*3)*.3,OWLPOS.z);
+  if(QUEST===-1){marker.visible=true;marker.position.set(SCHOOL_DOOR.x,4.2+Math.sin(markerT*3)*.35,SCHOOL_DOOR.z-1);
+    if(MODE==='explore'&&distTo(SCHOOL_DOOR)<4.5){actBtn.textContent='🚪 להיכנס לכיתה';actBtn.style.display='block';actBtn.onclick=()=>{sndTap();actBtn.style.display='none';enterClass()}}
+    else actBtn.style.display='none';
+  }else if(QUEST===0){marker.position.set(OWLPOS.x+.9,2.8+Math.sin(markerT*3)*.3,OWLPOS.z);
     if(MODE==='explore'&&distTo(OWLPOS)<4.5){actBtn.textContent='🦉 לדבר עם הינשוף';actBtn.style.display='block';actBtn.onclick=()=>{sndTap();actBtn.style.display='none';QUEST=.5;owlTalk()}}
     else actBtn.style.display='none';
   }else if(QUEST===1){marker.position.set(TEACHER.x,3.6+Math.sin(markerT*3)*.3,TEACHER.z+.9);
