@@ -66,6 +66,11 @@ h1{font-family:'Frank Ruhl Libre',serif;font-size:clamp(20px,5.5vw,28px);color:#
 .stk.new .c{animation:bounceIn .9s cubic-bezier(.3,1.4,.4,1)}
 @keyframes bounceIn{from{transform:scale(0) rotate(-30deg)}60%{transform:scale(1.25) rotate(6deg)}to{transform:scale(1)}}
 .total{font-size:14px;color:#cfc4ea;text-align:center;margin-top:16px;line-height:1.7}
+  /* mobile fit — buttons never exceed viewport */
+  @media(max-width:480px){
+    .ov{padding:20px 16px}
+    .btn{max-width:calc(100vw - 34px);font-size:16.5px;padding:14px 16px}
+  }
 </style>
 </head>
 <body>

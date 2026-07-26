@@ -79,6 +79,11 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
 #flyTool{position:fixed;font-size:66px;z-index:50;pointer-events:none;display:none}
 .stars{position:fixed;inset:0;pointer-events:none;z-index:0}
 .stars i{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;opacity:.5;animation:tw 3s infinite}
+  /* mobile fit — buttons never exceed viewport */
+  @media(max-width:480px){
+    .ov{padding:20px 16px}
+    .btn{max-width:calc(100vw - 34px);font-size:16.5px;padding:14px 16px}
+  }
 </style>
 <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
 </head>

@@ -79,6 +79,11 @@ h1{font-family:'Frank Ruhl Libre',serif;font-size:clamp(19px,5vw,26px);color:#ff
 .wd.on{color:#ffd54a;border-color:#ffd54a;background:rgba(255,213,74,.15);transform:scale(1.06)}
 .sayLoud{font-size:17px;font-weight:800;color:#7dffa8;text-align:center;animation:pulse 1.4s infinite}
 .sentence{font-size:clamp(18px,4.6vw,23px);font-weight:800;color:#ffe9a8;background:rgba(255,213,74,.12);border:2px solid rgba(255,213,74,.5);border-radius:18px;padding:12px 16px;text-align:center;line-height:1.5;width:100%}
+  /* mobile fit — buttons never exceed viewport */
+  @media(max-width:480px){
+    .ov{padding:20px 16px}
+    .btn{max-width:calc(100vw - 34px);font-size:16.5px;padding:14px 16px}
+  }
 </style>
 </head>
 <body>
