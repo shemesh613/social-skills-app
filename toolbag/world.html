@@ -705,7 +705,8 @@ const MEADOW_B={x1:-144,x2:-97,z1:-19,z2:19};
     const t=new THREE.Mesh(new THREE.PlaneGeometry(s[2],s[3]),M(0xd8c39a));
     t.rotation.x=-Math.PI/2;t.rotation.z=s[4];t.position.set(s[0],.005,s[1]);t.receiveShadow=true;scene.add(t)});
   /* trees, bushes, rocks */
-  [[-138,10,8.5,'tree3'],[-134,-12,9.5,'tree1'],[-108,-13,8,'tree5'],[-100,14,7.5,'tree1'],[-142,-2,8.8,'tree5']].forEach(v=>place(v[3],v[0],v[1],v[2]));
+  /* kept clear of (-100..-116, 5..16) — that's the entry trail + follow-camera's arc right after the fade-in */
+  [[-138,10,8.5,'tree3'],[-134,-12,9.5,'tree1'],[-108,-13,8,'tree5'],[-96,18,7.5,'tree1'],[-142,-2,8.8,'tree5']].forEach(v=>place(v[3],v[0],v[1],v[2]));
   [[-129,12,1.9,'bush1'],[-104,2,1.7,'berry'],[-136,-7,1.8,'bush1'],[-113,-9,1.6,'berry']].forEach(v=>place(v[3],v[0],v[1],v[2]));
   for(let i=0;i<3;i++){const r=new THREE.Mesh(new THREE.IcosahedronGeometry(.55+i*.2,0),M(0x9a9a92));
     r.position.set([-127.5,-110,-133][i],.4,[6.8,-4,-1][i]);r.castShadow=true;scene.add(r)}
