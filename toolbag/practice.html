@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta name="theme-color" content="#1a1030">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏋️</text></svg>">
+<title>🏋️ אימון הכלים — תיק הכלים</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;800&family=Frank+Ruhl+Libre:wght@700;900&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   אימון הכלים — practice hub for all 7 tools (הפרח has its own
+   3D page; the other six live here). Errorless, calm, RTL.
+   Stickers go to the shared albumV1 (3/day, shared with the
+   world chapters and the flower practice).
+   ============================================================ */
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Heebo',sans-serif;background:#1a1030;color:#fff;user-select:none;min-height:100dvh}
+button{font-family:inherit;cursor:pointer;border:none}
+#stars{position:fixed;inset:0;pointer-events:none;z-index:0}
+#stars i{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;opacity:.5;animation:tw 3s infinite}
+@keyframes tw{0%,100%{opacity:.15}50%{opacity:.7}}
+canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
+#wrap{position:relative;z-index:1;max-width:620px;margin:0 auto;padding:12px 12px 40px}
+
+#top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.tbBtn{min-height:48px;border-radius:16px;background:rgba(20,14,50,.72);border:1.5px solid rgba(255,213,74,.55);font-size:16px;font-weight:800;color:#ffd54a;padding:0 12px;box-shadow:0 6px 20px rgba(0,0,0,.35);transition:transform .1s}
+.tbBtn:active{transform:translateY(2px)}
+h1{font-family:'Frank Ruhl Libre',serif;font-size:clamp(19px,5vw,26px);color:#ffd54a;text-shadow:0 2px 12px rgba(0,0,0,.6);white-space:nowrap}
+.sub{font-size:14.5px;color:#cfc4ea;text-align:center;line-height:1.65}
+
+/* hub cards */
+#hub .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.mcard{display:flex;flex-direction:column;align-items:center;gap:6px;background:rgba(255,255,255,.06);border:2px solid var(--ac,rgba(255,255,255,.2));border-radius:20px;padding:16px 8px 12px;color:#fff;transition:transform .12s}
+.mcard:active{transform:scale(.96)}
+.mcard .ic{font-size:40px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.4))}
+.mcard .nm{font-size:15px;font-weight:800}
+.mcard .st{font-size:13px;color:#ffd54a;letter-spacing:2px;min-height:18px}
+#daily{display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(20,14,50,.72);border:1.5px solid rgba(255,213,74,.4);border-radius:16px;padding:8px 14px;margin:12px auto 0;max-width:330px;font-size:14.5px;font-weight:800;color:#ffe9a8}
+#daily .dot{width:15px;height:15px;border-radius:50%;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3)}
+#daily .dot.f{background:#ffd54a;border-color:#f5a623;box-shadow:0 0 8px rgba(255,213,74,.6)}
+
+/* play screen */
+#play{display:none}
+#modHead{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+#modHead .ic{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:25px;background:rgba(255,255,255,.09);border:1.5px solid var(--ac,#ffd54a)}
+#modHead h2{font-family:'Frank Ruhl Libre',serif;font-size:18px;color:#ffe9a8}
+#dots{display:flex;gap:7px;justify-content:center;margin:8px 0 12px}
+#dots i{width:13px;height:13px;border-radius:50%;background:rgba(255,255,255,.22);border:1.5px solid rgba(255,255,255,.3);transition:all .3s}
+#dots i.f{background:#ffd54a;border-color:#f5a623;transform:scale(1.18)}
+.pCard{width:100%;background:rgba(22,15,52,.92);border:1.5px solid rgba(255,213,74,.4);border-radius:22px;padding:16px 14px;display:flex;flex-direction:column;align-items:center;gap:11px;box-shadow:0 14px 40px rgba(0,0,0,.5);animation:fadeUp .35s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.scene{font-size:15.5px;color:#ffe9a8;background:rgba(255,213,74,.1);border:1.5px solid rgba(255,213,74,.35);border-radius:16px;padding:11px 14px;text-align:center;line-height:1.6;width:100%}
+.qTitle{font-size:clamp(17px,4.4vw,21px);font-weight:800;color:#ffe9a8;text-align:center;line-height:1.4}
+.optGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:9px;width:100%}
+.optGrid.one{grid-template-columns:1fr}
+.optCard{min-height:62px;padding:10px 8px;border-radius:18px;background:rgba(255,255,255,.09);border:2px solid rgba(255,255,255,.3);font-size:15.5px;font-weight:800;color:#fff;line-height:1.45;transition:transform .12s}
+.optCard:active{transform:scale(.95)}
+.optCard .big{display:block;font-size:31px;margin-bottom:3px;pointer-events:none}
+.optCard.hint{animation:pulse 1s infinite;border-color:#7dffa8;background:rgba(60,150,80,.25)}
+.optCard.dim{opacity:.32;pointer-events:none}
+.optCard.picked{border-color:#ffd54a;background:rgba(255,213,74,.2)}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.btn{display:block;width:100%;max-width:420px;margin:4px auto;padding:13px 20px;min-height:54px;border-radius:16px;font-size:17px;font-weight:800;background:linear-gradient(180deg,#ffd54a,#f5a623);color:#4a2c00;box-shadow:0 6px 0 #b57712,0 10px 24px rgba(0,0,0,.35);transition:transform .1s}
+.btn:active{transform:translateY(4px);box-shadow:0 2px 0 #b57712}
+.btn.sec{background:linear-gradient(180deg,#3c477f,#2a3260);color:#dfe6ff;box-shadow:0 6px 0 #1a2040}
+.btn.grn{background:linear-gradient(180deg,#7dffa8,#25c05f);color:#053514;box-shadow:0 6px 0 #128040}
+.msg{font-size:14.5px;color:#cfc4ea;text-align:center;line-height:1.6;min-height:22px}
+.spark{position:fixed;font-size:20px;pointer-events:none;z-index:70}
+
+/* torch specials */
+#hugHeart{font-size:74px;transition:transform .2s,filter .2s;filter:grayscale(.7) brightness(.6)}
+#hugHeart.lit{filter:none;animation:beat 1s infinite}
+@keyframes beat{0%,100%{transform:scale(1)}30%{transform:scale(1.12)}}
+.holdBtn{min-height:64px;font-size:18px}
+.words{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.wd{font-size:20px;font-weight:800;padding:9px 14px;border-radius:14px;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.25);color:#9d92c2;transition:all .25s}
+.wd.next{animation:pulse 1s infinite;border-color:#ffd54a}
+.wd.on{color:#ffd54a;border-color:#ffd54a;background:rgba(255,213,74,.15);transform:scale(1.06)}
+.sayLoud{font-size:17px;font-weight:800;color:#7dffa8;text-align:center;animation:pulse 1.4s infinite}
+.sentence{font-size:clamp(18px,4.6vw,23px);font-weight:800;color:#ffe9a8;background:rgba(255,213,74,.12);border:2px solid rgba(255,213,74,.5);border-radius:18px;padding:12px 16px;text-align:center;line-height:1.5;width:100%}
+  /* mobile fit — buttons never exceed viewport */
+  @media(max-width:480px){
+    .ov{padding:20px 16px}
+    .btn{max-width:calc(100vw - 34px);font-size:16.5px;padding:14px 16px}
+  }
+</style>
+</head>
+<body>
+<div id="stars"></div>
+<canvas id="confetti"></canvas>
+<div id="wrap">
+  <div id="top">
+    <button class="tbBtn" onclick="location.href='world.html'">🌍 לעולם</button>
+    <h1 id="pgTitle">🏋️ אימון הכלים</h1>
+    <button class="tbBtn" onclick="location.href='album.html'">📖 לאלבום</button>
+  </div>
+
+  <div id="hub">
+    <div class="sub">כל כלי מהמסע אפשר לאמן כאן שוב ושוב — וכל אימון שמסיימים מוסיף מדבקה לאלבום! 💪</div>
+    <div id="daily"></div>
+    <div class="grid" id="hubGrid"></div>
+  </div>
+
+  <div id="play">
+    <div id="modHead"><div class="ic" id="mIc"></div><h2 id="mNm"></h2>
+      <button class="tbBtn" style="margin-inline-start:auto;min-height:42px" onclick="goHub()">🏠</button></div>
+    <div id="dots"></div>
+    <div class="pCard" id="stage"></div>
+  </div>
+</div>
+<script>
+'use strict';
+const $=s=>document.querySelector(s);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const rnd=a=>a[(Math.random()*a.length)|0];
+(function(){let h='';for(let i=0;i<30;i++)h+='<i style="top:'+Math.random()*100+'%;right:'+Math.random()*100+'%;animation-delay:'+Math.random()*3+'s"></i>';$('#stars').innerHTML=h})();
+
+/* ---------- sound (WebAudio only, no TTS) ---------- */
+let AC=null;const actx=()=>AC||(AC=new (window.AudioContext||window.webkitAudioContext)());
+let SND=true;try{SND=localStorage.getItem('toolbagSnd')!=='0'}catch(e){}
+function tone(f,dur,type,when,vol){if(!SND)return;
+  try{const c=actx(),o=c.createOscillator(),g=c.createGain(),t=c.currentTime+(when||0);
+    o.type=type||'sine';o.frequency.value=f;o.connect(g);g.connect(c.destination);
+    g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol||.14,t+.02);
+    g.gain.exponentialRampToValueAtTime(.0001,t+(dur||.2));o.start(t);o.stop(t+(dur||.2));
+  }catch(e){}}
+const PENTA=[523,587,659,784,880];
+const sndTap=()=>tone(rnd(PENTA),.1,'sine',0,.09);
+const sndGood=()=>{tone(660,.16);tone(880,.22,'sine',.11)};
+const sndSoft=()=>{tone(300,.18,'sine',0,.1);tone(240,.22,'sine',.12,.09)};
+const sndWarm=()=>{tone(392,.4,'triangle',0,.09);tone(523,.5,'triangle',.18,.09)};
+const sndWin=()=>[523,659,784,1047].forEach((f,i)=>tone(f,.22,'triangle',i*.1,.15));
+document.addEventListener('pointerdown',()=>{try{actx().resume()}catch(e){}},{passive:true});
+
+/* ---------- sparkles + confetti ---------- */
+function sparklesAt(x,y,n){const ss=['✨','⭐','🌟','💫'];
+  for(let i=0;i<(n||4);i++){const e=document.createElement('div');e.className='spark';e.textContent=ss[i%4];
+    e.style.left=x+'px';e.style.top=y+'px';document.body.appendChild(e);
+    const dx=(Math.random()-.5)*140,dy=-40-Math.random()*100;
+    e.animate([{transform:'translate(0,0) scale(1)',opacity:1},{transform:`translate(${dx}px,${dy}px) scale(.3)`,opacity:0}],{duration:800,easing:'ease-out'});
+    setTimeout(()=>e.remove(),820)}}
+function confettiBurst(){
+  const c=$('#confetti'),x=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;
+  const cols=['#ffd54a','#7dffa8','#8fd3ff','#ff9bb3','#fff'];const P=[];
+  for(let i=0;i<90;i++)P.push({x:innerWidth/2,y:innerHeight*.4,vx:(Math.random()-.5)*11,vy:-Math.random()*10-3,s:Math.random()*7+4,c:cols[i%5],r:Math.random()*6});
+  let t=0;(function fr(){x.clearRect(0,0,c.width,c.height);t++;
+    P.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.3;p.r+=.15;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;x.fillRect(-p.s/2,-p.s/2,p.s,p.s*.6);x.restore()});
+    if(t<100)requestAnimationFrame(fr);else x.clearRect(0,0,c.width,c.height)})()}
+
+/* ---------- state: practiceV1 + shared albumV1 stickers ---------- */
+let P;function loadP(){try{P=JSON.parse(localStorage.getItem('practiceV1'))||{}}catch(e){P={}}P.tools=P.tools||{}}
+function saveP(){try{localStorage.setItem('practiceV1',JSON.stringify(P))}catch(e){}}
+loadP();
+function tstat(k){P.tools[k]=P.tools[k]||{done:0,stars:0,plays:0};return P.tools[k]}
+const DAILY_CAP=3;
+const ALBUM_ST={
+ torch:[['🔦','פנס האומץ'],['💛','לב מואר'],['🤗','חיבוק ללב'],['😌','מותר להרגיש'],['🌙','אור בחושך'],['⭐','כוכב פנימי'],['🕯️','נר קטן'],['💪','התגברתי!']],
+ dolphin:[['🐬','דולפין אמיץ'],['🌊','גל רגוע'],['🗣️','קול בטוח'],['✋','בבקשה להפסיק'],['😮‍💨','נשימה עמוקה'],['🐠','חבר מהים'],['🌀','צוללים פנימה'],['🏆','אלוף הרוגע']],
+ folder:[['📗','התיקיה שלי'],['🍃','עלה ירוק'],['🧘','רגוע וממשיך'],['😌','עברתי הלאה'],['🎮','ממשיכים לשחק'],['🤝','חברים שווים יותר'],['🌿','גמישות'],['🏅','מוותר בגדול']],
+ init:[['🙋','יוזמה!'],['👋','בוא נשחק'],['💬','מחמאה קטנה'],['🏰','אפשר להצטרף?'],['⚽','משחק חדש'],['😊','פנים מחייכות'],['🎈','הזמנתי חבר'],['🌟','פותח דלתות']],
+ efrat:[['❓','סימן שאלה'],['🤔','רגע, חושבים'],['💭','אולי סיפור אחר'],['🔍','בודקים קודם'],['🗨️','שאלתי!'],['🌤️','התבהר!'],['🧩','הבנתי נכון'],['🕊️','בלי ריב']],
+ shield:[['🛡️','מגן החברים'],['🦸','גיבור שקט'],['🗣️','זה לא בסדר'],['🤝','בוא אליי'],['💙','לב אמיץ'],['🌟','עמדתי לצידו'],['👫','לא לבד'],['🏆','האומץ הכי גדול']]};
+function albLoad(){try{const a=JSON.parse(localStorage.getItem('albumV1'))||{};a.earned=a.earned||{};a.daily=a.daily||{};return a}catch(e){return{earned:{},daily:{}}}}
+function awardSticker(toolKey){
+  const a=albLoad(),today=new Date().toISOString().slice(0,10);
+  if(a.daily.d!==today)a.daily={d:today,n:0};
+  if(a.daily.n>=DAILY_CAP)return{cap:true};
+  const got=a.earned[toolKey]||[];
+  const pool=ALBUM_ST[toolKey].map((s,i)=>i).filter(i=>!got.includes(i));
+  if(!pool.length)return{full:true};
+  const idx=pool[(Math.random()*pool.length)|0];
+  got.push(idx);a.earned[toolKey]=got;a.daily.n++;
+  try{localStorage.setItem('albumV1',JSON.stringify(a))}catch(e){}
+  return{idx,st:ALBUM_ST[toolKey][idx],n:a.daily.n};
+}
+function stickerHTML(r){
+  if(r.cap)return `<div class="msg" style="background:rgba(255,213,74,.12);border:1.5px solid rgba(255,213,74,.4);border-radius:14px;padding:10px 14px;color:#ffe9a8">אספת היום את כל ${DAILY_CAP} המדבקות — אלופים יודעים גם לנוח 🌙<br>מחר מחכה מדבקה חדשה!</div>`;
+  if(r.full)return `<div class="msg" style="color:#c9ffdd">עמוד המדבקות של הכלי הזה מלא! 🎉</div>`;
+  if(r.st)return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+    <div style="width:74px;height:74px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:34px;border:4px solid #fff;background:radial-gradient(circle at 32% 26%,#fff,#ffe9c4 45%,#f5a623);box-shadow:0 3px 12px rgba(0,0,0,.35)">${r.st[0]}</div>
+    <div style="font-size:15px;font-weight:800;color:#ffe9a8">מדבקה חדשה לאלבום: ${r.st[1]}!</div>
+    <div style="font-size:12.5px;color:#cfc4ea">מדבקות היום: ${r.n}/${DAILY_CAP}</div></div>`;
+  return '';
+}
+
+/* ---------- engine ---------- */
+let CUR=null,PROG=0,GOAL=0;
+function renderDots(){let h='';for(let i=0;i<GOAL;i++)h+='<i class="'+(i<PROG?'f':'')+'"></i>';$('#dots').innerHTML=h}
+function stage(html){$('#stage').innerHTML=html}
+function success(next){
+  PROG++;renderDots();sndGood();
+  sparklesAt(innerWidth/2,innerHeight*.35,5);
+  setTimeout(()=>{if(PROG>=GOAL)roundDone();else next()},650);
+}
+function roundDone(){
+  const t=tstat(CUR.key);t.done++;t.stars=Math.min(3,t.stars+1);saveP();
+  confettiBurst();sndWin();
+  const stk=awardSticker(CUR.key);
+  stage(`<div style="font-size:54px">🎉</div><h2 style="color:#ffe9a8">כל הכבוד! סיימת אימון ${CUR.name}!</h2>
+    <div style="font-size:24px;letter-spacing:3px;color:#ffd54a">${'⭐'.repeat(t.stars)}</div>
+    ${stickerHTML(stk)}
+    ${stk.idx!==undefined?`<button class="btn" onclick="location.href='album.html?new=${CUR.key}-${stk.idx}'">📖 לראות באלבום</button>`:''}
+    <button class="btn grn" onclick="startMod('${CUR.key}')">🔁 לאמן שוב</button>
+    <button class="btn sec" onclick="goHub()">🏠 לכל הכלים</button>`);
+}
+function gentle(btns,okIdx,msg){ /* errorless: dim wrong, pulse right, no penalty */
+  sndSoft();$('#gmsg')&&($('#gmsg').textContent=msg);
+  btns.forEach((b,i)=>{if(i===okIdx)b.classList.add('hint');else b.classList.add('dim')});
+}
+function goHub(){$('#play').style.display='none';$('#hub').style.display='block';$('#pgTitle').textContent='🏋️ אימון הכלים';renderHub()}
+function startMod(k){
+  sndTap();CUR=MODS[k];PROG=0;GOAL=CUR.goal;
+  tstat(k).plays++;saveP();
+  $('#hub').style.display='none';$('#play').style.display='block';
+  $('#pgTitle').textContent='🏋️ אימון';
+  document.getElementById('play').style.setProperty('--ac',CUR.color);
+  $('#mIc').textContent=CUR.icon;$('#mNm').textContent=CUR.name;
+  renderDots();
+  CUR.start();
+}
+
+/* ============================================================
+   modules
+   ============================================================ */
+const MODS={};
+
+/* ---------- 🔦 הפנס הפנימי: לזהות רגש, לחבק, "מותר לי" ---------- */
+const TORCH_SC=[
+ {t:'בהפסקה כולם רצו למגרש... ואותך לא הזמינו למשחק.',f:[['😢','עצוב'],['😠','כועס'],['😔','לבד'],['😕','מבולבל']]},
+ {t:'בנית מגדל שלם — ומישהו הפיל אותו בטעות.',f:[['😠','כועס'],['😢','עצוב'],['😫','מתוסכל'],['🥺','חבל לי']]},
+ {t:'מחר יש מבחן גדול, והבטן קצת מתהפכת.',f:[['😨','לחוץ'],['😟','דואג'],['😰','מפחד'],['😕','לא רגוע']]},
+ {t:'החבר הכי טוב שלך שיחק היום עם ילד אחר.',f:[['😔','קצת לבד'],['😢','עצוב'],['😒','מקנא'],['😕','מבולבל']]},
+ {t:'צחקו על הציור שציירת, ואמרת "לא אכפת לי"... אבל בפנים משהו כאב.',f:[['💔','פגוע'],['😢','עצוב'],['😳','נבוך'],['😠','כועס']]},
+ {t:'עברת לכיתה חדשה ואתה עוד לא מכיר אף אחד.',f:[['😟','חושש'],['😔','לבד'],['🤔','סקרן וגם לחוץ'],['😕','לא בטוח']]}];
+MODS.torch={key:'torch',icon:'🔦',name:'הפנס הפנימי',color:'#f5a623',goal:4,
+start(){this.order=shuffle(TORCH_SC).slice(0,this.goal);this.i=0;this.step()},
+step(){
+  const sc=this.order[this.i];
+  stage(`<div class="scene">${sc.t}</div>
+    <div class="qTitle">🔦 מדליקים פנס פנימי: מה הלב מרגיש?</div>
+    <div class="msg">אין תשובה לא נכונה — כל רגש שמזהים הוא אמיתי 💛</div>
+    <div class="optGrid">${sc.f.map((o,j)=>`<button class="optCard" data-j="${j}"><span class="big">${o[0]}</span>${o[1]}</button>`).join('')}</div>`);
+  document.querySelectorAll('#stage .optCard').forEach(b=>b.onclick=()=>{
+    sndTap();b.classList.add('picked');
+    document.querySelectorAll('#stage .optCard').forEach(x=>x.onclick=null);
+    const feel=sc.f[+b.dataset.j][1];
+    setTimeout(()=>this.hug(feel),450);
+  });
+},
+hug(feel){
+  stage(`<div class="qTitle">זיהית: אתה מרגיש <b style="color:#ffd54a">${feel}</b></div>
+    <div id="hugHeart">💗</div>
+    <div class="msg">עכשיו מחבקים את הלב: לחצו והחזיקו את הכפתור 🤗</div>
+    <button class="btn holdBtn" id="hugBtn">🤗 להחזיק = לחבק את הלב</button>`);
+  let p=0,iv=null,done=false;const heart=$('#hugHeart'),btn=$('#hugBtn');
+  const step=()=>{p=Math.min(100,p+4);
+    heart.style.filter=`grayscale(${.7-(p/100)*.7}) brightness(${.6+(p/100)*.4})`;
+    if(p%20===0)tone(220+p*3,.08,'sine',0,.06);
+    if(p>=100&&!done){done=true;clearInterval(iv);heart.classList.add('lit');heart.style.filter='';
+      sndWarm();sparklesAt(innerWidth/2,innerHeight*.35,6);
+      setTimeout(()=>this.words(feel),700)}};
+  btn.onpointerdown=e=>{e.preventDefault();if(done)return;sndTap();iv=setInterval(step,50)};
+  const stop=()=>{if(iv){clearInterval(iv);iv=null}};
+  btn.onpointerup=stop;btn.onpointerleave=stop;btn.onpointercancel=stop;
+},
+words(feel){
+  const W=['מותר','לי','להרגיש',feel];
+  stage(`<div style="font-size:44px">💗</div>
+    <div class="qTitle">עכשיו אומרים ללב — הקישו מילה אחר מילה:</div>
+    <div class="words" id="wrow">${W.map((w,i)=>`<span class="wd${i===0?' next':''}" data-i="${i}">${w}</span>`).join('')}</div>
+    <div class="msg">זה נורמלי להרגיש ככה 💛</div>`);
+  let at=0;
+  document.querySelectorAll('#wrow .wd').forEach(el=>el.onclick=()=>{
+    if(+el.dataset.i!==at)return;
+    el.classList.remove('next');el.classList.add('on');sndTap();
+    const r=el.getBoundingClientRect();sparklesAt(r.left+r.width/2,r.top,3);
+    at++;
+    const nx=document.querySelector(`#wrow .wd[data-i="${at}"]`);
+    if(nx)nx.classList.add('next');
+    else{sndWarm();this.i++;setTimeout(()=>success(()=>this.step()),700)}
+  });
+}};
+
+/* ---------- 🐬 דולפיניות: כריש/סרדין/דולפין + משפט דולפין ---------- */
+const DOLF_CLS=[
+ {t:'מישהו צחק על התיק החדש שלך. דני צעק עליו וזרק את הקלמר שלו על הרצפה.',a:0},
+ {t:'קראו ליוסי בשם מעליב. הוא הרכין ראש, שתק, והלך לפינה לבד.',a:1},
+ {t:'צחקו על רועי במגרש. הוא עצר, נשם עמוק... ואז אמר בקול רגוע: "בבקשה להפסיק, זה לא נעים לי".',a:2},
+ {t:'מישהו דחף את מיכל בתור. היא דחפה אותו בחזרה חזק וצעקה.',a:0},
+ {t:'לעגו לציור של נועה. היא ספרה עד 3 בלב, ואז אמרה בשקט וברור: "אני עבדתי קשה על הציור. בבקשה לא לצחוק".',a:2}];
+const DOLF_ANIMALS=[['🦈','כריש — מתפרץ ותוקף'],['🐟','סרדין — בורח ומוותר'],['🐬','דולפין — צולל, נרגע, ואז מדבר']];
+const DOLF_SAY=[
+ {t:'מישהו לוקח לך את הכדור באמצע המשחק.',ok:'"בבקשה תחזיר, עוד לא סיימתי"',bad:['"תחזיר עכשיו!!! אני אגיד למורה!!!"','...ללכת משם בשקט ולוותר על הכדור']},
+ {t:'חבר דוחף אותך בתור לברזייה.',ok:'"אני הייתי כאן קודם, בבקשה לא לדחוף"',bad:['לדחוף אותו בחזרה יותר חזק','לצאת מהתור בלי להגיד כלום']}];
+MODS.dolphin={key:'dolphin',icon:'🐬',name:'דולפיניות',color:'#4aa8d8',goal:5,
+start(){this.cls=shuffle(DOLF_CLS).slice(0,3);this.say=shuffle(DOLF_SAY);this.i=0;this.step()},
+step(){
+  if(this.i<3)this.classify(this.cls[this.i]);
+  else this.sentence(this.say[this.i-3]);
+},
+classify(sc){
+  stage(`<div class="scene">${sc.t}</div>
+    <div class="qTitle">🌊 איזו חיית ים זו הייתה?</div>
+    <div class="optGrid one">${DOLF_ANIMALS.map((o,j)=>`<button class="optCard" data-j="${j}"><span class="big">${o[0]}</span>${o[1]}</button>`).join('')}</div>
+    <div class="msg" id="gmsg"></div>`);
+  const btns=[...document.querySelectorAll('#stage .optCard')];
+  btns.forEach((b,j)=>b.onclick=()=>{
+    if(j===sc.a){b.classList.add('picked');btns.forEach(x=>x.onclick=null);
+      this.i++;success(()=>this.step())}
+    else gentle(btns,sc.a,'רגע... מי מתפרץ? מי בורח? ומי קודם נרגע ואז מדבר? 🤔');
+  });
+},
+sentence(sc){
+  const opts=shuffle([{t:sc.ok,ok:true},{t:sc.bad[0]},{t:sc.bad[1]}]);
+  stage(`<div class="scene">${sc.t}</div>
+    <div class="qTitle">🐬 קודם צוללים פנימה ונושמים... ואז — מה אומר הדולפין?</div>
+    <div class="optGrid one">${opts.map((o,j)=>`<button class="optCard" data-j="${j}">${o.t}</button>`).join('')}</div>
+    <div class="msg" id="gmsg"></div>`);
+  const btns=[...document.querySelectorAll('#stage .optCard')];
+  const okIdx=opts.findIndex(o=>o.ok);
+  btns.forEach((b,j)=>b.onclick=()=>{
+    if(j===okIdx){b.classList.add('picked');btns.forEach(x=>x.onclick=null);
+      stage(`<div class="sentence">🐬 ${sc.ok}</div>
+        <div class="sayLoud">עכשיו אמור את זה בקול — רגוע וחזק! 🎤</div>
+        <button class="btn grn" id="saidBtn">אמרתי בקול! ✅</button>`);
+      $('#saidBtn').onclick=()=>{sndWarm();this.i++;success(()=>this.step())};
+    }else gentle(btns,okIdx,'דולפין מדבר רגוע וחזק — בלי לתקוף ובלי לוותר 💪');
+  });
+}};
+
+/* ---------- 📗 תיקיה ירוקה: קטן=מתגמשים, גדול=מדברים ---------- */
+const FOLD_CARDS=[
+ {t:'מישהו דרך בטעות על הקו שציירת',e:'🖍️',small:true},
+ {t:'שינו חוק קטן במשחק באמצע',e:'🎲',small:true},
+ {t:'מישהו לקח בטעות את המקום שלך בתור',e:'🚶',small:true},
+ {t:'חבר בחר לשחק היום דווקא עם ילד אחר',e:'⚽',small:true},
+ {t:'מישהו מעליב אותך שוב ושוב, כל יום',e:'💔',small:false},
+ {t:'ילד גדול מפחיד אותך ולוקח לך דברים',e:'😨',small:false},
+ {t:'קיבלת פחות זמן במחשב ממה שרצית',e:'💻',small:true},
+ {t:'מישהו הרביץ לך בכוונה',e:'🤕',small:false}];
+MODS.folder={key:'folder',icon:'📗',name:'התיקיה הירוקה',color:'#3fae67',goal:6,
+start(){this.cards=shuffle(FOLD_CARDS).slice(0,this.goal);this.i=0;this.step()},
+step(){
+  const c=this.cards[this.i];
+  stage(`<div class="msg">דבר קטן? תיקיה ירוקה — מתגמשים וממשיכים לזרום (בלי פקקים! 🚗)<br>דבר גדול שבאמת פוגע? על זה דווקא מדברים!</div>
+    <div class="scene"><span style="font-size:30px">${c.e}</span><br>${c.t}</div>
+    <div class="qTitle">לאן זה הולך?</div>
+    <div class="optGrid">
+      <button class="optCard" data-j="0"><span class="big">📗</span>תיקיה ירוקה —<br>מתגמשים וממשיכים</button>
+      <button class="optCard" data-j="1"><span class="big">🗣️</span>דבר גדול —<br>מדברים על זה!</button>
+    </div>
+    <div class="msg" id="gmsg"></div>`);
+  const btns=[...document.querySelectorAll('#stage .optCard')];
+  const okIdx=c.small?0:1;
+  btns.forEach((b,j)=>b.onclick=()=>{
+    if(j===okIdx){b.classList.add('picked');btns.forEach(x=>x.onclick=null);
+      $('#gmsg').textContent=c.small?rnd(['גמישות! ככה שומרים על הזרימה 🌊','נכון! מי שמתגמש — כולם אוהבים לשחק איתו 💚','בדיוק! החברות גדולה מהחוק הקטן 🏅']):'נכון מאוד! דבר שבאמת פוגע לא נכנס לתיקיה — עליו מדברים עם מבוגר או עם החבר 💙';
+      this.i++;success(()=>this.step())}
+    else gentle(btns,okIdx,c.small?'רגע — זה באמת פוגע, או רק קצת מעצבן? רוב הדברים קטנים יותר ממה שהם מרגישים 😉':'שים לב — זה לא דבר קטן! כשבאמת פוגעים בנו, לא מתגמשים. מדברים!');
+  });
+}};
+
+/* ---------- 🙋 יוזמה חברתית: מחמאה + שאלה מנומסת ---------- */
+const INIT_SC=[
+ {t:'שני ילדים בונים מגדל ענק מלגו בפינת המשחקים.',c:'"וואו, המגדל הזה ענק!"',cb:['"תזוזו, גם אני רוצה לבנות"','...לעמוד לידם בשקט ולחכות שישימו לב'],a:'"אפשר לבנות איתכם?"',ab:['"אני בונה יותר יפה מכם"','"למה לא הזמנתם אותי?!"']},
+ {t:'קבוצה משחקת תופסת בחצר, נראה להם ממש כיף.',c:'"איזה משחק שווה יש לכם!"',cb:['"המשחק שלכם משעמם"','...להתחיל לרוץ ביניהם בלי לשאול'],a:'"אפשר להצטרף למשחק?"',ab:['"חייבים לצרף אותי כי ככה!"','"אם לא תצרפו אותי אני אגיד למורה"']},
+ {t:'ילדה מציירת ציור צבעוני מאוד על הספסל.',c:'"איזה ציור יפה! אילו צבעים מגניבים"',cb:['"הציור שלי יותר יפה"','...להציץ מעבר לכתף בלי מילה'],a:'"אפשר לצייר לידך?"',ab:['"תני לי את הטושים שלך"','"את חייבת לצייר איתי"']},
+ {t:'ילד חדש בכיתה יושב לבד בהפסקה עם קלפים.',c:'"היי! אילו קלפים מגניבים יש לך"',cb:['"למה אתה יושב לבד כמו עציץ?"','...לשבת רחוק ולהסתכל עליו'],a:'"בא לך לשחק יחד?"',ab:['"תן לי לראות את הקלפים"','"אתה חייב לשחק איתי כי אתה חדש"']}];
+MODS.init={key:'init',icon:'🙋',name:'יוזמה חברתית',color:'#e8903c',goal:4,
+start(){this.order=shuffle(INIT_SC);this.i=0;this.step()},
+step(){
+  const sc=this.order[this.i];
+  const opts=shuffle([{t:sc.c,ok:true},{t:sc.cb[0]},{t:sc.cb[1]}]);
+  stage(`<div class="scene">${sc.t}</div>
+    <div class="qTitle">שלב 1: פותחים במחמאה אמיתית 💬</div>
+    <div class="optGrid one">${opts.map((o,j)=>`<button class="optCard" data-j="${j}">${o.t}</button>`).join('')}</div>
+    <div class="msg" id="gmsg"></div>`);
+  const btns=[...document.querySelectorAll('#stage .optCard')];
+  const okIdx=opts.findIndex(o=>o.ok);
+  btns.forEach((b,j)=>b.onclick=()=>{
+    if(j===okIdx){b.classList.add('picked');btns.forEach(x=>x.onclick=null);setTimeout(()=>this.ask(sc),500)}
+    else gentle(btns,okIdx,'מחמאה אמיתית גורמת לצד השני לחייך — לא נדחפים ולא מחכים בשקט 😉');
+  });
+},
+ask(sc){
+  const opts=shuffle([{t:sc.a,ok:true},{t:sc.ab[0]},{t:sc.ab[1]}]);
+  stage(`<div class="scene">אמרת: <b>${sc.c}</b> — והם מחייכים אליך! 😊</div>
+    <div class="qTitle">שלב 2: עכשיו שאלה מנומסת 🙋</div>
+    <div class="optGrid one">${opts.map((o,j)=>`<button class="optCard" data-j="${j}">${o.t}</button>`).join('')}</div>
+    <div class="msg" id="gmsg"></div>`);
+  const btns=[...document.querySelectorAll('#stage .optCard')];
+  const okIdx=opts.findIndex(o=>o.ok);
+  btns.forEach((b,j)=>b.onclick=()=>{
+    if(j===okIdx){b.classList.add('picked');btns.forEach(x=>x.onclick=null);
+      stage(`<div class="sentence">💬 ${sc.c}<br>🙋 ${sc.a}</div>
+        <div class="msg" style="color:#7dffa8;font-weight:800">"בטח! בוא!" — נכנסת למשחק! 🎉</div>
+        <div class="sayLoud">אמור את שני המשפטים בקול! 🎤</div>
+        <button class="btn grn" id="saidBtn">אמרתי בקול! ✅</button>`);
+      $('#saidBtn').onclick=()=>{sndWarm();this.i++;success(()=>this.step())};
+    }else gentle(btns,okIdx,'שאלה מנומסת — לא דורשים ולא מאיימים. "אפשר...?" פותח דלתות 🚪');
+  });
+}};
+
+/* ---------- ❓ אפר״ת: אולי כן אולי לא — בודקים! ---------- */
+const EFRAT_SC=[
+ {t:'שלחת "היי" לחבר במחשב — והוא לא ענה כבר שעה.',bad:'"הוא מתעלם ממני בכוונה! הוא כבר לא רוצה להיות חבר שלי"',alts:[{t:'"אולי הוא בכלל לא ליד המחשב עכשיו"',ok:true},{t:'"אולי ההודעה לא נשלחה בכלל"',ok:true},{t:'"בטוח כולם שונאים אותי"',ok:false}],chk:'"היי, ראית את ההודעה ששלחתי?"'},
+ {t:'שני חברים מתלחששים... ומסתכלים לכיוון שלך.',bad:'"הם מדברים עליי רעות! הם צוחקים עליי!"',alts:[{t:'"אולי הם בכלל מדברים על משהו אחר"',ok:true},{t:'"אולי הם מתכננים משהו כיף ורוצים להפתיע"',ok:true},{t:'"בטוח כל הכיתה נגדי"',ok:false}],chk:'"היי, על מה אתם מדברים?"'},
+ {t:'המורה קראה לך לגשת אליה בסוף השיעור.',bad:'"אוי לא, אני בצרות! עשיתי משהו נורא!"',alts:[{t:'"אולי היא רוצה לבקש ממני עזרה"',ok:true},{t:'"אולי היא רוצה להגיד לי משהו טוב"',ok:true},{t:'"בטוח מתקשרים להורים שלי"',ok:false}],chk:'לגשת ולשאול: "רצית לדבר איתי?"'},
+ {t:'חבר הבטיח לשחק איתך בהפסקה — ואז שיחק עם מישהו אחר.',bad:'"הוא שיקר לי! אני לא שווה כלום בעיניו"',alts:[{t:'"אולי הוא פשוט שכח — קורה לכולם"',ok:true},{t:'"אולי הוא חשב שנשחק בהפסקה השנייה"',ok:true},{t:'"בטוח הוא עשה את זה בכוונה לפגוע"',ok:false}],chk:'"היי, חיכיתי לך בהפסקה — מה קרה?"'}];
+MODS.efrat={key:'efrat',icon:'❓',name:'אפר״ת',color:'#8f6fd8',goal:4,
+start(){this.order=shuffle(EFRAT_SC);this.i=0;this.step()},
+step(){
+  const sc=this.order[this.i];
+  stage(`<div class="scene">${sc.t}</div>
+    <div class="qTitle">💭 הראש ממהר לספר סיפור:</div>
+    <div class="sentence" style="border-color:rgba(255,120,120,.6);color:#ffb3b3">${sc.bad}</div>
+    <div class="msg"><b>אבל רגע... אולי כן, אולי לא — אנחנו פשוט לא יודעים!</b></div>
+    <button class="btn" id="qmark">❓ לשים סימן שאלה על הסיפור</button>`);
+  $('#qmark').onclick=()=>{sndTap();this.alts(sc)};
+},
+alts(sc){
+  const opts=shuffle(sc.alts);
+  stage(`<div class="scene">${sc.t}</div>
+    <div class="qTitle">🤔 איזה עוד סיפור יכול להיות נכון?</div>
+    <div class="optGrid one">${opts.map((o,j)=>`<button class="optCard" data-j="${j}">${o.t}</button>`).join('')}</div>
+    <div class="msg" id="gmsg"></div>`);
+  const btns=[...document.querySelectorAll('#stage .optCard')];
+  const okSet=opts.map(o=>o.ok);
+  btns.forEach((b,j)=>b.onclick=()=>{
+    if(okSet[j]){b.classList.add('picked');btns.forEach(x=>x.onclick=null);setTimeout(()=>this.check(sc),500)}
+    else gentle(btns,okSet.indexOf(true),'זה עוד סיפור מפחיד בלי הוכחות... מחפשים סיפור אחר שגם הוא אפשרי 🤔');
+  });
+},
+check(sc){
+  stage(`<div class="qTitle">יש שני סיפורים — ורק דרך אחת לדעת באמת:</div>
+    <div class="sentence">🔍 ${sc.chk}</div>
+    <div class="sayLoud">הולכים ובודקים! אמור את השאלה בקול 🎤</div>
+    <button class="btn grn" id="saidBtn">שאלתי! ✅</button>`);
+  $('#saidBtn').onclick=()=>{
+    sndWarm();
+    stage(`<div style="font-size:44px">🌤️</div>
+      <div class="qTitle">והתשובה? משהו פשוט לגמרי — בכלל לא מה שהסיפור סיפר!</div>
+      <div class="msg">ככה זה כמעט תמיד: שאלה אחת קטנה מפוצצת סיפור מפחיד שלם 💡</div>
+      <button class="btn grn" id="nxt">ממשיכים ▶️</button>`);
+    $('#nxt').onclick=()=>{this.i++;success(()=>this.step())};
+  };
+}};
+
+/* ---------- 🛡️ מגן החברים: לא שותקים, בלי ריב ---------- */
+const SHIELD_SC=[
+ {t:'בהפסקה, כמה ילדים צוחקים על המכנסיים של תלמיד חדש. הוא מרכין את הראש.',},
+ {t:'מישהו מחקה בלעג את הדיבור של ילד מהכיתה. כולם מסביב שותקים.',},
+ {t:'ילדה מהכיתה נשארה בחוץ ממשחק בכוונה — שוב. היא עומדת בצד עצובה.',},
+ {t:'שני ילדים לוקחים לילד קטן את הכובע וזורקים אותו אחד לשני.',}];
+const SHIELD_OPTS=[
+ ['🙈','לשתוק ולהסתכל — זה לא ענייני'],
+ ['😂','לצחוק יחד עם כולם'],
+ ['🛡️','להגיד בקול רגוע: "אני לא מסכים לזה. זה לא בסדר"']];
+MODS.shield={key:'shield',icon:'🛡️',name:'מגן החברים',color:'#4a90c9',goal:4,
+start(){this.order=shuffle(SHIELD_SC);this.i=0;this.step()},
+step(){
+  const sc=this.order[this.i];
+  const opts=shuffle(SHIELD_OPTS.map((o,i)=>({o,ok:i===2})));
+  stage(`<div class="scene">${sc.t}</div>
+    <div class="qTitle">🛡️ מה עושה מגן החברים?</div>
+    <div class="optGrid one">${opts.map((x,j)=>`<button class="optCard" data-j="${j}"><span class="big">${x.o[0]}</span>${x.o[1]}</button>`).join('')}</div>
+    <div class="msg" id="gmsg"></div>`);
+  const btns=[...document.querySelectorAll('#stage .optCard')];
+  const okIdx=opts.findIndex(x=>x.ok);
+  btns.forEach((b,j)=>b.onclick=()=>{
+    if(j===okIdx){b.classList.add('picked');btns.forEach(x=>x.onclick=null);setTimeout(()=>this.say(sc),500)}
+    else gentle(btns,okIdx,'מי ששותק או צוחק — משתתף בפגיעה. מגן לא רב ולא צועק: משפט אחד רגוע 💙');
+  });
+},
+say(sc){
+  stage(`<div class="sentence">🛡️ "אני לא מסכים לזה. זה לא בסדר"</div>
+    <div class="sayLoud">אמור את זה בקול — רגוע ובטוח! 🎤</div>
+    <button class="btn grn" id="saidBtn">אמרתי בקול! ✅</button>`);
+  $('#saidBtn').onclick=()=>{
+    sndWarm();
+    stage(`<div style="font-size:44px">🤝</div>
+      <div class="qTitle">ועכשיו הצעד השני של המגן: מזמינים אליך!</div>
+      <div class="optGrid one">
+        <button class="optCard" data-ok="1"><span class="big">👫</span>"בוא, שב איתנו! רוצה לשחק יחד?"</button>
+      </div>`);
+    document.querySelector('#stage .optCard').onclick=()=>{
+      sndGood();confettiBurst();
+      stage(`<div style="font-size:44px">💙</div>
+        <div class="qTitle">הילד מרים את הראש ומחייך. היום הוא גילה שיש לו מגן.</div>
+        <div class="msg">זה האומץ הכי גדול בתיק — אומץ בשביל מישהו אחר 🛡️</div>
+        <button class="btn grn" id="nxt">ממשיכים ▶️</button>`);
+      $('#nxt').onclick=()=>{this.i++;success(()=>this.step())};
+    };
+  };
+}};
+
+/* ---------- hub ---------- */
+const HUB=[
+ {k:'torch',ic:'🔦',nm:'הפנס הפנימי',ac:'#f5a623'},
+ {k:'dolphin',ic:'🐬',nm:'דולפיניות',ac:'#4aa8d8'},
+ {k:'flower',ic:'🌸',nm:'הפרח שנפתח',ac:'#e87ba6',href:'flower.html'},
+ {k:'folder',ic:'📗',nm:'התיקיה הירוקה',ac:'#3fae67'},
+ {k:'init',ic:'🙋',nm:'יוזמה חברתית',ac:'#e8903c'},
+ {k:'efrat',ic:'❓',nm:'אפר״ת',ac:'#8f6fd8'},
+ {k:'shield',ic:'🛡️',nm:'מגן החברים',ac:'#4a90c9'}];
+function renderHub(){
+  loadP();
+  const a=albLoad(),today=new Date().toISOString().slice(0,10);
+  const n=a.daily.d===today?(a.daily.n||0):0;
+  $('#daily').innerHTML='המדבקות של היום: '+Array.from({length:DAILY_CAP},(_,i)=>`<span class="dot ${i<n?'f':''}"></span>`).join('')+(n>=DAILY_CAP?' — נתראה מחר 🌙':'');
+  $('#hubGrid').innerHTML=HUB.map(h=>{
+    const t=(P.tools&&P.tools[h.k])||{stars:0};
+    const stars=h.k==='flower'?'':('⭐'.repeat(t.stars)||'חדש!');
+    return `<button class="mcard" style="--ac:${h.ac}" onclick="${h.href?`location.href='${h.href}'`:`startMod('${h.k}')`}">
+      <span class="ic">${h.ic}</span><span class="nm">${h.nm}</span>
+      <span class="st">${h.href?'🌸 בשדה הפרחים':stars}</span></button>`;
+  }).join('');
+}
+renderHub();
+</script>
+</body>
+</html>

@@ -79,6 +79,11 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
 #flyTool{position:fixed;font-size:66px;z-index:50;pointer-events:none;display:none}
 .stars{position:fixed;inset:0;pointer-events:none;z-index:0}
 .stars i{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;opacity:.5;animation:tw 3s infinite}
+  /* mobile fit — buttons never exceed viewport */
+  @media(max-width:480px){
+    .ov{padding:20px 16px}
+    .btn{max-width:calc(100vw - 34px);font-size:16.5px;padding:14px 16px}
+  }
 </style>
 <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
 </head>
@@ -88,6 +93,7 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
 <div id="flyTool">🔦</div>
 
 <div id="quest" style="display:none"></div>
+<button id="sndBtn" aria-label="השתקה" style="position:fixed;top:58px;left:10px;z-index:45;min-width:46px;min-height:46px;border-radius:14px;background:rgba(20,14,50,.72);border:1.5px solid rgba(255,213,74,.55);font-size:19px;box-shadow:0 6px 20px rgba(0,0,0,.35)">🔊</button>
 <button id="act"></button>
 <div id="joy" style="display:none"><div id="knob"></div></div>
 <div class="keysHint" id="keysHint" style="display:none">🎮 חצים / WASD לתנועה</div>
@@ -100,6 +106,8 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
   <h1>תיק הכלים</h1>
   <div class="chapter">פרק 1 · הפנס הפנימי 🔦</div>
   <button class="btn" id="startBtn" disabled onclick="ovShow('ov-char')">⏳ טוען את הדמויות...</button>
+  <button class="btn sec" style="max-width:290px" onclick="location.href='practice.html'">🏋️ אימון הכלים — תרגול ומדבקות</button>
+  <button class="btn sec" style="max-width:290px" onclick="location.href='album.html'">📖 האוסף שלי — כלים ומדבקות</button>
   <div class="tiny">מסע של 7 כלים לחיים · הזיזו את הדמות, גשו לדמויות — והחיים יקרו</div>
 </div>
 
@@ -110,10 +118,10 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
   <div class="charRow">
     <button class="charCard" data-ch="hoodie" onclick="chooseChar('hoodie')"><img alt="">קפוצ'ון</button>
     <button class="charCard" data-ch="casual" onclick="chooseChar('casual')"><img alt="">קז'ואל</button>
-    <button class="charCard" data-ch="adventurer" onclick="chooseChar('adventurer')"><img alt="">הרפתקן</button>
-    <button class="charCard" data-ch="worker" onclick="chooseChar('worker')"><img alt="">בנאי</button>
-    <button class="charCard" data-ch="farmer" onclick="chooseChar('farmer')"><img alt="">חקלאי</button>
   </div>
+  <!-- 'adventurer'/'worker'/'farmer' removed from the player picker: they have a baked-in beard/
+       mustache and hard-hat/bandana headwear (worker+farmer even clash visually with the new cap,
+       showing two hats stacked) — only 'hoodie'/'casual' are clean-shaven, hatless kid faces. -->
 </div>
 
 <!-- dialogue -->
@@ -152,9 +160,19 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
 function $(s){return document.querySelector(s)}
 function ovShow(id){document.querySelectorAll('.ov').forEach(function(o){o.classList.remove('on')});if(id)$('#'+id).classList.add('on')}
 var AC=null;
-function snd(f,d,type,vol){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();var o=AC.createOscillator(),g=AC.createGain();o.type=type||'sine';o.frequency.value=f;g.gain.value=vol||.12;g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+(d||.25));o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+(d||.25))}catch(e){}}
+/* master sound switch (SFX + ambience), persisted across sessions */
+var SND=true;try{SND=localStorage.getItem('toolbagSnd')!=='0'}catch(e){}
+function setSnd(on){
+  SND=on;try{localStorage.setItem('toolbagSnd',on?'1':'0')}catch(e){}
+  $('#sndBtn').textContent=on?'🔊':'🔇';
+  if(window._windGain)try{window._windGain.gain.value=on?.016:0}catch(e){}
+  if(on)sndTap();
+}
+function snd(f,d,type,vol){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(!SND)return;var o=AC.createOscillator(),g=AC.createGain();o.type=type||'sine';o.frequency.value=f;g.gain.value=vol||.12;g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+(d||.25));o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+(d||.25))}catch(e){}}
 function sndTap(){snd(520,.12)} function sndGood(){snd(660,.16);setTimeout(function(){snd(880,.22)},110)}
 function sndWarm(){snd(392,.4,'triangle',.1);setTimeout(function(){snd(523,.5,'triangle',.1)},180)}
+$('#sndBtn').onclick=function(){setSnd(!SND)};
+if(!SND)$('#sndBtn').textContent='🔇';
 (function(){var h='';for(var i=0;i<34;i++)h+='<i style="top:'+Math.random()*100+'%;right:'+Math.random()*100+'%;animation-delay:'+Math.random()*3+'s"></i>';$('#stars').innerHTML=h})();
 function confettiBurst(){
   var c=$('#confetti'),x=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;
@@ -220,16 +238,49 @@ var FAMS=[
   '<li>איך מרגיש ילד שמישהו עמד לצידו? ואיך מרגיש מי שעמד לצידו?</li></ul>'+
   '<div class="mission">🌟 <b>משימת האומץ של השבוע:</b> אם תראו מישהו פוגע בחבר — אמרו בקול רגוע ובטוח: <b>"אני לא מסכים לזה. זה לא בסדר"</b>, והזמינו את החבר אליכם. ספרו בבית — זה האומץ הכי גדול שיש!</div>'
 ];
+/* ---- sticker album (albumV1 — shared with album.html/flower.html): every successful chapter
+   completion (incl. replays) earns a sticker for THAT tool's page, capped 3/day across all pages ---- */
+var TOOLKEYS=['torch','dolphin','flower','folder','init','efrat','shield'];
+var ALBUM_ST={
+ torch:[['🔦','פנס האומץ'],['💛','לב מואר'],['🤗','חיבוק ללב'],['😌','מותר להרגיש'],['🌙','אור בחושך'],['⭐','כוכב פנימי'],['🕯️','נר קטן'],['💪','התגברתי!']],
+ dolphin:[['🐬','דולפין אמיץ'],['🌊','גל רגוע'],['🗣️','קול בטוח'],['✋','בבקשה להפסיק'],['😮‍💨','נשימה עמוקה'],['🐠','חבר מהים'],['🌀','צוללים פנימה'],['🏆','אלוף הרוגע']],
+ flower:[['🌸','פרח נפתח'],['🌷','עלה ראשון'],['🌻','חמנייה מחייכת'],['🦋','פרפר מבקר'],['🐝','דבורה חרוצה'],['🌈','קשת בשדה'],['💬','שיתפתי!'],['🌟','אמיתי שלי']],
+ folder:[['📗','התיקיה שלי'],['🍃','עלה ירוק'],['🧘','רגוע וממשיך'],['😌','עברתי הלאה'],['🎮','ממשיכים לשחק'],['🤝','חברים שווים יותר'],['🌿','גמישות'],['🏅','מוותר בגדול']],
+ init:[['🙋','יוזמה!'],['👋','בוא נשחק'],['💬','מחמאה קטנה'],['🏰','אפשר להצטרף?'],['⚽','משחק חדש'],['😊','פנים מחייכות'],['🎈','הזמנתי חבר'],['🌟','פותח דלתות']],
+ efrat:[['❓','סימן שאלה'],['🤔','רגע, חושבים'],['💭','אולי סיפור אחר'],['🔍','בודקים קודם'],['🗨️','שאלתי!'],['🌤️','התבהר!'],['🧩','הבנתי נכון'],['🕊️','בלי ריב']],
+ shield:[['🛡️','מגן החברים'],['🦸','גיבור שקט'],['🗣️','זה לא בסדר'],['🤝','בוא אליי'],['💙','לב אמיץ'],['🌟','עמדתי לצידו'],['👫','לא לבד'],['🏆','האומץ הכי גדול']]};
+function awardSticker(toolKey){
+  try{
+    var a=JSON.parse(localStorage.getItem('albumV1'))||{};a.earned=a.earned||{};a.daily=a.daily||{};
+    var today=new Date().toISOString().slice(0,10);
+    if(a.daily.d!==today)a.daily={d:today,n:0};
+    if(a.daily.n>=3)return{cap:true};
+    var got=a.earned[toolKey]||[],pool=[];
+    for(var i=0;i<8;i++)if(got.indexOf(i)<0)pool.push(i);
+    if(!pool.length)return{full:true};
+    var idx=pool[Math.floor(Math.random()*pool.length)];
+    got.push(idx);a.earned[toolKey]=got;a.daily.n++;
+    localStorage.setItem('albumV1',JSON.stringify(a));
+    return{idx:idx,st:ALBUM_ST[toolKey][idx],n:a.daily.n};
+  }catch(e){return{}}
+}
+function stickerLine(r){
+  if(r.cap)return '<div style="margin-top:10px;font-size:14px;color:#ffe9a8;background:rgba(255,213,74,.12);border:1.5px solid rgba(255,213,74,.4);border-radius:12px;padding:8px 12px">אספת היום את כל 3 המדבקות — אלופים יודעים גם לנוח 🌙 מחר מחכה חדשה!</div>';
+  if(r.full)return '<div style="margin-top:10px;font-size:14px;color:#c9ffdd">עמוד המדבקות של הכלי הזה מלא! 🎉</div>';
+  if(r.st)return '<div style="margin-top:10px;font-size:15px;font-weight:800;color:#ffd0e2">✨ מדבקה חדשה לאלבום: '+r.st[0]+' '+r.st[1]+'! <span style="font-weight:600;font-size:12.5px;color:#cfc4ea">('+r.n+'/3 היום)</span></div>';
+  return '';
+}
 function earnBadge(idx){
   CUR_BADGE=idx;
   try{var pr=+localStorage.getItem('toolbagProg')||0;if(idx+1>pr)localStorage.setItem('toolbagProg',String(idx+1))}catch(e){}
   var B=BADGES[idx];
-  $('#bdgH').textContent=B.h;$('#bdgSub').innerHTML=B.sub;
+  $('#bdgH').textContent=B.h;$('#bdgSub').innerHTML=B.sub+stickerLine(awardSticker(TOOLKEYS[idx]));
   ovShow('ov-badge');
   var h='';TOOLS.forEach(function(t,i){h+='<div class="slot'+(i<idx?' earned':'')+'" id="slot'+i+'">'+(i<idx?t:(i===idx?'':'🔒'))+'</div>'});
   $('#slots').innerHTML=h;
   var bh='';
   if(B.next)bh+='<button class="btn" onclick="nextChapter()">'+B.next+'</button>';
+  bh+='<button class="btn calm" onclick="location.href=\'album.html\'">📖 האוסף שלי</button>';
   bh+='<button class="btn calm" onclick="showFam()">🏡 קלף למשפחה ולכיתה</button>';
   bh+='<button class="btn sec" onclick="location.reload()">🔄 לשחק שוב</button>';
   $('#bdgBtns').innerHTML=bh;
@@ -348,6 +399,21 @@ let BOUNDS={x1:113.3,x2:126.7,z1:-5.3,z2:5.4};
 const OWL_LAMP=new THREE.Vector3();
 const DOORP=new THREE.Vector3(127.2,0,2.2);
 const STATCOL=[[117,-1.8,1.35],[123,-1.8,1.35],[117,1.2,1.35],[123,1.2,1.35],[117,4.2,1.35],[123,4.2,1.35],[124.6,-4.7,1.4],[112.9,-4.6,1.2]];
+/* solid outdoor obstacles (trees/bushes/bench/streetlight) — [x,z,radius], matches the tree/bush/bench/
+   streetlight placements below. Flowers and grass are left walk-through on purpose (too fussy, no real
+   need to block them) — only the large solid props actually stop the player. */
+const OBSTACLES=[
+  [-24,10,1.3],[-30,-6,1.4],[26,12,1.3],[32,-14,1.15],[-20,-24,1.1],[24,-26,1.3],[-36,18,1.35],[38,6,1.2], /* yard trees */
+  [-8,-31.5,.85],[11,-31.5,.8],[-17,-31,.75],[24,7.5,.75],[-27,2,.85],[34,-20,.85],[-34,-16,.75], /* yard bushes */
+  [20,4,1.1],[7,12,.6], /* bench, streetlight */
+  [-138,10,1.3],[-134,-12,1.4],[-108,-13,1.15],[-100,14,1.1],[-142,-2,1.3], /* meadow trees */
+  [-129,12,.85],[-104,2,.75],[-136,-7,.85],[-113,-9,.75], /* meadow bushes */
+  [-127.5,6.8,.65],[-110,-4,.75],[-133,-1,.95], /* meadow rocks */
+  [-16.2,-10.6,.45],[-16.2,-5.4,.45],[16.2,-10.6,.45],[16.2,-5.4,.45], /* soccer goal posts */
+  [-26.4,13.1,.85] /* sand castle (chapter 5 prop — don't let kids trample it) */
+];
+/* the sandbox floor is raised (.28) — anyone standing inside must stand ON the sand, not sink into it */
+const SANDBOX={x1:-28.7,x2:-23.3,z1:10.6,z2:15.4,y:.28};
 (function buildClassroom(){
   const W=0xf5e6d3,WOOD=0xc19a6b,DARK=0x5c4a3d,PLAS=0xc75740;
   /* grass pad + wooden floor */
@@ -437,12 +503,30 @@ const STATCOL=[[117,-1.8,1.35],[123,-1.8,1.35],[117,1.2,1.35],[123,1.2,1.35],[11
   });
 })();
 
-/* emoji sprite helper */
+/* emoji sprite helper — floating in-world symbols (hearts, smileys, ❗ etc.) use Microsoft Fluent 3D
+   art (CC-licensed, emoji/ folder) so they match the low-poly characters; anything unmapped falls
+   back to the system emoji drawn on a canvas. UI emojis in HTML are untouched on purpose. */
+const EMOJI3D={'💗':'growing_heart','🖤':'black_heart','💛':'yellow_heart','💔':'broken_heart',
+  '💬':'speech_balloon','🦋':'butterfly','📄':'page_facing_up','🐬':'dolphin',
+  '🌸':'cherry_blossom','🌼':'blossom','🌷':'tulip','🌺':'hibiscus',
+  '💢':'anger_symbol','📗':'green_book','❗':'red_exclamation_mark','🙋':'person_raising_hand',
+  '😡':'pouting_face','🧊':'ice','❓':'red_question_mark','💡':'light_bulb','🛡️':'shield','🔦':'flashlight'};
+const _emTexLoader=new THREE.TextureLoader(),_emTex={};
 function emojiSprite(em,scale){
-  const cv=document.createElement('canvas');cv.width=cv.height=128;const x=cv.getContext('2d');
-  x.font='100px serif';x.textAlign='center';x.textBaseline='middle';x.fillText(em,64,72);
-  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv),transparent:true}));
-  sp.scale.set(scale,scale,1);return sp;
+  let map;
+  const key=EMOJI3D[em];
+  if(key){
+    if(!_emTex[key]){_emTex[key]=_emTexLoader.load('emoji/'+key+'.png');_emTex[key].colorSpace=THREE.SRGBColorSpace}
+    map=_emTex[key];
+  }else{
+    const cv=document.createElement('canvas');cv.width=cv.height=128;const x=cv.getContext('2d');
+    x.font='100px serif';x.textAlign='center';x.textBaseline='middle';x.fillText(em,64,72);
+    map=new THREE.CanvasTexture(cv);
+  }
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map,transparent:true}));
+  /* Fluent art fills its whole canvas; system emoji glyphs only ~60% — shrink so sizes match */
+  const s=key?scale*.68:scale;
+  sp.scale.set(s,s,1);return sp;
 }
 /* the owl mentor — a real modeled owl (base at y0, sits on the streetlight) */
 const owl=new THREE.Group();
@@ -552,6 +636,8 @@ for(let i=0;i<6;i++){const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:clo
 /* Quaternius "Ultimate Modular Men" — CC0, rigged, animations built in */
 const loader=new GLTFLoader();
 const CHAR_FILES={hoodie:'models/hoodie.glb',casual:'models/casual.glb',adventurer:'models/adventurer.glb',worker:'models/worker.glb',farmer:'models/farmer.glb',suit:'models/suit.glb'};
+/* bright kid t-shirt + shorts colors per model — 'suit' excluded on purpose (the teacher stays an adult) */
+const KID_OUTFIT={hoodie:[0xff5a4d,0x2a5fb0],casual:[0x2fa8e0,0x3a3a3a],adventurer:[0x3ecb6e,0x5a3d24],worker:[0xffc93c,0x2d383f],farmer:[0xff8a3d,0x3a5f3a]};
 const MODELS={};
 const charsReady=Promise.all(Object.entries(CHAR_FILES).map(([k,f])=>new Promise((res,rej)=>loader.load(f,gl=>{MODELS[k]=gl;res()},undefined,rej))));
 /* static environment models — Quaternius nature + KayKit citybits (both CC0) */
@@ -589,20 +675,39 @@ function makeChar(model,targetH,kipColor,kidHead){
   src.animations.forEach(c=>{actions[c.name.replace(/^.*\|/,'')]=mixer.clipAction(c)});
   const k={g,inner,mixer,actions,cur:null,curName:'',busy:false,target:null,speed:4.4};
   mixer.addEventListener('finished',()=>{k.busy=false;k.cur=null;k.curName='';playA(k,'Idle_Neutral')});
-  /* kippah, attached to the head bone so it moves with the animations */
+  /* baseball cap, attached to the head bone so it moves with the animations */
   if(kipColor!==undefined){
     const head=inner.getObjectByName('Head');
     if(head){
       inner.updateMatrixWorld(true);
       const ws=new THREE.Vector3();head.getWorldScale(ws);
-      const r=(.06*targetH)/ws.y;
-      const kip=new THREE.Mesh(new THREE.SphereGeometry(r,14,10),M(kipColor));
-      kip.scale.y=.4;kip.position.y=(.098*targetH)/ws.y;kip.castShadow=false;
-      head.add(kip);
+      const r=(.062*targetH)/ws.y;
+      const cap=new THREE.Group();
+      /* kids: baseball cap (crown+brim+button); adults: a small kippah disc on the top-back */
+      const crown=new THREE.Mesh(new THREE.SphereGeometry(r,16,10,0,Math.PI*2,0,Math.PI*(kidHead?.56:.3)),M(kipColor));
+      crown.castShadow=false;cap.add(crown);
+      if(kidHead){
+        const brim=new THREE.Mesh(new THREE.CylinderGeometry(r*1.32,r*1.32,r*.09,20,1,false,-Math.PI*.42,Math.PI*.84),M(kipColor));
+        brim.position.set(0,-r*.03,r*.16);brim.castShadow=false;cap.add(brim);
+        const button=new THREE.Mesh(new THREE.SphereGeometry(r*.09,8,6),M(kipColor));
+        button.position.y=r*.98;cap.add(button);
+      }else cap.rotation.x=-.38; /* tilt the kippah toward the back of the head */
+      /* kids: head bone is scaled up after this, which pulls the cap down onto the enlarged scalp;
+         adults keep head scale 1 — lower the kippah by .75r so it rests on the hair, not mid-air */
+      cap.position.y=(.1*targetH)/ws.y-(kidHead?0:r*.75);
+      head.add(cap);
     }
   }
-  /* kid proportions: enlarge the head bone (skinned verts follow) — kippah is a child so it scales along */
+  /* kid proportions: enlarge the head bone (skinned verts follow) — cap is a child so it scales along */
   if(kidHead){const h=inner.getObjectByName('Head');if(h)h.scale.multiplyScalar(kidHead)}
+  /* kid-styled clothing: bright t-shirt + shorts, leaving skin-tone parts (Body_2/3/4, Legs_1, Head_*) untouched */
+  if(kidHead&&KID_OUTFIT[model]){
+    const[shirt,shorts]=KID_OUTFIT[model];
+    inner.traverse(o=>{if(!o.isMesh)return;
+      if(/_Body_1$/.test(o.name))o.material.color.setHex(shirt);
+      else if(/_Legs_2$|_Legs$|_Pants$/.test(o.name))o.material.color.setHex(shorts);
+    });
+  }
   playA(k,'Idle_Neutral');
   return k;
 }
@@ -617,8 +722,36 @@ function stepTo(k,dt){ /* move kid toward k.target; returns moving? */
   return true;
 }
 
+/* the 'casual' model ships with a ponytail; flatten those verts against the nape via inverse
+   skinning (positions are bind-space, so world targets must be mapped back through the skin matrix).
+   Runs once on the shared geometry — every clone (kids, previews, picker) gets the short haircut. */
+function deTail(gl){
+  gl.scene.updateMatrixWorld(true);
+  gl.scene.traverse(m=>{if(!m.isSkinnedMesh||!/_Head_5$/.test(m.name))return;
+    const g=m.geometry;if(g.userData.deTailed)return;g.userData.deTailed=true;
+    const pos=g.attributes.position,si=g.attributes.skinIndex,sw=g.attributes.skinWeight,sk=m.skeleton;
+    const v=new THREE.Vector3(),M=new THREE.Matrix4(),T=new THREE.Matrix4(),B=new THREE.Matrix4();
+    const bt=(m.applyBoneTransform||m.boneTransform).bind(m);
+    for(let i=0;i<pos.count;i++){
+      const wp=bt(i,v.fromBufferAttribute(pos,i).clone()).applyMatrix4(m.matrixWorld);
+      if(!(wp.z<-.008&&wp.y>1.3&&wp.y<1.68))continue; /* the tail hangs behind the nape band */
+      const me=M.elements;for(let e=0;e<16;e++)me[e]=0;
+      for(let j=0;j<4;j++){const wt=sw.getComponent(i,j);if(!wt)continue;
+        const bi=si.getComponent(i,j);
+        T.multiplyMatrices(sk.bones[bi].matrixWorld,sk.boneInverses[bi]);
+        for(let e=0;e<16;e++)me[e]+=T.elements[e]*wt;}
+      B.copy(m.bindMatrix).premultiply(M).premultiply(m.bindMatrixInverse).premultiply(m.matrixWorld);
+      wp.z=-.008;wp.x*=.35; /* onto the nape plane, narrowed toward the neck axis */
+      wp.applyMatrix4(B.invert());
+      pos.setXYZ(i,wp.x,wp.y,wp.z);
+    }
+    pos.needsUpdate=true;g.computeVertexNormals();
+  });
+}
+
 /* wait for all models, then populate the world */
 try{await Promise.all([charsReady,statReady])}catch(e){const sb=document.getElementById('startBtn');sb.textContent='❌ שגיאה בטעינה — רעננו את הדף';throw e}
+deTail(MODELS.casual);
 const sb=document.getElementById('startBtn');sb.disabled=false;sb.textContent='▶️ להיכנס לעולם';
 /* returning player — offer to jump straight to the next tool he hasn't earned yet */
 try{const prog=+localStorage.getItem('toolbagProg')||0;
@@ -645,7 +778,26 @@ if(prog>=1){
       const inner=SkeletonUtils.clone(src.scene);
       inner.traverse(o=>{if(o.isMesh){o.frustumCulled=false;o.material=new THREE.MeshLambertMaterial({color:o.material.color})}});
       inner.scale.setScalar(1.58/2.35);inner.rotation.y=-.4;
-      const ph=inner.getObjectByName('Head');if(ph)ph.scale.multiplyScalar(1.55);
+      if(KID_OUTFIT[name]){const[shirt,shorts]=KID_OUTFIT[name];
+        inner.traverse(o=>{if(!o.isMesh)return;
+          if(/_Body_1$/.test(o.name))o.material.color.setHex(shirt);
+          else if(/_Legs_2$|_Legs$|_Pants$/.test(o.name))o.material.color.setHex(shorts);
+        });
+      }
+      const ph=inner.getObjectByName('Head');
+      if(ph){
+        inner.updateMatrixWorld(true);
+        const ws=new THREE.Vector3();ph.getWorldScale(ws);
+        const r=.098/ws.y;
+        const cap=new THREE.Group();
+        const crown=new THREE.Mesh(new THREE.SphereGeometry(r,16,10,0,Math.PI*2,0,Math.PI*.56),M(0xd44a3c));
+        cap.add(crown);
+        const brim=new THREE.Mesh(new THREE.CylinderGeometry(r*1.32,r*1.32,r*.09,20,1,false,-Math.PI*.42,Math.PI*.84),M(0xd44a3c));
+        brim.position.set(0,-r*.03,r*.16);cap.add(brim);
+        cap.position.y=.158/ws.y;
+        ph.add(cap);
+        ph.scale.multiplyScalar(1.7);
+      }
       /* pose it in Idle instead of the T bind pose */
       const mx=new THREE.AnimationMixer(inner);
       const clip=src.animations.find(c=>/Idle_Neutral/.test(c.name))||src.animations[0];
@@ -727,39 +879,46 @@ const MEADOW_B={x1:-144,x2:-97,z1:-19,z2:19};
 })();
 
 /* player — default model; swapped by the character-select screen */
-let player=makeChar('hoodie',1.58,0x2255aa,1.55);
+let player=makeChar('hoodie',1.58,0x2255aa,1.7);
 player.g.position.set(119.5,0,3.2);player.g.rotation.y=Math.PI*.72;
 window.chooseChar=function(name){
   sndGood();
   const pos=player.g.position.clone(),rot=player.g.rotation.y;
   scene.remove(player.g);
-  player=makeChar(name,1.58,0x2255aa,1.55);
+  player=makeChar(name,1.58,0x2255aa,1.7);
   player.g.position.copy(pos);player.g.rotation.y=rot;
   CHARS=[player,...kids,teacher,...CLSKIDS,newKid];
   try{localStorage.setItem('toolbagChar',name)}catch(e){}
   enterWorld();
 };
-/* soccer kids in a circle */
-const KIDMODELS=['casual','adventurer','worker','farmer','casual'];
+/* soccer kids in a circle — only clean-shaven, hatless models (adventurer/worker/farmer all have a
+   baked-in beard/mustache and their own headwear that clashes with the new cap) */
+const KIDMODELS=['casual','hoodie','casual','hoodie','casual'];
 const KIPCOL=[0x333333,0x884422,0x2255aa,0x117755,0x992222];
 const kids=[];const HOME=[];
 for(let i=0;i<5;i++){
   const a=i/5*Math.PI*2;
-  const k=makeChar(KIDMODELS[i],1.52,KIPCOL[i],1.55);
+  const k=makeChar(KIDMODELS[i],1.52,KIPCOL[i],1.7);
   const pos=new THREE.Vector3(FIELD.x+Math.cos(a)*5.2,0,FIELD.z+Math.sin(a)*4);
   k.g.position.copy(pos);HOME.push(pos.clone());
   kids.push(k);
 }
-/* teacher — chapter 1: at the classroom board */
-const teacher=makeChar('suit',2.5,0x111111);
+/* teacher — chapter 1: at the classroom board. Warm friendly look (per request):
+   terracotta cardigan over the light shirt, mustard tie, khaki trousers, knitted kippah */
+const teacher=makeChar('suit',2.5,0x8a5a3a);
+teacher.inner.traverse(o=>{if(!o.isMesh)return;
+  if(o.name==='Suit_Body_1')o.material.color.setHex(0xc4633f);
+  else if(o.name==='Suit_Body_3')o.material.color.setHex(0xe8b04a);
+  else if(o.name==='Suit_Legs')o.material.color.setHex(0x8a7358);
+  else if(o.name==='Suit_Feet')o.material.color.setHex(0x4a3626);});
 teacher.g.position.set(120.3,0,-5.35);teacher.g.rotation.y=0;
 const TEACHER=new THREE.Vector3(120.3,0,-5.35);
 /* two classmates at their desks */
-const CLSKIDS=[makeChar('casual',1.52,0x554433,1.55),makeChar('worker',1.52,0x226644,1.55)];
+const CLSKIDS=[makeChar('casual',1.52,0x554433,1.7),makeChar('hoodie',1.52,0x226644,1.7)];
 CLSKIDS[0].g.position.set(118.1,0,1.6);CLSKIDS[0].g.rotation.y=Math.PI+.35;
 CLSKIDS[1].g.position.set(122.1,0,4.4);CLSKIDS[1].g.rotation.y=Math.PI-.4;
 /* the quiet new kid — waits in the yard's far corner; stars in chapters 3 and 7 */
-const newKid=makeChar('adventurer',1.42,0x7744aa,1.6);
+const newKid=makeChar('casual',1.42,0x7744aa,1.75);
 newKid.g.position.set(33,0,23);newKid.g.rotation.y=Math.PI*.85;
 let CHARS=[player,...kids,teacher,...CLSKIDS,newKid];
 /* ball */
@@ -812,12 +971,14 @@ const explored=new Set();
 const actBtn=document.getElementById('act');
 const questEl=document.getElementById('quest');
 window.enterWorld=function(){sndTap();ovShow(null);MODE='explore';
-  questEl.style.display='block';questEl.textContent='🦉 מישהו מחכה לכם על אדן החלון... לכו אליו';
   const touch='ontouchstart' in window;
   document.getElementById(touch?'joy':'keysHint').style.display='block';
   setTimeout(startAmbience,400);
   if(window._RESUME){const p=window._RESUME;window._RESUME=0;toYard(2.5,-24);
-    if(p===1)window.startCh2();else startChapterN(p+1)}
+    if(p===1)window.startCh2();else startChapterN(p+1);return}
+  /* fresh start: out in the yard, walk to the school door, then step inside */
+  toYardStart();QUEST=-1;
+  questEl.style.display='block';questEl.textContent='🏫 יום לימודים מתחיל! לכו אל דלת בית הספר';
 };
 /* leave the classroom → the schoolyard (also used by the resume flow) */
 function toYard(px,pz){
@@ -838,6 +999,27 @@ function exitClass(){
     setTimeout(()=>{f.style.opacity=0},350);
   },800);
 }
+/* opening: begin OUT in the schoolyard, walk to the entrance, then step inside to chapter 1 */
+const SCHOOL_DOOR=new THREE.Vector3(0,0,-29);
+function toYardStart(){
+  INCLASS=false;BOUNDS=YARD_B;
+  player.g.position.set(2,0,20);player.g.rotation.y=Math.PI;
+  camPos.copy(player.g.position).add(new THREE.Vector3(0,4.6,7));
+  camLook.copy(player.g.position).add(new THREE.Vector3(0,1.5,0));
+}
+function enterClass(){
+  MODE='cine';questEl.style.display='none';
+  const f=document.getElementById('fade');f.style.opacity=1;sndWarm();
+  setTimeout(()=>{
+    INCLASS=true;BOUNDS={x1:113.3,x2:126.7,z1:-5.3,z2:5.4};
+    player.g.position.set(119.5,0,3.2);player.g.rotation.y=Math.PI*.72;
+    camPos.copy(player.g.position).add(new THREE.Vector3(0,9.5,7));
+    camLook.copy(player.g.position).add(new THREE.Vector3(0,1.5,0));
+    QUEST=0;MODE='explore';
+    questEl.style.display='block';questEl.textContent='🦉 מישהו מחכה לכם על אדן החלון... לכו אליו';
+    setTimeout(()=>{f.style.opacity=0},350);
+  },800);
+}
 
 /* ---- ambient sound, fully synthesized (no assets, no copyright) ---- */
 let ambOn=false;
@@ -849,11 +1031,11 @@ function startAmbience(){
     for(let i=0;i<len;i++)d[i]=Math.random()*2-1;
     const src=AC.createBufferSource();src.buffer=buf;src.loop=true;
     const f=AC.createBiquadFilter();f.type='lowpass';f.frequency.value=300;
-    const g=AC.createGain();g.gain.value=.016;
+    const g=AC.createGain();g.gain.value=SND?.016:0;window._windGain=g;
     src.connect(f);f.connect(g);g.connect(AC.destination);src.start();
   }catch(e){}
   (function birds(){
-    setTimeout(()=>{if(NIGHT<.3)chirp();birds()},2600+Math.random()*4600);
+    setTimeout(()=>{if(NIGHT<.3&&SND)chirp();birds()},2600+Math.random()*4600);
   })();
 }
 function chirp(){
@@ -887,11 +1069,20 @@ dlg.addEventListener('click',()=>{
 
 /* =================== camera =================== */
 let camMode='follow';let camPos=new THREE.Vector3(),camLook=new THREE.Vector3();
+let camYaw=Math.PI; /* camera heading — follows the player's walk direction (outdoors) */
+function angLerp(a,b,t){let d=((b-a+Math.PI)%(2*Math.PI))-Math.PI;if(d<-Math.PI)d+=2*Math.PI;return a+d*t;}
 function camTick(dt){
   let tp,tl;
   if(camMode==='follow'){
-    tp=player.g.position.clone().add(new THREE.Vector3(0,4.6,7));
-    tl=player.g.position.clone().add(new THREE.Vector3(0,1.5,0));
+    if(!INCLASS){
+      /* rotate the camera to sit behind the player's heading, so walking right turns the world right */
+      camYaw=angLerp(camYaw,player.g.rotation.y,Math.min(dt*2.4,1));
+      tp=player.g.position.clone().add(new THREE.Vector3(-Math.sin(camYaw)*7,4.6,-Math.cos(camYaw)*7));
+      tl=player.g.position.clone().add(new THREE.Vector3(Math.sin(camYaw)*1.4,1.5,Math.cos(camYaw)*1.4));
+    }else{
+      tp=player.g.position.clone().add(new THREE.Vector3(0,4.6,7));
+      tl=player.g.position.clone().add(new THREE.Vector3(0,1.5,0));
+    }
   }else if(camMode==='field'){
     tp=new THREE.Vector3(10,4.6,4);tl=new THREE.Vector3(0,1.2,-8);
   }else if(camMode==='teacher'){
@@ -1351,8 +1542,8 @@ const CHAPTERS={
   prompt:'<b>מה הלב בוחר?</b> 🌸',
   choices:[
     '🥀 להישאר מאחור לבד: "ממילא אין לי מה לספר..."',
-    '😶 לעמוד לידם בשקט — אולי הם ישימו לב אליי לבד',
-    '🌸 לאזור אומץ ולפתוח עלה אחד: לספר להם דבר קטן ואמיתי שאני אוהב'
+    '😊 להתקרב ולעמוד לידם בשקט — צעד ראשון',
+    '🔦 להדליק פנס פנימי — ואז לאזור אומץ ולפתוח עלה אחד'
   ],
   cons:[
     function(){
@@ -1365,26 +1556,42 @@ const CHAPTERS={
       },3000);
     },
     function(){
+      /* standing quietly nearby is a REAL first-step technique (per the teacher) — validate it,
+         then point to the one small petal that completes the bridge. No dimming: this isn't failure. */
       player.target=new THREE.Vector3(-122.3,0,3.2);player.speed=3.2;
       player.onArrive=()=>{face(player,CLSKIDS[0].g.position)};
       setTimeout(()=>{playA(CLSKIDS[0],'Wave',true)},1600);
       setTimeout(()=>{
-        dimTo(.4,2000);
         say([
-          {who:'',t:'אתה עומד ממש לידם. קרוב. שומע הכל... הם צוחקים ממשהו שדני אמר.'},
-          {who:'',t:'דקה עוברת. עוד דקה. הם בכלל לא שמו לב שאתה שם — לא כי הם רעים. כי אתה שקוף כשאתה שותק.'}
+          {who:'',t:'אתה מתקרב ועומד לידם בשקט. הלב עדיין דופק — אבל תראה: אתה כבר לא מאחור! זה בעצמו צעד אמיץ.'},
+          {who:'',t:'אתה מקשיב, מחייך מהבדיחה של דני... ויואב מרים אליך מבט לרגע. הם יודעים שאתה כאן.'},
+          {who:'',t:'להתקרב בשקט זו התחלה מצוינת. עכשיו חסר רק גשר קטן אחד — עלה — כדי שידעו שאתה רוצה להיות איתם.'}
         ],()=>{
-          reflect('עמדת שם בשקט... וכלום לא קרה. להיות קרוב זה עדיין לא להיות ביחד.',
-                  '😶 גם פרח שעומד באמצע השדה — אם העלים סגורים, אף אחד לא רואה אותו. קרבה בלי מילה אחת נשארת שקופה.');
+          reflect('התקרבת ועמדת ליד — צעד ראשון אמיץ ונכון! מהמקום הקרוב הזה, עלה אחד קטן משלים את הדרך.',
+                  '😊 לעמוד ליד בשקט זו טכניקה טובה להתחלה: מתקרבים, מקשיבים, מחייכים. ואז — עלה אחד ("אני ממש אוהב...") הופך קרוב לחבר.');
         });
       },2400);
     },
     function(){
+      /* the inner flashlight comes FIRST (per the teacher): understand the fear, hug the heart,
+         "מותר לי להרגיש ככה" — and from that self-understanding, the courage to open a petal */
+      dimTo(.45,1200);
+      heartSp.material=emojiSprite('💗',2.4).material;heartSp.visible=true;
+      say([
+        {who:'',t:'הלב דופק חזק. רגע — לפני הכל, אתה עוצר... ומדליק את הפנס הפנימי 🔦'},
+        {who:'🧒 אתה (בלב)',t:'"מה אני מרגיש עכשיו?... אני מפחד. מפחד שאספר — וידחו אותי."'},
+        {who:'🧒 אתה (בלב)',t:'אתה מחבק את הלב בעדינות: "מותק, מותר לי להרגיש ככה. זה נורמלי לפחד."'},
+        {who:'',t:'הפחד לא נעלם — אבל עכשיו אתה מבין אותו, ויש לו מקום. ולידו... פתאום יש מקום גם לאומץ. אתה נושם, והולך.'}
+      ],()=>{
+        dimTo(0,1200);heartSp.visible=false;sndWarm();
+        goPetal();
+      });
+      function goPetal(){
       player.target=new THREE.Vector3(-122.6,0,3.6);player.speed=3.4;
       player.onArrive=()=>{
         face(player,CLSKIDS[0].g.position);face(CLSKIDS[0],player.g.position);
         say([
-          {who:'🙂 אתה (הלב דופק... ובכל זאת)',t:'"תראו את הפרח הסגול הזה! אני... אני ממש אוהב טבע. יש לי בבית אוסף אבנים מיוחדות מכל טיול"'},
+          {who:'🙂 אתה (הלב עוד דופק... ובכל זאת)',t:'"תראו את הפרח הסגול הזה! אני... אני ממש אוהב טבע. יש לי בבית אוסף אבנים מיוחדות מכל טיול"'},
           {who:'👦 יואב',t:'"רגע, באמת?! גם אני אוסף!! יש לי אבן עם נצנצים מאילת!" העיניים שלו נדלקות. "איזו הכי מיוחדת שיש לך?"'},
           {who:'👦 דני',t:'"אני חייב לראות את האוסף הזה! אולי תביא מחר לכיתה?"'},
           {who:'',t:'ופתאום... אתם שלושה. יושבים על השמיכה, מדברים על אבנים, צבים ומפלים. עלה אחד נפתח — ופתח הכל.'}
@@ -1404,11 +1611,12 @@ const CHAPTERS={
             confettiBurst();sndWarm();
           },1800);
           setTimeout(()=>{
-            reflect('אזרת אומץ, פתחת עלה אחד קטן — ושני "גם אני!" חיכו לך בצד השני. ככה בדיוק נולדת חברות.',
-              '🌸 הלב דופק? זה בסדר — פותחים עלה אחד בכל זאת: דבר קטן ואמיתי שאוהבים. והקסם: מי ששומע, נפתח בחזרה!',true);
+            reflect('הבנת את הפחד, חיבקת את הלב — ואז פתחת עלה אחד קטן. ושני "גם אני!" חיכו לך בצד השני. ככה נולדת חברות.',
+              '🔦🌸 הלב דופק? קודם פנס פנימי: מה אני מרגיש? מותר לי. ומתוך ההבנה הזאת — פותחים עלה אחד. והקסם: מי ששומע, נפתח בחזרה!',true);
           },4200);
         });
       };
+      }
     }
   ],
   retry(){
@@ -1438,8 +1646,10 @@ const CHAPTERS={
     'שמעת פעם על <b>התיקיה הירוקה</b>? 📗 זה אחד הכלים הכי חזקים בתיק.',
     'בכל יום קורים דברים קטנים ומעצבנים: מישהו דרך על קו, שינה חוק, לקח את התור...',
     'יש ילדים שפותחים על כל דבר כזה <b>תיק אדום</b> 📕 — ויכוח גדול, צעקות... והמשחק מת.',
+    'זה כמו <b>פקק בכביש</b> 🚗: מי שנתקע על כל דבר קטן — עוצר את כל הזרימה של המשחק. ואף אחד לא אוהב לעמוד בפקק...',
     'אבל אפשר גם אחרת: לשים את הדבר הקטן ב<b>תיקיה הירוקה</b> — לסגור אותה בעדינות, ולהמשיך לשחק.',
-    'שים לב: דברים <b>גדולים</b> — כשמישהו באמת פוגע — לא נכנסים לתיקיה. עליהם דווקא מדברים!',
+    'והנה הסוד הכי גדול: מי שיודע <b>להתגמש</b> — כולם אוהבים לשחק איתו. לילד גמיש יש הכי הרבה חברים! 🤸',
+    'שים לב: להתגמש זה <b>לא</b> לוותר על עצמך! דברים <b>גדולים</b> — כשמישהו באמת פוגע — לא נכנסים לתיקיה. עליהם דווקא מדברים!',
     'רק הקטנים-קטנים. רוב הדברים קטנים יותר ממה שהם מרגישים ברגע 😉',
     'החברים שלך משחקים קלאס שם ליד המדרכה. לך תשחק — ותחזיק את התיקיה מוכנה 📗'
   ],
@@ -1475,7 +1685,7 @@ const CHAPTERS={
       dimTo(.45,2200);
       setTimeout(()=>{
         reflect('צעקת על החוק... והמשחק פשוט נגמר. יואב מושך בכתפיים: "טוב, אז לא משחקים". כולם מתפזרים.',
-                '📕 התיק האדום ניצח בוויכוח — והפסיד את המשחק. על חוק קטן שילמת בהפסקה שלמה של כיף.');
+                '📕 התיק האדום עשה פקק 🚗 — כל הזרימה של המשחק נעצרה. על חוק קטן שילמת בהפסקה שלמה של כיף.');
       },2600);
     },
     function(){
@@ -1500,7 +1710,7 @@ const CHAPTERS={
         confettiBurst();
         setTimeout(()=>{
           reflect('שמת את החוק הקטן בתיקיה הירוקה — והמשחק נהיה אפילו יותר מצחיק ממקודם!',
-            '📗 דבר קטן ← תיקיה ירוקה ← ממשיכים לזרום. ככה חברות נשארת גדולה מהחוקים הקטנים!',true);
+            '📗 דבר קטן ← תיקיה ירוקה ← ממשיכים לזרום. מי שמתגמש — כולם אוהבים לשחק איתו! (ועל דברים גדולים? עליהם כן מדברים)',true);
         },2200);
       });
     }
@@ -1631,6 +1841,8 @@ const CHAPTERS={
   setup(){
     CLSKIDS[0].target=null;CLSKIDS[0].g.position.set(-8,0,-17);CLSKIDS[0].g.rotation.y=Math.PI/2;
     CLSKIDS[1].target=null;CLSKIDS[1].g.position.set(12,0,-2);CLSKIDS[1].g.rotation.y=Math.PI;
+    /* the teacher usually stands by the door — move him aside so only יואב is near the path */
+    teacher.g.position.set(-16,0,-28.5);teacher.g.rotation.y=Math.PI*.4;
   },
   startScene(){
     MODE='cine';camMode='follow';actBtn.style.display='none';questEl.style.display='none';
@@ -1641,11 +1853,12 @@ const CHAPTERS={
       say([
         {who:'',t:'זה יואב! החבר הכי טוב שלך! אתמול שיחקתם יחד אצלך בבית...'},
         {who:'',t:'הוא עובר ממש לידך... בלי מבט. בלי "היי". בלי כלום. פשוט ממשיך ללכת.'},
-        {who:'💭 הראש שלך',t:'"הוא כועס עליי?... אמרתי משהו?... אולי הוא כבר לא חבר שלי?!" הסיפורים מתחילים לרוץ...'}
+        {who:'💭 הראש שלך',t:'"הוא כועס עליי?... אמרתי משהו?... אולי הוא כבר לא חבר שלי?!" הסיפורים מתחילים לרוץ...'},
+        {who:'',t:'אבל רגע. אולי הוא כועס... ואולי בכלל לא? <b>אולי כן, אולי לא — אנחנו פשוט לא יודעים.</b> וזו בדיוק הנקודה.'}
       ],showChoicesN);
     },1600);
   },
-  prompt:'<b>מה עושים עם הסיפור שבראש?</b> 💭',
+  prompt:'<b>אולי כן, אולי לא... מה עושים כשלא יודעים?</b> 💭',
   choices:[
     '😠 להאמין לסיפור: "הוא שונא אותי! ידעתי! איזה חבר גרוע!"',
     '🧊 מלחמה קרה: "אה ככה?! אז גם אני לא מדבר איתו יותר. אף פעם."',
@@ -1869,7 +2082,7 @@ function animate(){
         const d=Math.hypot(dx,dz);
         if(d<.95&&d>1e-4){player.g.position.x=c.g.position.x+dx/d*.95;player.g.position.z=c.g.position.z+dz/d*.95}
       });
-      if(INCLASS)STATCOL.forEach(s=>{
+      (INCLASS?STATCOL:OBSTACLES).forEach(s=>{
         const dx=player.g.position.x-s[0],dz=player.g.position.z-s[1];
         const d=Math.hypot(dx,dz);
         if(d<s[2]&&d>1e-4){player.g.position.x=s[0]+dx/d*s[2];player.g.position.z=s[1]+dz/d*s[2]}
@@ -1881,8 +2094,17 @@ function animate(){
   loco(player,moving,true);
   /* kids */
   kids.forEach(k=>{loco(k,stepTo(k,dt),k.speed>5)});
+  /* classmates + the new kid also walk when a scene gives them a target (e.g. יואב passing by in ch6) */
+  CLSKIDS.forEach(k=>{loco(k,stepTo(k,dt),false)});
+  loco(newKid,stepTo(newKid,dt),false);
   ballTick(dt,soccerActive);
   CHARS.forEach(c=>c.mixer.update(dt));
+  /* sandbox height rule: feet on the sand surface inside the box, back to the ground outside */
+  CHARS.forEach(c=>{const p=c.g.position;
+    const inS=p.x>SANDBOX.x1&&p.x<SANDBOX.x2&&p.z>SANDBOX.z1&&p.z<SANDBOX.z2;
+    const ty=inS?SANDBOX.y:0;
+    if(Math.abs(p.y-ty)>.001)p.y+=(ty-p.y)*Math.min(dt*8,1);
+  });
   /* quest markers + triggers */
   markerT+=dt;
   marker.rotation.y=markerT*2.4;
@@ -1897,7 +2119,10 @@ function animate(){
     const bs=markerT<owl.userData.blinkUntil?.1:1;
     owl.userData.eyes.forEach(e=>{e.scale.y+= (bs-e.scale.y)*Math.min(dt*30,1)});
   }
-  if(QUEST===0){marker.position.set(OWLPOS.x+.9,2.8+Math.sin(markerT*3)*.3,OWLPOS.z);
+  if(QUEST===-1){marker.visible=true;marker.position.set(SCHOOL_DOOR.x,4.2+Math.sin(markerT*3)*.35,SCHOOL_DOOR.z-1);
+    if(MODE==='explore'&&distTo(SCHOOL_DOOR)<4.5){actBtn.textContent='🚪 להיכנס לכיתה';actBtn.style.display='block';actBtn.onclick=()=>{sndTap();actBtn.style.display='none';enterClass()}}
+    else actBtn.style.display='none';
+  }else if(QUEST===0){marker.position.set(OWLPOS.x+.9,2.8+Math.sin(markerT*3)*.3,OWLPOS.z);
     if(MODE==='explore'&&distTo(OWLPOS)<4.5){actBtn.textContent='🦉 לדבר עם הינשוף';actBtn.style.display='block';actBtn.onclick=()=>{sndTap();actBtn.style.display='none';QUEST=.5;owlTalk()}}
     else actBtn.style.display='none';
   }else if(QUEST===1){marker.position.set(TEACHER.x,3.6+Math.sin(markerT*3)*.3,TEACHER.z+.9);
@@ -1934,7 +2159,25 @@ window._dbg={
   tp:(x,z)=>{player.g.position.set(x,0,z)},
   quest:()=>QUEST, mode:()=>MODE, ch:()=>CH, soccer:()=>soccerActive,
   pos:()=>[+player.g.position.x.toFixed(2),+player.g.position.z.toFixed(2)],
-  mind:()=>Math.min(...CHARS.filter(c=>c!==player).map(c=>player.g.position.distanceTo(c.g.position)))
+  py:()=>+player.g.position.y.toFixed(3),
+  mind:()=>Math.min(...CHARS.filter(c=>c!==player).map(c=>player.g.position.distanceTo(c.g.position))),
+  meshes:()=>{const out=[];player.inner.traverse(o=>{if(o.isMesh)out.push({n:o.name,c:'#'+o.material.color.getHexString(),map:!!o.material.map})});return out},
+  bones:()=>{const out=[];player.inner.traverse(o=>{if(o.isBone)out.push(o.name)});return out},
+  face:(model)=>{
+    const k=makeChar(model,1.58,0x2255aa,1.7);
+    const pr=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});
+    pr.setSize(220,280);
+    const ps=new THREE.Scene();ps.background=new THREE.Color(0xdddddd);
+    const pc=new THREE.PerspectiveCamera(30,220/280,.1,50);
+    pc.position.set(0,1.35,2.6);pc.lookAt(0,1.15,0);
+    ps.add(new THREE.HemisphereLight(0xffffff,0x778899,1.3));
+    const dl=new THREE.DirectionalLight(0xffffff,1.6);dl.position.set(1,3,2);ps.add(dl);
+    scene.remove(k.g);k.g.position.set(0,0,0);k.g.rotation.y=0;ps.add(k.g);
+    pr.render(ps,pc);
+    const url=pr.domElement.toDataURL();
+    pr.dispose();
+    return url;
+  }
 };
 </script>
 </body>
